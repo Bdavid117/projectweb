@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\RequestController;
@@ -31,3 +32,5 @@ Route::get('/estudiantes/{id}', [StudentController::class, 'show'])->name('stude
 
 Route::get('/solicitudes/nueva', [RequestController::class, 'create'])->name('requests.create');
 Route::post('/solicitudes/nueva', [RequestController::class, 'store'])->name('requests.store');
+
+Route::get('/indicadores', [IndicatorController::class, 'index'])->name('indicators.index');
