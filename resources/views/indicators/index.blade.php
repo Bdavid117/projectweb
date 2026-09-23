@@ -72,22 +72,24 @@
                 <h2 class="text-sm font-semibold text-[var(--text-primary)]">Solicitudes por tipo y estado</h2>
                 <p class="text-xs text-[var(--text-muted)]">Periodo 2026-2S · RF-28</p>
             </div>
-            <div class="hidden gap-3 border-t border-[var(--border-subtle)] px-4 py-[10px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)] sm:flex">
-                <span class="flex-1">TIPO DE SOLICITUD</span>
-                <span class="w-[110px]">RADICADAS</span>
-                <span class="w-[120px]">EN REVISIÓN</span>
-                <span class="w-[125px]">CON DECISIÓN</span>
-                <span class="w-[125px]">TIEMPO MEDIO</span>
-            </div>
-            @foreach($requestsByType as $row)
-                <div class="flex flex-col gap-1 border-t border-[var(--border-subtle)] px-4 py-[11px] text-sm sm:flex-row sm:items-center sm:gap-3">
-                    <span class="flex-1 font-medium text-[var(--text-primary)] sm:font-normal">{{ $row['type'] }}</span>
-                    <span class="text-[var(--text-secondary)] sm:w-[110px]">Radicadas: {{ $row['filed'] }}</span>
-                    <span class="text-[var(--text-secondary)] sm:w-[120px]">En revisión: {{ $row['review'] }}</span>
-                    <span class="text-[var(--text-secondary)] sm:w-[125px]">Con decisión: {{ $row['decided'] }}</span>
-                    <span class="text-[var(--text-secondary)] sm:w-[125px]">Tiempo medio: {{ $row['avgTime'] }}</span>
+            <div class="overflow-x-auto">
+                <div class="hidden gap-3 border-t border-[var(--border-subtle)] px-4 py-[10px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)] sm:flex sm:min-w-[680px]">
+                    <span class="flex-1">TIPO DE SOLICITUD</span>
+                    <span class="w-[110px]">RADICADAS</span>
+                    <span class="w-[120px]">EN REVISIÓN</span>
+                    <span class="w-[125px]">CON DECISIÓN</span>
+                    <span class="w-[125px]">TIEMPO MEDIO</span>
                 </div>
-            @endforeach
+                @foreach($requestsByType as $row)
+                    <div class="flex flex-col gap-1 border-t border-[var(--border-subtle)] px-4 py-[11px] text-sm sm:flex-row sm:min-w-[680px] sm:items-center sm:gap-3">
+                        <span class="flex-1 font-medium text-[var(--text-primary)] sm:font-normal">{{ $row['type'] }}</span>
+                        <span class="text-[var(--text-secondary)] sm:w-[110px]">Radicadas: {{ $row['filed'] }}</span>
+                        <span class="text-[var(--text-secondary)] sm:w-[120px]">En revisión: {{ $row['review'] }}</span>
+                        <span class="text-[var(--text-secondary)] sm:w-[125px]">Con decisión: {{ $row['decided'] }}</span>
+                        <span class="text-[var(--text-secondary)] sm:w-[125px]">Tiempo medio: {{ $row['avgTime'] }}</span>
+                    </div>
+                @endforeach
+            </div>
         </div>
     </div>
 </x-layouts.app>

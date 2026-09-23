@@ -1,7 +1,7 @@
 <x-layouts.guest title="Iniciar sesión · Trayectoria Estudiantil">
-    <div class="flex h-full w-full flex-col overflow-y-auto sm:flex-row sm:overflow-visible">
+    <div class="flex h-full w-full flex-col overflow-y-auto lg:flex-row lg:overflow-visible">
         <div
-            class="flex shrink-0 flex-col justify-between gap-8 p-8 text-[var(--color-white)] sm:h-full sm:w-[560px] sm:justify-between sm:gap-0 sm:p-14"
+            class="flex shrink-0 flex-col justify-between gap-8 p-8 text-[var(--color-white)] lg:h-full lg:w-[560px] lg:justify-between lg:gap-0 lg:p-14"
             style="background-image: linear-gradient(168.743deg, #112F52 5.949%, #1E5290 94.051%)"
         >
             <div class="flex items-center gap-3">
@@ -18,13 +18,13 @@
                 </p>
             </div>
 
-            <p class="hidden text-xs text-[var(--color-primary-300)] sm:block">
+            <p class="hidden text-xs text-[var(--color-primary-300)] lg:block">
                 Programa de Administración de Sistemas Informáticos<br />
                 Universidad Nacional de Colombia · Sede Manizales
             </p>
         </div>
 
-        <div class="flex flex-1 flex-col items-center justify-center gap-5 bg-[var(--surface-page)] p-6 sm:h-full sm:p-14">
+        <div class="flex flex-1 flex-col items-center justify-center gap-5 bg-[var(--surface-page)] p-6 sm:h-full lg:p-14">
             <form method="POST" action="{{ route('login.store') }}" class="flex w-full max-w-[400px] flex-col gap-5 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 sm:p-9">
                 @csrf
                 <div class="flex flex-col gap-[5px]">

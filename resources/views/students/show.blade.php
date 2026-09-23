@@ -23,7 +23,7 @@
                     @endforeach
                 </div>
             </div>
-            <div class="flex gap-3">
+            <div class="flex flex-wrap gap-3">
                 <x-button variant="secondary">Exportar ficha</x-button>
                 <x-button variant="primary">Registrar tutoría</x-button>
             </div>
