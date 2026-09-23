@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PanelController;
+use App\Http\Controllers\RequestController;
 use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,3 +28,6 @@ Route::get('/panel', [PanelController::class, 'index'])->name('panel.index');
 
 Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');
 Route::get('/estudiantes/{id}', [StudentController::class, 'show'])->name('students.show');
+
+Route::get('/solicitudes/nueva', [RequestController::class, 'create'])->name('requests.create');
+Route::post('/solicitudes/nueva', [RequestController::class, 'store'])->name('requests.store');
