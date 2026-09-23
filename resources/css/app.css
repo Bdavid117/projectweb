@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+:root {
+  /* ---------- Marca · Azul institucional ---------- */
+  --color-primary-50:  #EEF4FB;
+  --color-primary-100: #D6E4F5;
+  --color-primary-200: #ADC9EB;
+  --color-primary-300: #7FA9DD;
+  --color-primary-400: #4E85C9;
+  --color-primary-500: #2B66AE;
+  --color-primary-600: #1E5290;
+  --color-primary-700: #17406F;
+  --color-primary-800: #112F52;
+  --color-primary-900: #0B1F36;
+
+  /* ---------- Acento · Verde académico ---------- */
+  --color-accent-50:  #ECF7F1;
+  --color-accent-100: #D2EDE0;
+  --color-accent-300: #7FCFA9;
+  --color-accent-500: #2E9E6B;
+  --color-accent-600: #16704A;
+  --color-accent-800: #0D4A31;
+
+  /* ---------- Neutrales ---------- */
+  --color-white: #FFFFFF;
+  --color-neutral-50:  #F7F8FA;
+  --color-neutral-100: #EEF0F4;
+  --color-neutral-200: #DFE3E9;
+  --color-neutral-300: #C6CCD6;
+  --color-neutral-400: #99A1AE;
+  --color-neutral-500: #6B7280;
+  --color-neutral-600: #4B5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1F2937;
+  --color-neutral-900: #111827;
+
+  /* ---------- Semánticos ---------- */
+  --color-success:    #16704A;
+  --color-success-bg: #ECF7F1;
+  --color-warning:    #92610C;
+  --color-warning-bg: #FDF6E7;
+  --color-danger:     #B42318;
+  --color-danger-bg:  #FDF0EF;
+  --color-info:       #1E5290;
+  --color-info-bg:    #EEF4FB;
+
+  --color-restricted:    #6D28D9;
+  --color-restricted-bg: #F4F0FE;
+
+  /* ---------- Roles de superficie ---------- */
+  --surface-page:    var(--color-neutral-50);
+  --surface-card:    var(--color-white);
+  --surface-sunken:  var(--color-neutral-100);
+  --surface-inverse: var(--color-primary-800);
+  --border-subtle:   var(--color-neutral-200);
+  --border-default:  var(--color-neutral-300);
+  --border-strong:   var(--color-neutral-400);
+  --text-primary:    var(--color-neutral-900);
+  --text-secondary:  var(--color-neutral-600);
+  --text-muted:      var(--color-neutral-500);
+  --text-on-brand:   var(--color-white);
+  --focus-ring:      var(--color-primary-500);
+
+  /* ---------- Tipografía ---------- */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  --leading-tight:  1.25;
+  --leading-normal: 1.5;
+  --leading-loose:  1.7;
+
+  /* ---------- Espaciado · base 4px ---------- */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* ---------- Radios ---------- */
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   10px;
+  --radius-xl:   14px;
+  --radius-full: 9999px;
+
+  /* ---------- Sombras ---------- */
+  --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.06);
+  --shadow-md: 0 2px 6px rgba(17, 24, 39, 0.08);
+  --shadow-lg: 0 8px 24px rgba(17, 24, 39, 0.12);
+
+  /* ---------- Layout ---------- */
+  --sidebar-width:           260px;
+  --sidebar-width-collapsed: 72px;
+  --topbar-height:           60px;
+  --content-max-width:       1280px;
+
+  /* ---------- Puntos de quiebre ---------- */
+  --bp-mobile:  360px;
+  --bp-tablet:  768px;
+  --bp-desktop: 1280px;
+
+  /* ---------- Componentes ---------- */
+  --control-height:    40px;
+  --control-height-sm: 32px;
+  --touch-target-min:  44px;
+}
+
+@layer base {
+  html, body {
+    height: 100%;
+  }
+
+  .font-sans {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
