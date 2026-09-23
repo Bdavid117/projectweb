@@ -95,13 +95,20 @@ para capturar props/estructura exacta:
 
 ### Iconos
 
-El diseño usa el set Lucide (`data-icon-set="lucide"` en el export). En vez
-de añadir una dependencia nueva (Composer/npm) solo para iconos, se extrae
-la geometría SVG exacta de cada ícono usado desde el `.pen` con
-`Get(nodeId, {includePathGeometry: true})` y se crea un componente Blade por
-ícono único bajo `resources/views/components/icons/`, p. ej.
-`x-icons.graduation-cap`. Cada uno acepta `class` para tamaño/color vía
-`fill-[var(--...)]`.
+El diseño usa 25 íconos distintos del set estándar de Lucide, referenciados
+por nombre en el `.pen` (`icon: "download"`, `library: "lucide"`, etc.):
+`graduation-cap`, `calendar`, `bell`, `chevron-down`, `upload`,
+`message-square`, `file-text`, `circle-check`, `sparkles`, `file-plus`,
+`user-plus`, `search`, `chevron-right`, `book-open`, `plane`, `mic`,
+`briefcase`, `lock`, `cloud-upload`, `x`, `circle-alert`, `info`, `menu`,
+`download`, `users`.
+
+Dado que son 25 íconos del set estándar (no artes personalizados), se usa el
+paquete Composer `mallardduck/blade-lucide-icons`, que provee un componente
+`<x-lucide-{nombre} class="..." />` por cada ícono de Lucide. Color se
+controla con `text-[var(--color-...)]` (el paquete usa `currentColor` como
+`stroke`/`fill`). Esto evita mantener 25 SVGs a mano y sigue siendo un set
+1:1 con el diseño.
 
 ## Rutas y controladores
 
@@ -158,6 +165,7 @@ Por cada pantalla, tras implementarla:
   las filas de tablas/listas; se completan con criterio manteniendo
   coherencia con lo que sí está visible (nombres, estados, cifras de
   indicadores).
-- Si algún ícono usado en el diseño no es parte del set estándar de Lucide
-  disponible en el `.pen`, se extrae igual su geometría tal cual aparece en
-  el archivo (no se sustituye por un ícono distinto).
+- Si algún nombre de ícono del `.pen` no existe en el paquete
+  `blade-lucide-icons` instalado, se verifica el nombre equivalente más
+  cercano en la librería Lucide (pueden variar guiones/alias entre
+  versiones) antes de sustituirlo.
