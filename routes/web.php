@@ -26,3 +26,4 @@ Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 Route::get('/panel', [PanelController::class, 'index'])->name('panel.index');
 
 Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');
+Route::get('/estudiantes/{id}', [StudentController::class, 'show'])->name('students.show');
