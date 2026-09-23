@@ -1682,7 +1682,7 @@ git commit -m "feat: add ficha del estudiante screen"
 
 **Interfaces:**
 - Consumes: `x-layouts.app`, `x-form-field`, `x-button`, `Navigation::studentPortal()`.
-- Produces: named route `requests.create` (`GET /solicitudes/nueva`).
+- Produces: named routes `requests.create` (`GET /solicitudes/nueva`) and `requests.store` (`POST /solicitudes/nueva`, no validation, redirects back to `requests.create` — same no-backend pattern as `login.store`).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1722,10 +1722,17 @@ Expected: FAIL — `/solicitudes/nueva` route does not exist.
 namespace App\Http\Controllers;
 
 use App\Support\Navigation;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class RequestController extends Controller
 {
+    public function store(Request $request): RedirectResponse
+    {
+        return redirect()->route('requests.create');
+    }
+
     public function create(): View
     {
         return view('requests.create', [
@@ -1767,7 +1774,8 @@ class RequestController extends Controller
         </div>
 
         <div class="flex flex-col gap-5 lg:flex-row">
-            <form method="POST" action="/solicitudes/nueva" class="flex flex-1 flex-col gap-[18px] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
+            <form method="POST" action="{{ route('requests.store') }}" class="flex flex-1 flex-col gap-[18px] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
+                @csrf
                 <div class="flex flex-col gap-4 sm:flex-row">
                     <div class="flex-1">
                         <x-form-field label="Tipo de solicitud *" name="tipo" type="select" help="Cancelación de asignatura, reingreso, homologación, cupo de créditos…">
@@ -1855,6 +1863,7 @@ class RequestController extends Controller
 use App\Http\Controllers\RequestController;
 
 Route::get('/solicitudes/nueva', [RequestController::class, 'create'])->name('requests.create');
+Route::post('/solicitudes/nueva', [RequestController::class, 'store'])->name('requests.store');
 ```
 
 - [ ] **Step 6: Run test to verify it passes**
