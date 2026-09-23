@@ -25,7 +25,8 @@
         </div>
 
         <div class="flex flex-1 flex-col items-center justify-center gap-5 bg-[var(--surface-page)] p-6 sm:h-full sm:p-14">
-            <form method="POST" action="{{ url('/login') }}" class="flex w-full max-w-[400px] flex-col gap-5 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 sm:p-9">
+            <form method="POST" action="{{ route('login.store') }}" class="flex w-full max-w-[400px] flex-col gap-5 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 sm:p-9">
+                @csrf
                 <div class="flex flex-col gap-[5px]">
                     <h2 class="text-xl font-semibold text-[var(--text-primary)]">Iniciar sesión</h2>
                     <p class="text-sm text-[var(--text-secondary)]">Use sus credenciales institucionales.</p>
