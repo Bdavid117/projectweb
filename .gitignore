@@ -17,3 +17,11 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# macOS
+.DS_Store
+
+# Herramientas de diseño / desarrollo asistido (no forman parte del código fuente)
+/mokup
+/.playwright-mcp
+/.superpowers
