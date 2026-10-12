@@ -1,4 +1,4 @@
-@props(['user', 'navGroups', 'title' => null])
+gi@props(['user', 'navGroups', 'title' => null])
 
 <!DOCTYPE html>
 <html lang="es" class="h-full">
