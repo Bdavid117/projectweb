@@ -18,6 +18,9 @@ gi@props(['user', 'navGroups', 'title' => null])
             <x-sidebar :groups="$navGroups" />
             <main class="flex-1 overflow-y-auto">
                 {{ $slot }}
+                <div class="px-4 pb-5 sm:px-7">
+                    <x-footer />
+                </div>
             </main>
         </div>
     </div>

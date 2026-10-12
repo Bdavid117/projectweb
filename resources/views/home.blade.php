@@ -99,9 +99,7 @@
                 </div>
             </section>
 
-            <footer class="border-t border-[var(--border-subtle)] pt-5 text-sm text-[var(--text-muted)]">
-                Programa de Administración de Sistemas Informáticos · Universidad Nacional de Colombia, Sede Manizales
-            </footer>
+            <x-footer />
         </main>
     </div>
 </x-layouts.guest>
