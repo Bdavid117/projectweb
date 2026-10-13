@@ -52,4 +52,9 @@ class Student extends Model
     {
         return $this->hasMany(Internship::class);
     }
+
+    public function requests(): HasMany
+    {
+        return $this->hasMany(CommitteeRequest::class);
+    }
 }
