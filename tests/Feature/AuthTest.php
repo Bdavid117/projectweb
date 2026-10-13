@@ -114,10 +114,13 @@ class AuthTest extends TestCase
 
     public function test_role_matrix_returns_403_on_foreign_routes_and_200_on_own(): void
     {
+        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $juan = \App\Models\Student::where('codigo', '2020123')->firstOrFail();
+
         $matrix = [
             ['/panel', [Role::Estudiante, Role::Profesor, Role::Tutor, Role::Coordinacion]],
             ['/estudiantes', [Role::Profesor, Role::Tutor, Role::Coordinacion]],
-            ['/estudiantes/2020123', [Role::Profesor, Role::Tutor, Role::Coordinacion]],
+            ['/estudiantes/'.$juan->id, [Role::Profesor, Role::Tutor, Role::Coordinacion]],
             ['/solicitudes/nueva', [Role::Estudiante, Role::Coordinacion]],
             ['/indicadores', [Role::Coordinacion]],
         ];

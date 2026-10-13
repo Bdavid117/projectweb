@@ -45,6 +45,9 @@
                         <p class="text-xs text-[var(--text-muted)]">Historia conservada por periodo, no sobrescrita · RNF-08</p>
                     </div>
                     <div class="flex items-end gap-[14px] overflow-x-auto border-t border-[var(--border-subtle)] px-4 py-4">
+                        @if(empty($papaChart))
+                            <p class="text-sm text-[var(--text-muted)]">Sin historia académica registrada.</p>
+                        @endif
                         @foreach($papaChart as $bar)
                             <div class="flex min-w-[36px] flex-1 flex-col items-center justify-end gap-[7px]">
                                 <span class="text-xs font-medium text-[var(--text-secondary)]">{{ $bar['value'] }}</span>
@@ -61,6 +64,9 @@
                         <p class="text-xs text-[var(--text-muted)]">Registradas y validadas por Coordinación · RF-30, RF-33</p>
                     </div>
                     <div class="flex flex-col border-t border-[var(--border-subtle)] px-4 pb-4">
+                        @if(empty($timeline))
+                            <p class="py-3 text-sm text-[var(--text-muted)]">Sin experiencias registradas.</p>
+                        @endif
                         @foreach($timeline as $item)
                             <div class="flex gap-3 py-2">
                                 <div class="flex w-7 flex-col items-center">
@@ -88,6 +94,9 @@
                         <h2 class="text-sm font-semibold text-[var(--text-primary)]">Procesos en curso</h2>
                     </div>
                     <div class="flex flex-col gap-[10px] border-t border-[var(--border-subtle)] p-4">
+                        @if(empty($processes))
+                            <p class="text-sm text-[var(--text-muted)]">Sin procesos en curso.</p>
+                        @endif
                         @foreach($processes as $process)
                             <div class="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3">
                                 <div class="flex flex-1 flex-col gap-[3px]">
@@ -134,6 +143,9 @@
                         <p class="text-xs text-[var(--text-muted)]">Visibles para tutores y Coordinación</p>
                     </div>
                     <div class="flex flex-col gap-[10px] border-t border-[var(--border-subtle)] p-4">
+                        @if(empty($tutorials))
+                            <p class="text-sm text-[var(--text-muted)]">Sin tutorías registradas.</p>
+                        @endif
                         @foreach($tutorials as $tutorial)
                             <div class="flex flex-col gap-1 rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-[11px]">
                                 <span class="text-xs text-[var(--text-muted)]">{{ $tutorial['date'] }}</span>

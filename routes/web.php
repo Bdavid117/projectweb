@@ -34,7 +34,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:profesor,tutor,coordinacion')->group(function () {
         Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');
-        Route::get('/estudiantes/{id}', [StudentController::class, 'show'])->name('students.show');
+        Route::get('/estudiantes/{student}', [StudentController::class, 'show'])->whereNumber('student')->name('students.show');
     });
 
     Route::middleware('role:estudiante,coordinacion')->group(function () {

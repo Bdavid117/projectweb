@@ -20,9 +20,12 @@ class ShellUserTest extends TestCase
 
     public function test_every_screen_uses_the_session_user_not_the_mock_one(): void
     {
+        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $juanId = \App\Models\Student::where('codigo', '2020123')->firstOrFail()->id;
+
         $this->actingAsRole(Role::Tutor, ['name' => 'Tomás Gil']);
         $this->get('/estudiantes')->assertSee('Tomás Gil')->assertDontSee('Ana Restrepo');
-        $this->get('/estudiantes/2020123')->assertSee('Tomás Gil')->assertDontSee('text-[var(--text-primary)]">Carlos Pineda</span>', false);
+        $this->get('/estudiantes/'.$juanId)->assertSee('Tomás Gil')->assertDontSee('text-[var(--text-primary)]">Carlos Pineda</span>', false);
 
         $this->actingAsRole(Role::Coordinacion, ['name' => 'Laura Mejía']);
         $this->get('/indicadores')->assertSee('Laura Mejía')->assertDontSee('Ana Restrepo');
