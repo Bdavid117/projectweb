@@ -4,10 +4,13 @@ namespace Tests\Feature;
 
 use App\Enums\Role;
 use App\Support\Navigation;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ShellUserTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_topbar_shows_the_authenticated_user_and_role(): void
     {
         $this->actingAsRole(Role::Coordinacion, ['name' => 'Laura Mejía']);
