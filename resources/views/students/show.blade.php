@@ -25,7 +25,9 @@
             </div>
             <div class="flex flex-wrap gap-3">
                 <x-button variant="secondary">Exportar ficha</x-button>
-                <x-button variant="primary">Registrar tutoría</x-button>
+                @if($canRegisterTutorship)
+                    <x-button variant="primary" :href="route('tutorships.create', $student['id'])">Registrar tutoría</x-button>
+                @endif
             </div>
         </div>
 
@@ -151,6 +153,9 @@
                                 <span class="text-xs text-[var(--text-muted)]">{{ $tutorial['date'] }}</span>
                                 <span class="text-sm font-medium text-[var(--text-primary)]">{{ $tutorial['reason'] }}</span>
                                 <span class="text-xs text-[var(--text-secondary)]">{{ $tutorial['note'] }}</span>
+                                @if($tutorial['editUrl'])
+                                    <a href="{{ $tutorial['editUrl'] }}" class="text-xs font-semibold text-[var(--color-primary-600)]">Editar</a>
+                                @endif
                             </div>
                         @endforeach
                     </div>

@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\CommitteeRequest;
+use App\Models\Tutorship;
 use App\Policies\CommitteeRequestPolicy;
+use App\Policies\TutorshipPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -15,6 +17,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         CommitteeRequest::class => CommitteeRequestPolicy::class,
+        Tutorship::class => TutorshipPolicy::class,
     ];
 
     /**

@@ -5,6 +5,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TutorshipController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,6 +36,14 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:profesor,tutor,coordinacion')->group(function () {
         Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');
         Route::get('/estudiantes/{student}', [StudentController::class, 'show'])->whereNumber('student')->name('students.show');
+    });
+
+    Route::middleware('role:tutor,coordinacion')->group(function () {
+        Route::get('/estudiantes/{student}/tutorias/crear', [TutorshipController::class, 'create'])->whereNumber('student')->name('tutorships.create');
+        Route::post('/estudiantes/{student}/tutorias', [TutorshipController::class, 'store'])->whereNumber('student')->name('tutorships.store');
+        Route::get('/tutorias/{tutoria}/editar', [TutorshipController::class, 'edit'])->whereNumber('tutoria')->name('tutorships.edit');
+        Route::put('/tutorias/{tutoria}', [TutorshipController::class, 'update'])->whereNumber('tutoria')->name('tutorships.update');
+        Route::delete('/tutorias/{tutoria}', [TutorshipController::class, 'destroy'])->whereNumber('tutoria')->name('tutorships.destroy');
     });
 
     Route::middleware('role:estudiante,coordinacion')->group(function () {

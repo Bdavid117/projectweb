@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicTerm;
 use App\Models\Student;
+use App\Models\Tutorship;
 use App\Models\User;
 use App\Support\Input;
 use App\Support\Labels;
@@ -86,6 +87,7 @@ class StudentController extends Controller
         return view('students.show', [
             'user' => $user->viewData(),
             'navGroups' => Navigation::forRole($user->role, 'estudiantes'),
+            'canRegisterTutorship' => $user->can('create', Tutorship::class),
             ...StudentProfile::build($student, $user),
         ]);
     }

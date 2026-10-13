@@ -72,6 +72,7 @@ class StudentProfile
                 'date' => Labels::date($t->fecha),
                 'reason' => $t->motivo,
                 'note' => (string) $t->observaciones,
+                'editUrl' => $viewer && $viewer->can('update', $t) ? route('tutorships.edit', $t) : null,
             ])->all(),
         ];
     }
