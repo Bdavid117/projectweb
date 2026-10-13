@@ -10,8 +10,8 @@ class PanelController extends Controller
     public function index(): View
     {
         return view('panel.index', [
-            'user' => ['initials' => 'AR', 'name' => 'Ana Restrepo', 'role' => 'Coordinación'],
-            'navGroups' => Navigation::coordinator('panel'),
+            'user' => auth()->user()->viewData(),
+            'navGroups' => Navigation::forRole(auth()->user()->role, 'panel'),
             'indicators' => [
                 ['label' => 'ESTUDIANTES ACTIVOS', 'value' => '312', 'detail' => 'Matriculados en 2026-2S'],
                 ['label' => 'PAPA PROMEDIO', 'value' => '3.9', 'detail' => '+0.1 frente al periodo anterior'],

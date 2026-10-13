@@ -17,8 +17,8 @@ class RequestController extends Controller
     public function create(): View
     {
         return view('requests.create', [
-            'user' => ['initials' => 'JP', 'name' => 'Juan Pérez', 'role' => 'Estudiante'],
-            'navGroups' => Navigation::studentPortal('solicitudes'),
+            'user' => auth()->user()->viewData(),
+            'navGroups' => Navigation::forRole(auth()->user()->role, 'solicitudes'),
             'requestTypes' => [
                 'Cancelación de asignatura',
                 'Reingreso al programa',

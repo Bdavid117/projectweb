@@ -2,8 +2,19 @@
 
 namespace App\Support;
 
+use App\Enums\Role;
+
 class Navigation
 {
+    public static function forRole(Role $role, string $active): array
+    {
+        return match ($role) {
+            Role::Estudiante => self::studentPortal($active),
+            Role::Tutor => self::coordinatorWithTutorExtras($active),
+            default => self::coordinator($active),
+        };
+    }
+
     public static function coordinator(string $active): array
     {
         return [

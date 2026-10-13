@@ -24,8 +24,8 @@ class StudentController extends Controller
     public function index(): View
     {
         return view('students.index', [
-            'user' => ['initials' => 'AR', 'name' => 'Ana Restrepo', 'role' => 'Coordinación'],
-            'navGroups' => Navigation::coordinator('estudiantes'),
+            'user' => auth()->user()->viewData(),
+            'navGroups' => Navigation::forRole(auth()->user()->role, 'estudiantes'),
             'students' => self::STUDENTS,
         ]);
     }
@@ -33,8 +33,8 @@ class StudentController extends Controller
     public function show(string $id): View
     {
         return view('students.show', [
-            'user' => ['initials' => 'CP', 'name' => 'Carlos Pineda', 'role' => 'Tutor'],
-            'navGroups' => Navigation::coordinatorWithTutorExtras('estudiantes'),
+            'user' => auth()->user()->viewData(),
+            'navGroups' => Navigation::forRole(auth()->user()->role, 'estudiantes'),
             'student' => [
                 'initials' => 'JP',
                 'name' => 'Pérez Rojas, Juan Sebastián',

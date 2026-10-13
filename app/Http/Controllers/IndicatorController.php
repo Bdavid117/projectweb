@@ -10,8 +10,8 @@ class IndicatorController extends Controller
     public function index(): View
     {
         return view('indicators.index', [
-            'user' => ['initials' => 'AR', 'name' => 'Ana Restrepo', 'role' => 'Coordinación'],
-            'navGroups' => Navigation::coordinator('indicadores'),
+            'user' => auth()->user()->viewData(),
+            'navGroups' => Navigation::forRole(auth()->user()->role, 'indicadores'),
             'keyIndicators' => [
                 ['label' => 'ESTUDIANTES ACTIVOS', 'value' => '312', 'detail' => 'Matriculados en 2026-2S'],
                 ['label' => 'PRÁCTICAS EN CURSO', 'value' => '28', 'detail' => '9% de los activos'],

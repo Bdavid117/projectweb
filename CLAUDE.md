@@ -12,10 +12,15 @@ indicators) was built from a Pencil design mockup at
 `mokup/design-tokens.css` for the token values and `mokup/exports/*.png` for
 reference screenshots; both are gitignored, not part of the repo).
 
-**Current scope is visual/presentational only**: no real authentication,
-database, or server-side validation. `POST /login` and `POST
-/solicitudes/nueva` always redirect without validating anything. All data
-shown on screen is mock data hardcoded as PHP arrays inside controllers.
+**Current scope**: PostgreSQL (`trayectoria_estudiantil`; tests run against
+`trayectoria_estudiantil_test`) with the 25 domain tables from the analysis
+document (`mokup/Documento-Analisis-y-Diseno.pdf` §5.3), one Eloquent model per
+table, and seeders (`php artisan migrate:fresh --seed`; demo users
+`coordinacion@`, `tutor@`, `profesor@`, `estudiante@unal.edu.co`, password
+`password`). Real session login with 4 roles (`App\Enums\Role`, route middleware
+`role:...`). Screens still show mock data hardcoded in controllers, except the
+user and the sidebar menu, which come from the session (`Navigation::forRole`);
+wiring each screen to the database is the next sub-project.
 
 Design spec and implementation plan (superpowers-style docs, useful for
 understanding *why* the UI is structured this way):
@@ -27,7 +32,8 @@ understanding *why* the UI is structured this way):
 ```bash
 # PHP dependencies / tests
 composer install
-php artisan test                       # full suite
+php artisan migrate:fresh --seed      # recreate the DB with demo data
+php artisan test                       # full suite (RefreshDatabase on the _test DB)
 php artisan test --filter=LoginTest    # single test class
 php artisan test tests/Feature/StudentTest.php::test_student_show_renders_profile_regardless_of_id
 
@@ -42,7 +48,10 @@ php artisan serve
 
 Feature tests call `$this->withoutVite()` in `tests/TestCase.php::setUp()`,
 so `php artisan test` works even without a prior `npm run build` — no need
-to build assets just to run the suite.
+to build assets just to run the suite. Screen tests authenticate with
+`$this->actingAsRole(Role::X)`, which builds an unsaved user and never touches
+the database; only tests under `tests/Feature/Database` and `AuthTest` use
+`RefreshDatabase`.
 
 ## Architecture
 
@@ -98,8 +107,10 @@ inconsistency, and is documented per-screen in the implementation plan
 linked above.
 
 **Routing pattern**: one route → one single-purpose controller method →
-one Blade view. Controllers hold mock data as `private const` arrays or
-inline arrays passed to the view; there is no model/migration layer yet.
+one Blade view. Controllers still hold mock data as `private const` arrays or
+inline arrays passed to the view; the models/migrations exist but the screens
+are not wired to them yet. Routes are guarded by `auth` and `role:` middleware
+(`routes/web.php`).
 `GET /estudiantes/{id}` intentionally ignores `$id` and always renders the
 same illustrative profile — a deliberate scope decision, not a bug.
 
