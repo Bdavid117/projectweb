@@ -30,6 +30,11 @@ understanding *why* the UI is structured this way):
 ## Commands
 
 ```bash
+# One-time setup (PostgreSQL must be running; php artisan test fails without the _test DB)
+createdb trayectoria_estudiantil && createdb trayectoria_estudiantil_test
+cp .env.example .env && php artisan key:generate   # then set DB_USERNAME in .env
+php artisan migrate --seed
+
 # PHP dependencies / tests
 composer install
 php artisan migrate:fresh --seed      # recreate the DB with demo data
