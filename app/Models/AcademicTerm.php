@@ -15,4 +15,10 @@ class AcademicTerm extends Model
     {
         return $this->hasMany(AcademicRecord::class, 'term_id');
     }
+
+    public static function current(): ?self
+    {
+        return static::query()->whereHas('academicRecords')->orderByDesc('fecha_inicio')->first()
+            ?? static::query()->orderByDesc('fecha_inicio')->first();
+    }
 }

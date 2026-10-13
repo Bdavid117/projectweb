@@ -10,8 +10,9 @@ class Navigation
     {
         return match ($role) {
             Role::Estudiante => self::studentPortal($active),
-            Role::Tutor => self::coordinatorWithTutorExtras($active),
-            default => self::coordinator($active),
+            Role::Tutor => self::staff($active, true),
+            Role::Profesor => self::staff($active),
+            Role::Coordinacion => self::coordinator($active),
         };
     }
 
@@ -23,26 +24,12 @@ class Navigation
         ];
     }
 
-    public static function coordinatorWithTutorExtras(string $active): array
-    {
-        $groups = self::coordinator($active);
-        $groups[] = [
-            'label' => null,
-            'items' => self::mark([
-                ['key' => 'registrar-tutoria', 'icon' => 'message-square', 'label' => 'Registrar tutoría', 'href' => '#'],
-                ['key' => 'mis-asesorias', 'icon' => 'clipboard-list', 'label' => 'Mis asesorías', 'href' => '#'],
-            ], $active),
-        ];
-
-        return $groups;
-    }
-
     public static function studentPortal(string $active): array
     {
         $items = [
             ['key' => 'panel', 'icon' => 'layout-dashboard', 'label' => 'Panel', 'href' => '/panel'],
             ['key' => 'perfil', 'icon' => 'user', 'label' => 'Mi perfil', 'href' => '#'],
-            ['key' => 'solicitudes', 'icon' => 'file-text', 'label' => 'Mis solicitudes', 'href' => '/solicitudes/nueva'],
+            ['key' => 'solicitudes', 'icon' => 'file-text', 'label' => 'Mis solicitudes', 'href' => '/solicitudes'],
             ['key' => 'experiencias', 'icon' => 'sparkles', 'label' => 'Mis experiencias', 'href' => '#'],
             ['key' => 'trabajo-grado', 'icon' => 'book-open', 'label' => 'Mi trabajo de grado', 'href' => '#'],
             ['key' => 'historia', 'icon' => 'trending-up', 'label' => 'Mi historia académica', 'href' => '#'],
@@ -57,12 +44,34 @@ class Navigation
         ];
     }
 
+    private static function staff(string $active, bool $withTutorExtras = false): array
+    {
+        $items = array_values(array_filter(
+            self::coordinatorGeneralItems(),
+            static fn (array $item) => $item['key'] !== 'indicadores'
+        ));
+
+        $groups = [['label' => 'GENERAL', 'items' => self::mark($items, $active)]];
+
+        if ($withTutorExtras) {
+            $groups[] = [
+                'label' => null,
+                'items' => self::mark([
+                    ['key' => 'registrar-tutoria', 'icon' => 'message-square', 'label' => 'Registrar tutoría', 'href' => '/mis-asesorias'],
+                    ['key' => 'mis-asesorias', 'icon' => 'clipboard-list', 'label' => 'Mis asesorías', 'href' => '/mis-asesorias'],
+                ], $active),
+            ];
+        }
+
+        return $groups;
+    }
+
     private static function coordinatorGeneralItems(): array
     {
         return [
             ['key' => 'panel', 'icon' => 'layout-dashboard', 'label' => 'Panel', 'href' => '/panel'],
             ['key' => 'estudiantes', 'icon' => 'users', 'label' => 'Estudiantes', 'href' => '/estudiantes'],
-            ['key' => 'solicitudes', 'icon' => 'file-text', 'label' => 'Solicitudes', 'href' => '/solicitudes/nueva'],
+            ['key' => 'solicitudes', 'icon' => 'file-text', 'label' => 'Solicitudes', 'href' => '/solicitudes'],
             ['key' => 'experiencias', 'icon' => 'sparkles', 'label' => 'Experiencias', 'href' => '#'],
             ['key' => 'tutorias', 'icon' => 'message-square', 'label' => 'Tutorías', 'href' => '#'],
             ['key' => 'indicadores', 'icon' => 'bar-chart-3', 'label' => 'Indicadores', 'href' => '/indicadores'],
