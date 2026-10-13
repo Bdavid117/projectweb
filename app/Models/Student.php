@@ -57,4 +57,24 @@ class Student extends Model
     {
         return $this->hasMany(CommitteeRequest::class);
     }
+
+    public function experiences(): HasMany
+    {
+        return $this->hasMany(Experience::class);
+    }
+
+    public function tutorships(): HasMany
+    {
+        return $this->hasMany(Tutorship::class);
+    }
+
+    public function interventions(): HasMany
+    {
+        return $this->hasMany(Intervention::class);
+    }
+
+    public function alerts(): HasMany
+    {
+        return $this->hasMany(Alert::class);
+    }
 }
