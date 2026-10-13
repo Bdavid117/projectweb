@@ -3,7 +3,7 @@
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
             <div class="flex flex-1 flex-col gap-[3px]">
                 <h1 class="text-2xl font-semibold text-[var(--text-primary)]">Panel del programa</h1>
-                <p class="text-sm text-[var(--text-secondary)]">Datos al 20/09/2026 · última sincronización con la API hace 2 horas</p>
+                <p class="text-sm text-[var(--text-secondary)]">Datos al {{ $cutoff }} · periodo {{ $termLabel }}</p>
             </div>
             <div class="flex gap-3">
                 <x-button variant="subtle" icon="download">Exportar</x-button>
@@ -35,13 +35,16 @@
                             <span class="w-[118px]">ESTADO</span>
                             <span class="w-[70px]"></span>
                         </div>
+                        @if(empty($attentionRows))
+                            <p class="border-t border-[var(--border-subtle)] px-4 py-6 text-sm text-[var(--text-muted)]">Sin situaciones registradas.</p>
+                        @endif
                         @foreach($attentionRows as $row)
                             <div class="flex min-w-[620px] items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-3 text-sm">
                                 <span class="w-[210px] text-[var(--text-primary)]">{{ $row['name'] }}</span>
                                 <span class="flex-1 text-[var(--text-secondary)]">{{ $row['issue'] }}</span>
                                 <span class="w-24 text-[var(--text-secondary)]">{{ $row['date'] }}</span>
                                 <span class="w-[118px]"><x-status-badge :text="$row['status']" :tone="$row['tone']" /></span>
-                                <a href="/estudiantes" class="w-[70px] text-sm font-medium text-[var(--color-primary-600)]">Ver ficha</a>
+                                <a href="{{ $row['url'] }}" class="w-[70px] text-sm font-medium text-[var(--color-primary-600)]">Ver ficha</a>
                             </div>
                         @endforeach
                     </div>
@@ -53,6 +56,9 @@
                         <p class="text-xs text-[var(--text-muted)]">Porcentaje medio del plan de estudios cursado</p>
                     </div>
                     <div class="flex items-end gap-[18px] overflow-x-auto border-t border-[var(--border-subtle)] px-4 py-5">
+                        @if(empty($cohortChart))
+                            <p class="text-sm text-[var(--text-muted)]">Sin datos de avance por cohorte.</p>
+                        @endif
                         @foreach($cohortChart as $bar)
                             <div class="flex min-w-[28px] flex-1 flex-col items-center justify-end gap-2">
                                 <span class="text-xs font-medium text-[var(--text-secondary)]">{{ $bar['value'] }}</span>
@@ -71,6 +77,9 @@
                         <p class="text-xs text-[var(--text-muted)]">Últimos registros del programa</p>
                     </div>
                     <div class="flex flex-col gap-1 border-t border-[var(--border-subtle)] py-1">
+                        @if(empty($recentActivity))
+                            <p class="px-4 py-3 text-sm text-[var(--text-muted)]">Sin actividad reciente.</p>
+                        @endif
                         @foreach($recentActivity as $activity)
                             <div class="flex items-center gap-[11px] px-4 py-[10px]">
                                 <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--surface-sunken)]">
@@ -91,10 +100,10 @@
                     </div>
                     <div class="flex flex-col gap-2 border-t border-[var(--border-subtle)] p-4">
                         @foreach($quickLinks as $link)
-                            <button type="button" class="flex w-full items-center gap-[9px] rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 py-[10px] text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]">
+                            <a href="{{ $link['href'] ?? '#' }}" class="flex w-full items-center gap-[9px] rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 py-[10px] text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]">
                                 <x-dynamic-component :component="'lucide-' . $link['icon']" class="h-4 w-4 text-[var(--color-primary-600)]" />
                                 {{ $link['label'] }}
-                            </button>
+                            </a>
                         @endforeach
                     </div>
                 </div>

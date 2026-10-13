@@ -9,18 +9,9 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3">
-            <div class="flex h-[38px] items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 text-sm text-[var(--text-secondary)]">
-                Cohorte: todas <x-lucide-chevron-down class="h-[15px] w-[15px] text-[var(--color-neutral-400)]" />
-            </div>
-            <div class="flex h-[38px] items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 text-sm text-[var(--text-secondary)]">
-                Periodo: 2026-2S <x-lucide-chevron-down class="h-[15px] w-[15px] text-[var(--color-neutral-400)]" />
-            </div>
-            <div class="flex h-[38px] items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 text-sm text-[var(--text-secondary)]">
-                Estado: activos <x-lucide-chevron-down class="h-[15px] w-[15px] text-[var(--color-neutral-400)]" />
-            </div>
-            <x-button variant="secondary">Aplicar</x-button>
+            <span class="rounded-full bg-[var(--surface-sunken)] px-3 py-1 text-sm text-[var(--text-secondary)]">Periodo {{ $termLabel }}</span>
             <div class="flex-1"></div>
-            <span class="text-sm text-[var(--text-muted)]">Datos al 20/09/2026</span>
+            <span class="text-sm text-[var(--text-muted)]">Datos al {{ $cutoff }}</span>
         </div>
 
         <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -70,7 +61,7 @@
         <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
             <div class="flex flex-col gap-[2px] px-4 pb-2 pt-[14px]">
                 <h2 class="text-sm font-semibold text-[var(--text-primary)]">Solicitudes por tipo y estado</h2>
-                <p class="text-xs text-[var(--text-muted)]">Periodo 2026-2S · RF-28</p>
+                <p class="text-xs text-[var(--text-muted)]">Periodo {{ $termLabel }} · RF-28</p>
             </div>
             <div class="overflow-x-auto">
                 <div class="hidden gap-3 border-t border-[var(--border-subtle)] px-4 py-[10px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)] sm:flex sm:min-w-[680px]">
