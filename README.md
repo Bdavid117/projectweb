@@ -2,7 +2,7 @@
 
 Sistema de seguimiento de trayectorias estudiantiles para un área de coordinación académica. Construido con **Laravel 10** (PHP 8.1) y **Tailwind CSS v4**, a partir de un mockup de diseño en Pencil.
 
-> **Estado actual del proyecto:** todas las pantallas leen de PostgreSQL (25 tablas, modelos y seeders) con login real y 4 roles (estudiante, profesor, tutor, coordinación). Solicitudes (radicar con soportes, revisión y decisión del comité) y tutorías (con ventana de edición de 24 horas) tienen CRUD con validación en español y permisos por rol. Pendientes: `/mi-*`, `/experiencias` y `/admin/*`.
+> **Estado actual del proyecto:** todas las pantallas leen de PostgreSQL (26 tablas, modelos y seeders) con login real y 4 roles (estudiante, profesor, tutor, coordinación). Solicitudes (radicar con soportes, revisión y decisión del comité) y tutorías (con ventana de edición de 24 horas) tienen CRUD con validación en español y permisos por rol. Pendientes: `/mi-*`, `/experiencias` y `/admin/*`.
 
 ## Índice
 

@@ -13,7 +13,7 @@ indicators) was built from a Pencil design mockup at
 reference screenshots; both are gitignored, not part of the repo).
 
 **Current scope**: PostgreSQL (`trayectoria_estudiantil`; tests run against
-`trayectoria_estudiantil_test`) with the 25 domain tables from the analysis
+`trayectoria_estudiantil_test`) with the 26 domain tables from the analysis
 document (`mokup/Documento-Analisis-y-Diseno.pdf` §5.3), one Eloquent model per
 table, and seeders (`php artisan migrate:fresh --seed`; demo users
 `coordinacion@`, `tutor@`, `profesor@`, `estudiante@unal.edu.co`, password
