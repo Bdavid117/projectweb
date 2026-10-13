@@ -37,7 +37,6 @@ class Navigation
 
         return [
             ['label' => 'GENERAL', 'items' => self::mark($items, $active)],
-            ['label' => 'ADMINISTRACIÓN', 'items' => self::mark(self::adminItems(), $active)],
             ['label' => null, 'items' => self::mark([
                 ['key' => 'practica', 'icon' => 'briefcase', 'label' => 'Mi práctica', 'href' => '#'],
             ], $active)],

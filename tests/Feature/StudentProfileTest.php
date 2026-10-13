@@ -83,4 +83,18 @@ class StudentProfileTest extends TestCase
 
         $this->get('/estudiantes/'.$juan->id)->assertForbidden();
     }
+
+    public function test_tutorship_notes_are_visible_only_to_tutors_and_coordination(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $juan = Student::where('codigo', '2020123')->firstOrFail();
+
+        foreach ([Role::Tutor, Role::Coordinacion] as $role) {
+            $this->signInSeeded($role);
+            $this->get('/estudiantes/'.$juan->id)->assertSee('Últimas tutorías')->assertSee('Acordó reducir a 15 créditos');
+        }
+
+        $this->signInSeeded(Role::Profesor);
+        $this->get('/estudiantes/'.$juan->id)->assertOk()->assertDontSee('Últimas tutorías')->assertDontSee('Acordó reducir a 15 créditos')->assertDontSee('Seguimiento a carga académica');
+    }
 }

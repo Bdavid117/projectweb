@@ -14,7 +14,7 @@ class StoreTutorshipRequest extends FormRequest
 
         return $tutorship
             ? $this->user()->can('update', $tutorship)
-            : $this->user()->can('create', Tutorship::class);
+            : $this->user()->can('create', [Tutorship::class, $this->route('student')]);
     }
 
     public function rules(): array

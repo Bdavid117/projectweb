@@ -46,4 +46,43 @@ class PanelTest extends TestCase
 
         $this->get('/panel')->assertRedirect('/solicitudes');
     }
+
+    public function test_coordination_sees_every_alert_but_a_tutor_only_those_of_their_students(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $this->signInSeeded(Role::Coordinacion);
+        $this->get('/panel')->assertSee('Ruiz Salazar, Andrés')->assertSee('Gómez Ruiz, Laura')->assertSee('Pérez Rojas, Juan Sebastián');
+
+        $this->signInSeeded(Role::Tutor);
+        $tutor = $this->get('/panel');
+        $tutor->assertSee('Gómez Ruiz, Laura')->assertSee('Pérez Rojas, Juan Sebastián');
+        $tutor->assertDontSee('Ruiz Salazar, Andrés');
+        $tutor->assertSee('Tutoría registrada a');
+    }
+
+    public function test_a_professor_does_not_see_the_alert_table_nor_tutorship_activity(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->signInSeeded(Role::Profesor);
+
+        $response = $this->get('/panel');
+
+        $response->assertOk();
+        $response->assertSee('ESTUDIANTES ACTIVOS');
+        $response->assertDontSee('Situaciones que requieren atención');
+        $response->assertDontSee('Ruiz Salazar, Andrés');
+        $response->assertDontSee('Tutoría registrada a');
+    }
+
+    public function test_alert_counter_follows_the_same_scope(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $this->signInSeeded(Role::Tutor);
+        $this->assertSame('2', collect((new \App\Support\ProgramMetrics)->panel(auth()->user())['indicators'])->firstWhere('label', 'ALERTAS ABIERTAS')['value']);
+
+        $this->signInSeeded(Role::Coordinacion);
+        $this->assertSame('3', collect((new \App\Support\ProgramMetrics)->panel(auth()->user())['indicators'])->firstWhere('label', 'ALERTAS ABIERTAS')['value']);
+    }
 }

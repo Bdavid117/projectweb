@@ -87,7 +87,7 @@ class StudentController extends Controller
         return view('students.show', [
             'user' => $user->viewData(),
             'navGroups' => Navigation::forRole($user->role, 'estudiantes'),
-            'canRegisterTutorship' => $user->can('create', Tutorship::class),
+            'canRegisterTutorship' => $user->can('create', [Tutorship::class, $student]),
             ...StudentProfile::build($student, $user),
         ]);
     }

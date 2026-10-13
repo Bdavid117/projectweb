@@ -18,7 +18,7 @@ class TutorshipController extends Controller
 {
     public function create(Request $request, Student $student): View
     {
-        $this->authorize('create', Tutorship::class);
+        $this->authorize('create', [Tutorship::class, $student]);
 
         return $this->form($request, $student, null);
     }

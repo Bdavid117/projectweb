@@ -43,6 +43,9 @@ class NavigationRolesTest extends TestCase
         $this->assertSame('/solicitudes', $student['solicitudes']['href']);
         $this->assertArrayHasKey('practica', $student);
         $this->assertArrayNotHasKey('indicadores', $student);
+        foreach (['usuarios', 'cargas', 'catalogos', 'bitacora'] as $admin) {
+            $this->assertArrayNotHasKey($admin, $student);
+        }
     }
 
     public function test_active_item_is_marked(): void

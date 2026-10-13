@@ -216,6 +216,28 @@ class TutorshipTest extends TestCase
             ->assertSee('href="'.route('tutorships.edit', $tutorship).'"', false);
     }
 
+    public function test_a_tutor_can_only_register_sessions_for_their_assigned_students(): void
+    {
+        $andres = Student::where('codigo', '2019087')->firstOrFail();
+        $count = Tutorship::count();
+
+        $this->get('/estudiantes/'.$andres->id.'/tutorias/crear')->assertForbidden();
+        $this->post('/estudiantes/'.$andres->id.'/tutorias', $this->valid())->assertForbidden();
+        $this->assertSame($count, Tutorship::count());
+
+        $this->get(route('students.show', $andres))->assertOk()->assertDontSee('href="'.route('tutorships.create', $andres).'"', false);
+    }
+
+    public function test_coordination_can_register_for_any_student_even_if_not_assigned(): void
+    {
+        $andres = Student::where('codigo', '2019087')->firstOrFail();
+        $this->signInSeeded(Role::Coordinacion);
+
+        $this->get('/estudiantes/'.$andres->id.'/tutorias/crear')->assertOk();
+        $this->get(route('students.show', $andres))->assertSee('href="'.route('tutorships.create', $andres).'"', false);
+        $this->post('/estudiantes/'.$andres->id.'/tutorias', $this->valid())->assertRedirect();
+    }
+
     // ---- ficha ----
 
     public function test_the_profile_offers_register_and_edit_only_to_those_who_can_use_them(): void

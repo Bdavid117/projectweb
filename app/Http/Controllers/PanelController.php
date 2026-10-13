@@ -25,7 +25,8 @@ class PanelController extends Controller
             'navGroups' => Navigation::forRole($user->role, 'panel'),
             'cutoff' => $metrics->cutoff(),
             'termLabel' => Labels::termLabel($metrics->term()),
-            ...$metrics->panel(),
+            'showAttention' => $user->role !== Role::Profesor,
+            ...$metrics->panel($user),
             'quickLinks' => [
                 ['icon' => 'upload', 'label' => 'Cargar archivo de Excel'],
                 ['icon' => 'file-plus', 'label' => 'Registrar decisión del comité', 'href' => '/solicitudes'],

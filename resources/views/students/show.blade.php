@@ -139,6 +139,7 @@
                     </div>
                 </div>
 
+                @if($showTutorials)
                 <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
                     <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
                         <h2 class="text-sm font-semibold text-[var(--text-primary)]">Últimas tutorías</h2>
@@ -160,6 +161,7 @@
                         @endforeach
                     </div>
                 </div>
+                @endif
 
                 <div class="flex gap-[11px] rounded-[var(--radius-lg)] border border-[var(--color-restricted)] bg-[var(--color-restricted-bg)] p-[14px]">
                     <x-lucide-lock class="h-[17px] w-[17px] shrink-0 text-[var(--color-restricted)]" />

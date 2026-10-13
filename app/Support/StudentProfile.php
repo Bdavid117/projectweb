@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\Role;
 use App\Models\AcademicRecord;
 use App\Models\AcademicTerm;
 use App\Models\Student;
@@ -47,6 +48,7 @@ class StudentProfile
     {
         $records = self::records($student);
         $latest = $records->last();
+        $seesTutorships = in_array($viewer?->role, [Role::Tutor, Role::Coordinacion], true);
         $previous = $records->count() > 1 ? $records[$records->count() - 2] : null;
 
         return [
@@ -68,7 +70,8 @@ class StudentProfile
                     ['label' => 'Promedio anterior', 'value' => $previous ? number_format((float) $previous->papa, 1) : '—'],
                 ],
             ],
-            'tutorials' => $student->tutorships()->latest('fecha')->latest('id')->limit(20)->get()->map(fn ($t) => [
+            'showTutorials' => $seesTutorships,
+            'tutorials' => ! $seesTutorships ? [] : $student->tutorships()->latest('fecha')->latest('id')->limit(20)->get()->map(fn ($t) => [
                 'date' => Labels::date($t->fecha),
                 'reason' => $t->motivo,
                 'note' => (string) $t->observaciones,

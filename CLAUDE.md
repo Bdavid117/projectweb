@@ -120,7 +120,10 @@ inputs with `Support\Input::text()/id()` (not `$request->string()`, which throws
 see only their own), `/solicitudes/nueva` and `POST /solicitudes` (estudiante, coordinación),
 `/solicitudes/{id}`, `/revision` and `/decision` (the last two only coordinación),
 `/mis-asesorias` (tutor), `/estudiantes/{id}/tutorias/crear` and `/tutorias/{id}/editar` (tutor,
-coordinación; edit/delete only by the author within 24 h), `/indicadores` (coordinación).
+coordinación; a tutor only for students assigned to them in the current term; edit/delete only by
+the author within 24 h). Tutorship notes on the profile and tutorship activity/alerts on the panel are
+visible only to tutor (own students) and coordinación — never to profesor; the student menu has no
+Administración block, `/indicadores` (coordinación).
 
 **Pencil canvas** (`mokup/trayectoria-estudiantil.pen`) is organized in lanes per role
 (Fundamentos, Acceso, Coordinación C1–C5, Tutor T1–T3, Estudiante E1, Móvil). Put new screens at the

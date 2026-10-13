@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\Role;
 use App\Models\AcademicRecord;
 use App\Models\AcademicTerm;
 use App\Models\Alert;
@@ -11,7 +12,9 @@ use App\Models\Internship;
 use App\Models\RequestType;
 use App\Models\Student;
 use App\Models\Thesis;
+use App\Models\TutorAssignment;
 use App\Models\Tutorship;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 class ProgramMetrics
@@ -39,15 +42,16 @@ class ProgramMetrics
         return now()->format('d/m/Y');
     }
 
-    public function panel(): array
+    public function panel(?User $viewer = null): array
     {
+        $ids = $this->visibleStudentIds($viewer);
         $term = $this->term();
         $records = $this->records($term);
         $avgPapa = (clone $records)->avg('papa');
         $avgAdvance = (clone $records)->avg('porcentaje_avance');
         $previous = $this->previousTerm($term);
         $prevPapa = $previous ? $this->records($previous)->avg('papa') : null;
-        $open = Alert::where('atendida', false)->count();
+        $open = $this->alerts($ids)->where('atendida', false)->count();
 
         $delta = $avgPapa !== null && $prevPapa !== null
             ? ((float) $avgPapa - (float) $prevPapa >= 0 ? '+' : '').number_format((float) $avgPapa - (float) $prevPapa, 1).' frente al periodo anterior'
@@ -65,9 +69,9 @@ class ProgramMetrics
                 ['label' => 'AVANCE MEDIO', 'value' => $avgAdvance !== null ? round((float) $avgAdvance).'%' : '—', 'detail' => 'Créditos cursados del plan'],
                 $alerts,
             ],
-            'attentionRows' => $this->attentionRows(),
+            'attentionRows' => $this->attentionRows($ids),
             'cohortChart' => $this->cohortChart($records),
-            'recentActivity' => $this->recentActivity(),
+            'recentActivity' => $this->recentActivity($ids),
         ];
     }
 
@@ -111,9 +115,24 @@ class ProgramMetrics
             : null;
     }
 
-    private function attentionRows(): array
+    /** Estudiantes cuyas alertas y tutorías puede ver: todos (null), los asignados (tutor) o ninguno (profesor). */
+    private function visibleStudentIds(?User $viewer): ?array
     {
-        return Alert::with('student.user')->latest('fecha_deteccion')->latest('id')->limit(6)->get()->map(fn (Alert $alert) => [
+        return match ($viewer?->role) {
+            null, Role::Coordinacion => null,
+            Role::Tutor => TutorAssignment::where('tutor_id', $viewer->id)->where('term_id', $this->term()?->id ?? 0)->pluck('student_id')->all(),
+            default => [],
+        };
+    }
+
+    private function alerts(?array $ids): Builder
+    {
+        return Alert::query()->when($ids !== null, fn ($q) => $q->whereIn('student_id', $ids));
+    }
+
+    private function attentionRows(?array $ids): array
+    {
+        return $this->alerts($ids)->with('student.user')->latest('fecha_deteccion')->latest('id')->limit(6)->get()->map(fn (Alert $alert) => [
             'name' => $alert->student->user?->name ?? $alert->student->codigo,
             'issue' => $alert->detalle ?? $alert->tipo,
             'date' => Labels::date($alert->fecha_deteccion),
@@ -138,11 +157,14 @@ class ProgramMetrics
             ])->all();
     }
 
-    private function recentActivity(): array
+    private function recentActivity(?array $ids): array
     {
         $items = collect();
 
-        foreach (Tutorship::with(['student.user', 'tutor'])->latest()->limit(5)->get() as $t) {
+        $tutorships = Tutorship::with(['student.user', 'tutor'])
+            ->when($ids !== null, fn ($q) => $q->whereIn('student_id', $ids))
+            ->latest()->limit(5)->get();
+        foreach ($tutorships as $t) {
             $items->push(['at' => $t->created_at, 'icon' => 'message-square', 'description' => 'Tutoría registrada a '.($t->student->user?->name ?? $t->student->codigo), 'meta' => $t->created_at->diffForHumans().' · '.$t->tutor->name]);
         }
         foreach (CommitteeRequest::with(['student.user', 'type'])->latest('fecha_radicacion')->limit(5)->get() as $r) {
