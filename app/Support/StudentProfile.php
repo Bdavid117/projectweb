@@ -68,7 +68,7 @@ class StudentProfile
                     ['label' => 'Promedio anterior', 'value' => $previous ? number_format((float) $previous->papa, 1) : '—'],
                 ],
             ],
-            'tutorials' => $student->tutorships()->latest('fecha')->limit(3)->get()->map(fn ($t) => [
+            'tutorials' => $student->tutorships()->latest('fecha')->latest('id')->limit(20)->get()->map(fn ($t) => [
                 'date' => Labels::date($t->fecha),
                 'reason' => $t->motivo,
                 'note' => (string) $t->observaciones,

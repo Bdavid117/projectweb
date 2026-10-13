@@ -206,6 +206,16 @@ class TutorshipTest extends TestCase
         $this->get('/tutorias/abc/editar')->assertNotFound();
     }
 
+    public function test_a_just_registered_tutorship_with_an_old_date_is_listed_and_editable(): void
+    {
+        $this->post($this->storeUrl(), $this->valid(['fecha' => '2025-01-15', 'observaciones' => 'Sesión atrasada registrada hoy.']))->assertRedirect();
+        $tutorship = Tutorship::where('observaciones', 'Sesión atrasada registrada hoy.')->firstOrFail();
+
+        $this->get(route('students.show', $this->juan))
+            ->assertSee('Sesión atrasada registrada hoy.')
+            ->assertSee('href="'.route('tutorships.edit', $tutorship).'"', false);
+    }
+
     // ---- ficha ----
 
     public function test_the_profile_offers_register_and_edit_only_to_those_who_can_use_them(): void

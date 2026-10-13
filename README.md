@@ -42,6 +42,7 @@ Sistema de seguimiento de trayectorias estudiantiles para un área de coordinaci
 
 - PHP ^8.1 con Composer y la extensión `pdo_pgsql`
 - PostgreSQL en ejecución (por ejemplo `brew install postgresql`)
+- `upload_max_filesize` ≥ 5M y `post_max_size` ≥ 26M en `php.ini` (los soportes de solicitudes admiten hasta 5 archivos de 5 MB; con el valor por defecto de 2M el servidor rechaza los archivos grandes con un 413)
 - Node.js con npm
 - Copia local de `mokup/trayectoria-estudiantil.pen` y `mokup/design-tokens.css` si necesitas consultar el diseño original (la carpeta `mokup/` está en `.gitignore`, no forma parte del repositorio)
 
