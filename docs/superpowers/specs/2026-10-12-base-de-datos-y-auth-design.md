@@ -93,10 +93,13 @@ BD de pruebas separada con `RefreshDatabase`. Pruebas: las migraciones corren co
 - `POST /logout` invalida la sesión y redirige a `/login`. El topbar muestra el botón de salir.
 - Middleware `auth` en todas las rutas salvo `/login`; `guest` en `/login`.
 - Middleware `EnsureRole` (alias `role`): `role:coordinacion,tutor` devuelve 403 si el rol no está permitido (RF-03, RNF-04). Matriz inicial aplicada a las rutas actuales:
-  - `/panel`, `/indicadores`: coordinación (el PDF da `/indicadores` solo a coordinación).
+  - `/panel`: los cuatro roles (PDF §6.1; el contenido por rol llega en el sub-proyecto 2).
+  - `/indicadores`: solo coordinación.
   - `/estudiantes`, `/estudiantes/{id}`: profesor, tutor, coordinación.
   - `/solicitudes/nueva`: estudiante, coordinación.
-- Los controladores toman `user` de `Auth::user()` (iniciales, nombre, rol legible) en lugar del array fijo, y eligen `Navigation::*` por rol.
+- Los controladores toman `user` de `Auth::user()` (iniciales, nombre, rol legible) en lugar del array fijo, y eligen el menú con `Navigation::forRole($role, $active)` (estudiante → portal del estudiante; tutor → coordinador + extras de tutor; profesor y coordinación → coordinador).
+- El correo se normaliza (trim + minúsculas) antes de autenticar; los correos se guardan en minúsculas.
+- Los middleware `Authenticate` y `RedirectIfAuthenticated` se corrigen para usar la ruta `login.show` y el destino `/panel` (hoy apuntan a `login` y `/home`, que no existen).
 - Contraseñas con bcrypt (cast `hashed` / `Hash::make`), CSRF activo en los formularios.
 
 ### Tests de auth
