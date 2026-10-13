@@ -18,9 +18,11 @@ document (`mokup/Documento-Analisis-y-Diseno.pdf` §5.3), one Eloquent model per
 table, and seeders (`php artisan migrate:fresh --seed`; demo users
 `coordinacion@`, `tutor@`, `profesor@`, `estudiante@unal.edu.co`, password
 `password`). Real session login with 4 roles (`App\Enums\Role`, route middleware
-`role:...`). Screens still show mock data hardcoded in controllers, except the
-user and the sidebar menu, which come from the session (`Navigation::forRole`);
-wiring each screen to the database is the next sub-project.
+`role:...`). All screens read from PostgreSQL: students (list, profile), the panel and
+indicators (`App\Support\ProgramMetrics`), and the requests and tutorships modules
+have full CRUD with Spanish validation, role/ownership policies and an audit trail.
+Still out of scope: `/mi-*`, `/experiencias`, `/admin/*`, automatic alerts, Excel
+import/export.
 
 Design spec and implementation plan (superpowers-style docs, useful for
 understanding *why* the UI is structured this way):
@@ -53,10 +55,11 @@ php artisan serve
 
 Feature tests call `$this->withoutVite()` in `tests/TestCase.php::setUp()`,
 so `php artisan test` works even without a prior `npm run build` — no need
-to build assets just to run the suite. Screen tests authenticate with
-`$this->actingAsRole(Role::X)`, which builds an unsaved user and never touches
-the database; only tests under `tests/Feature/Database` and `AuthTest` use
-`RefreshDatabase`.
+to build assets just to run the suite. Every test that touches a DB-backed
+controller uses `RefreshDatabase`; most seed with `$this->seed(DatabaseSeeder::class)` and sign in
+with `$this->signInSeeded(Role::X)`. `actingAsRole()` builds an unsaved user (fine for empty-database
+checks). Attachments are tested with `Storage::fake()`, time-dependent code with `Carbon::setTestNow()`.
+`TestCase::setUpTraits()` aborts if the test database name doesn't end in `_test`.
 
 ## Architecture
 
@@ -99,25 +102,30 @@ breakpoint and replaced by a (currently non-functional — no JS in scope)
 hamburger icon in the topbar, since three screens have explicit 360px
 mockups that assume no fixed sidebar.
 
-**Navigation** (`app/Support/Navigation.php`) is a small static-method
-helper, not a database-backed menu: `Navigation::coordinator($active)`,
-`::coordinatorWithTutorExtras($active)`, and `::studentPortal($active)`
-each return the exact nav-groups array shape `x-sidebar` expects
-(`[['label' => ?string, 'items' => [['key','icon','label','href','active'], ...]], ...]`),
-with the item matching `$active` marked `active: true`. Different screens
-use different Navigation methods because the mockup shows different
-sidebar content depending on the logged-in user's role for that screen
-(coordinator vs. tutor vs. student) — this is deliberate, not
-inconsistency, and is documented per-screen in the implementation plan
-linked above.
+**Navigation** (`app/Support/Navigation.php`): `Navigation::forRole($role, $active)` returns
+the nav-groups array `x-sidebar` expects, already filtered by role (Indicadores and the
+Administración block only for Coordinación; the tutor extras only for Tutor; the student keeps
+the portal menu from the mockup). Never link to a route the role can't open.
 
-**Routing pattern**: one route → one single-purpose controller method →
-one Blade view. Controllers still hold mock data as `private const` arrays or
-inline arrays passed to the view; the models/migrations exist but the screens
-are not wired to them yet. Routes are guarded by `auth` and `role:` middleware
-(`routes/web.php`).
-`GET /estudiantes/{id}` intentionally ignores `$id` and always renders the
-same illustrative profile — a deliberate scope decision, not a bug.
+**Data flow**: one route → one thin controller method → one Blade view. Controllers query
+Eloquent and build the same arrays the views always consumed. Business logic lives in
+`App\Services\RequestWorkflow` (file / start review / decide, with status history) and
+`App\Support\{ProgramMetrics,StudentProfile,Labels,Input}`; authorization in
+`App\Policies\{CommitteeRequest,Tutorship}Policy` (ownership and the 24 h edit window) on top of
+the `role:` route middleware; limits and thresholds in `config/program.php`. Read search/filter
+inputs with `Support\Input::text()/id()` (not `$request->string()`, which throws on `q[]=x`).
+
+**Routes by role** (`routes/web.php`): `/panel` (staff; students are redirected to `/solicitudes`),
+`/estudiantes` and `/estudiantes/{id}` (profesor, tutor, coordinación), `/solicitudes` (all; students
+see only their own), `/solicitudes/nueva` and `POST /solicitudes` (estudiante, coordinación),
+`/solicitudes/{id}`, `/revision` and `/decision` (the last two only coordinación),
+`/mis-asesorias` (tutor), `/estudiantes/{id}/tutorias/crear` and `/tutorias/{id}/editar` (tutor,
+coordinación; edit/delete only by the author within 24 h), `/indicadores` (coordinación).
+
+**Pencil canvas** (`mokup/trayectoria-estudiantil.pen`) is organized in lanes per role
+(Fundamentos, Acceso, Coordinación C1–C5, Tutor T1–T3, Estudiante E1, Móvil). Put new screens at the
+end of their role's lane, 1600 px after the previous one, and name the frame with the lane code and
+the route.
 
 ## Commit convention
 
