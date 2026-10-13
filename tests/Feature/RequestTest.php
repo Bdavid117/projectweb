@@ -3,20 +3,27 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use Database\Seeders\DatabaseSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class RequestTest extends TestCase
 {
-    public function test_request_form_renders_fields_and_options(): void
+    use RefreshDatabase;
+
+    public function test_request_form_renders_fields_steps_and_breadcrumb(): void
     {
-        $this->actingAsRole(Role::Estudiante);
+        $this->seed(DatabaseSeeder::class);
+        $this->signInSeeded(Role::Estudiante);
 
         $response = $this->get('/solicitudes/nueva');
 
         $response->assertOk();
-        $response->assertSee('Nueva solicitud al comité asesor');
-        $response->assertSee('Cancelación de asignatura');
+        $response->assertSee('Tipo de solicitud *');
+        $response->assertSee('Descripción y justificación *');
         $response->assertSee('Radicar solicitud');
-        $response->assertSee('Falta un campo obligatorio');
+        $response->assertSee('¿Qué pasa después?');
+        $response->assertSee('Mis solicitudes');
+        $response->assertSee('PDF, JPG o PNG · máximo 5 MB por archivo');
     }
 }

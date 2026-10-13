@@ -39,7 +39,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:estudiante,coordinacion')->group(function () {
         Route::get('/solicitudes/nueva', [RequestController::class, 'create'])->name('requests.create');
-        Route::post('/solicitudes/nueva', [RequestController::class, 'store'])->name('requests.store');
+        Route::post('/solicitudes', [RequestController::class, 'store'])->name('requests.store');
     });
 
     Route::get('/solicitudes', [RequestController::class, 'index'])->name('requests.index');

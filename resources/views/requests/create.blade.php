@@ -3,7 +3,7 @@
         <div class="flex items-center gap-[6px] text-sm text-[var(--text-secondary)]">
             <a href="/panel">Inicio</a>
             <x-lucide-chevron-right class="h-[13px] w-[13px]" />
-            <a href="/solicitudes/nueva">Mis solicitudes</a>
+            <a href="{{ route('requests.index') }}">Mis solicitudes</a>
             <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <span class="text-[var(--text-primary)]">Nueva solicitud</span>
         </div>
@@ -14,19 +14,26 @@
         </div>
 
         <div class="flex flex-col gap-5 lg:flex-row">
-            <form method="POST" action="{{ route('requests.store') }}" class="flex flex-1 flex-col gap-[18px] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
+            <form method="POST" action="{{ route('requests.store') }}" enctype="multipart/form-data" class="flex flex-1 flex-col gap-[18px] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
                 @csrf
+                @if($isStaff)
+                    <x-form-field label="Código del estudiante *" name="codigo_estudiante" icon="user" placeholder="p. ej. 2020123" help="La solicitud se radica a nombre de este estudiante." />
+                @endif
+
                 <div class="flex flex-col gap-4 sm:flex-row">
                     <div class="flex-1">
                         <x-form-field label="Tipo de solicitud *" name="tipo" type="select" help="Cancelación de asignatura, reingreso, homologación, cupo de créditos…">
                             <option value="">Seleccione…</option>
-                            @foreach($requestTypes as $type)
-                                <option value="{{ $type }}">{{ $type }}</option>
+                            @foreach($requestTypes as $id => $nombre)
+                                <option value="{{ $id }}" @selected((string) old('tipo') === (string) $id)>{{ $nombre }}</option>
                             @endforeach
                         </x-form-field>
+                        @if(count($existing))
+                            <p class="mt-1 text-[11px] font-medium text-[var(--color-warning)]">Ya radicó este periodo: {{ implode(', ', $existing) }}</p>
+                        @endif
                     </div>
                     <div class="sm:w-[300px]">
-                        <x-form-field label="Periodo académico *" name="periodo" value="2026-2S" help="Se toma del periodo activo." />
+                        <x-form-field label="Periodo académico *" name="periodo" :value="$termLabel" :readonly="true" help="Se toma del periodo activo." />
                     </div>
                 </div>
 
@@ -38,33 +45,38 @@
                     help="Mínimo 50 caracteres."
                 />
 
+                @php($fileErrors = collect($errors->get('soportes.*'))->flatten()->merge($errors->get('soportes'))->unique())
                 <div class="flex flex-col gap-[6px]">
-                    <label class="text-xs font-semibold text-[var(--text-secondary)]">Soportes</label>
-                    <div class="flex h-24 flex-col items-center justify-center gap-[5px] rounded-[var(--radius-md)] border border-dashed border-[var(--border-default)]">
+                    <label for="soportes" class="text-xs font-semibold text-[var(--text-secondary)]">Soportes</label>
+                    <div class="flex flex-col items-center justify-center gap-[6px] rounded-[var(--radius-md)] border border-dashed border-[var(--border-default)] p-4">
                         <x-lucide-cloud-upload class="h-[22px] w-[22px] text-[var(--color-neutral-400)]" />
-                        <p class="text-sm text-[var(--text-secondary)]">Arrastre los archivos aquí o haga clic para seleccionar</p>
-                        <p class="text-xs text-[var(--text-muted)]">PDF, JPG o PNG · máximo 5 MB por archivo</p>
+                        <p class="text-sm text-[var(--text-secondary)]">Seleccione los archivos de soporte</p>
+                        <input id="soportes" name="soportes[]" type="file" multiple accept=".pdf,.jpg,.jpeg,.png" class="text-sm text-[var(--text-secondary)]" />
+                        <p class="text-xs text-[var(--text-muted)]">PDF, JPG o PNG · máximo 5 MB por archivo · hasta 5 archivos</p>
                     </div>
-                    <div class="flex items-center gap-[10px] rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-[10px]">
-                        <x-lucide-file-text class="h-4 w-4 text-[var(--color-neutral-500)]" />
-                        <span class="flex-1 text-sm text-[var(--text-primary)]">soporte-medico.pdf</span>
-                        <span class="text-xs text-[var(--text-muted)]">1,2 MB</span>
-                        <x-lucide-x class="h-[15px] w-[15px] text-[var(--color-neutral-400)]" />
-                    </div>
+                    @foreach($fileErrors as $message)
+                        <p class="text-[11px] font-medium text-[var(--color-danger)]">{{ $message }}</p>
+                    @endforeach
                 </div>
 
-                <div class="flex gap-[10px] rounded-[var(--radius-md)] bg-[var(--color-danger-bg)] p-3">
-                    <x-lucide-circle-alert class="h-4 w-4 shrink-0 text-[var(--color-danger)]" />
-                    <div class="flex flex-col gap-[2px]">
-                        <p class="text-sm font-semibold text-[var(--color-danger)]">Falta un campo obligatorio</p>
-                        <p class="text-xs text-[var(--text-secondary)]">Seleccione el tipo de solicitud antes de continuar. Los datos escritos se conservan (RNF-10).</p>
+                @if($errors->any())
+                    <div class="flex gap-[10px] rounded-[var(--radius-md)] bg-[var(--color-danger-bg)] p-3">
+                        <x-lucide-circle-alert class="h-4 w-4 shrink-0 text-[var(--color-danger)]" />
+                        <div class="flex flex-col gap-[2px]">
+                            <p class="text-sm font-semibold text-[var(--color-danger)]">Revise los campos marcados</p>
+                            <ul class="list-disc pl-4 text-xs text-[var(--text-secondary)]">
+                                @foreach($errors->all() as $message)
+                                    <li>{{ $message }}</li>
+                                @endforeach
+                            </ul>
+                            <p class="text-xs text-[var(--text-secondary)]">Los datos escritos se conservan (RNF-10).</p>
+                        </div>
                     </div>
-                </div>
+                @endif
 
                 <div class="flex flex-col gap-[10px] sm:flex-row sm:items-center">
                     <div class="flex-1"></div>
-                    <x-button variant="secondary">Cancelar</x-button>
-                    <x-button variant="secondary">Guardar borrador</x-button>
+                    <x-button variant="secondary" :href="route('requests.index')">Cancelar</x-button>
                     <x-button variant="primary" type="submit">Radicar solicitud</x-button>
                 </div>
             </form>

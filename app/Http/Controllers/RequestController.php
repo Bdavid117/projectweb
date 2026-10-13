@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Role;
+use App\Http\Requests\StoreSolicitudRequest;
 use App\Models\AcademicTerm;
 use App\Models\CommitteeRequest;
 use App\Models\RequestAttachment;
 use App\Models\RequestType;
+use App\Models\Student;
 use App\Services\RequestWorkflow;
 use App\Support\Input;
 use App\Support\Labels;
@@ -20,29 +22,51 @@ use Illuminate\View\View;
 
 class RequestController extends Controller
 {
-    public function store(Request $request): RedirectResponse
+    public function create(Request $request, RequestWorkflow $workflow): View
     {
-        return redirect()->route('requests.create');
-    }
+        $user = $request->user();
+        $term = AcademicTerm::current();
+        $student = $user->role === Role::Estudiante ? $user->student : null;
 
-    public function create(): View
-    {
         return view('requests.create', [
-            'user' => auth()->user()->viewData(),
-            'navGroups' => Navigation::forRole(auth()->user()->role, 'solicitudes'),
-            'requestTypes' => [
-                'Cancelación de asignatura',
-                'Reingreso al programa',
-                'Homologación de créditos',
-                'Ampliación de cupo de créditos',
-                'Otras',
-            ],
+            'user' => $user->viewData(),
+            'navGroups' => Navigation::forRole($user->role, 'solicitudes'),
+            'isStaff' => $user->role === Role::Coordinacion,
+            'requestTypes' => RequestType::orderBy('id')->pluck('nombre', 'id'),
+            'termLabel' => $term?->codigo ?? 'Sin periodo',
+            'existing' => $student && $term ? $workflow->existingTypeNames($student, $term) : [],
             'steps' => [
                 ['number' => 1, 'title' => 'Radicada', 'detail' => 'Queda registrada con fecha y ya no puede editarla.'],
                 ['number' => 2, 'title' => 'En revisión', 'detail' => 'El comité asesor estudia el caso.'],
                 ['number' => 3, 'title' => 'Con decisión', 'detail' => 'Coordinación carga la decisión y el número de acta.'],
             ],
         ]);
+    }
+
+    public function store(StoreSolicitudRequest $request, RequestWorkflow $workflow): RedirectResponse
+    {
+        $user = $request->user();
+        $student = $user->role === Role::Estudiante
+            ? $user->student
+            : Student::where('codigo', $request->input('codigo_estudiante'))->first();
+
+        abort_if($student === null, 403, 'Su usuario no tiene una ficha de estudiante.');
+
+        $term = AcademicTerm::current();
+        if ($term === null) {
+            return back()->withInput()->withErrors(['tipo' => 'No hay un periodo académico vigente configurado.']);
+        }
+
+        $solicitud = $workflow->file(
+            $student,
+            RequestType::findOrFail((int) $request->input('tipo')),
+            $term,
+            (string) $request->input('descripcion'),
+            $request->file('soportes', []),
+            $user,
+        );
+
+        return redirect()->route('requests.show', $solicitud)->with('status', 'Solicitud radicada correctamente.');
     }
 
     public function index(Request $request): View
