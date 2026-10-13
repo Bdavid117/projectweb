@@ -42,4 +42,14 @@ class Student extends Model
     {
         return $this->hasMany(TutorAssignment::class);
     }
+
+    public function theses(): HasMany
+    {
+        return $this->hasMany(Thesis::class);
+    }
+
+    public function internships(): HasMany
+    {
+        return $this->hasMany(Internship::class);
+    }
 }
