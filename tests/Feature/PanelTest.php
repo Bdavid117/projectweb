@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use Tests\TestCase;
 
 class PanelTest extends TestCase
 {
     public function test_panel_renders_indicators_and_attention_table(): void
     {
+        $this->actingAsRole(Role::Coordinacion);
+
         $response = $this->get('/panel');
 
         $response->assertOk();

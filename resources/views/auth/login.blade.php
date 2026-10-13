@@ -32,8 +32,12 @@
                     <p class="text-sm text-[var(--text-secondary)]">Use sus credenciales institucionales.</p>
                 </div>
 
-                <x-form-field label="Correo institucional" name="email" type="email" placeholder="usuario@unal.edu.co" icon="mail" />
+                <x-form-field label="Correo institucional" name="email" type="email" placeholder="usuario@unal.edu.co" icon="mail" :value="old('email')" />
                 <x-form-field label="Contraseña" name="password" type="password" placeholder="••••••••••" icon="eye-off" />
+
+                @error('email')
+                    <p class="text-sm font-medium text-[var(--color-danger)]">{{ $message }}</p>
+                @enderror
 
                 <x-button variant="primary" type="submit" class="w-full justify-center">Ingresar</x-button>
 

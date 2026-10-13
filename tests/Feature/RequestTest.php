@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use Tests\TestCase;
 
 class RequestTest extends TestCase
 {
     public function test_request_form_renders_fields_and_options(): void
     {
+        $this->actingAsRole(Role::Estudiante);
+
         $response = $this->get('/solicitudes/nueva');
 
         $response->assertOk();

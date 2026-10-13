@@ -29,4 +29,12 @@
         </div>
         <x-lucide-chevron-down class="h-[14px] w-[14px] text-[var(--color-neutral-400)]" />
     </div>
+
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit" class="flex items-center gap-1 rounded-[var(--radius-md)] px-2 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]" aria-label="Cerrar sesión">
+            <x-lucide-log-out class="h-4 w-4" />
+            <span class="hidden sm:inline">Salir</span>
+        </button>
+    </form>
 </header>

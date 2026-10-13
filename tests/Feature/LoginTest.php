@@ -14,11 +14,4 @@ class LoginTest extends TestCase
         $response->assertSee('Iniciar sesión');
         $response->assertSee('Una visión integral de la trayectoria de cada estudiante.');
     }
-
-    public function test_submitting_login_redirects_to_panel_without_validation(): void
-    {
-        $response = $this->post('/login', []);
-
-        $response->assertRedirect('/panel');
-    }
 }

@@ -22,15 +22,27 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/login', [LoginController::class, 'show'])->name('login.show');
-Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'show'])->name('login.show');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+});
 
-Route::get('/panel', [PanelController::class, 'index'])->name('panel.index');
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');
-Route::get('/estudiantes/{id}', [StudentController::class, 'show'])->name('students.show');
+    Route::get('/panel', [PanelController::class, 'index'])->name('panel.index');
 
-Route::get('/solicitudes/nueva', [RequestController::class, 'create'])->name('requests.create');
-Route::post('/solicitudes/nueva', [RequestController::class, 'store'])->name('requests.store');
+    Route::middleware('role:profesor,tutor,coordinacion')->group(function () {
+        Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');
+        Route::get('/estudiantes/{id}', [StudentController::class, 'show'])->name('students.show');
+    });
 
-Route::get('/indicadores', [IndicatorController::class, 'index'])->name('indicators.index');
+    Route::middleware('role:estudiante,coordinacion')->group(function () {
+        Route::get('/solicitudes/nueva', [RequestController::class, 'create'])->name('requests.create');
+        Route::post('/solicitudes/nueva', [RequestController::class, 'store'])->name('requests.store');
+    });
+
+    Route::get('/indicadores', [IndicatorController::class, 'index'])
+        ->middleware('role:coordinacion')
+        ->name('indicators.index');
+});

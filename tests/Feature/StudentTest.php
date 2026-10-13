@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use Tests\TestCase;
 
 class StudentTest extends TestCase
 {
     public function test_students_index_renders_table_and_filters(): void
     {
+        $this->actingAsRole(Role::Tutor);
+
         $response = $this->get('/estudiantes');
 
         $response->assertOk();
@@ -19,6 +22,8 @@ class StudentTest extends TestCase
 
     public function test_student_show_renders_profile_regardless_of_id(): void
     {
+        $this->actingAsRole(Role::Tutor);
+
         $response = $this->get('/estudiantes/2020123');
 
         $response->assertOk();
@@ -29,6 +34,8 @@ class StudentTest extends TestCase
 
     public function test_student_show_does_not_fail_on_unknown_id(): void
     {
+        $this->actingAsRole(Role::Tutor);
+
         $response = $this->get('/estudiantes/999999');
 
         $response->assertOk();
