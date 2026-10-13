@@ -24,4 +24,11 @@ class EmptyDatabaseScreensTest extends TestCase
         $this->get('/panel')->assertOk()->assertSee('ESTUDIANTES ACTIVOS')->assertSee('sin periodo');
         $this->get('/indicadores')->assertOk()->assertSee('Indicadores del programa');
     }
+
+    public function test_request_list_renders_with_an_empty_database(): void
+    {
+        $this->actingAsRole(Role::Coordinacion);
+
+        $this->get('/solicitudes')->assertOk()->assertSee('No hay solicitudes')->assertSee('0 solicitudes');
+    }
 }

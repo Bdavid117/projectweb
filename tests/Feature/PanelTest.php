@@ -38,4 +38,12 @@ class PanelTest extends TestCase
             $this->get('/panel')->assertOk();
         }
     }
+
+    public function test_the_student_is_redirected_away_from_the_panel(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->signInSeeded(Role::Estudiante);
+
+        $this->get('/panel')->assertRedirect('/solicitudes');
+    }
 }

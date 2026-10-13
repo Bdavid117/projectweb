@@ -42,6 +42,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/solicitudes/nueva', [RequestController::class, 'store'])->name('requests.store');
     });
 
+    Route::get('/solicitudes', [RequestController::class, 'index'])->name('requests.index');
+    Route::get('/solicitudes/{solicitud}', [RequestController::class, 'show'])->whereNumber('solicitud')->name('requests.show');
+    Route::get('/solicitudes/{solicitud}/soportes/{soporte}', [RequestController::class, 'download'])
+        ->whereNumber(['solicitud', 'soporte'])
+        ->name('requests.attachments.show');
+
     Route::get('/indicadores', [IndicatorController::class, 'index'])
         ->middleware('role:coordinacion')
         ->name('indicators.index');

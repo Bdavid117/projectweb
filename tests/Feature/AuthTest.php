@@ -118,7 +118,7 @@ class AuthTest extends TestCase
         $juan = \App\Models\Student::where('codigo', '2020123')->firstOrFail();
 
         $matrix = [
-            ['/panel', [Role::Estudiante, Role::Profesor, Role::Tutor, Role::Coordinacion]],
+            ['/solicitudes', [Role::Estudiante, Role::Profesor, Role::Tutor, Role::Coordinacion]],
             ['/estudiantes', [Role::Profesor, Role::Tutor, Role::Coordinacion]],
             ['/estudiantes/'.$juan->id, [Role::Profesor, Role::Tutor, Role::Coordinacion]],
             ['/solicitudes/nueva', [Role::Estudiante, Role::Coordinacion]],
@@ -133,6 +133,17 @@ class AuthTest extends TestCase
                     : $this->get($url)->assertForbidden();
             }
         }
+    }
+
+    public function test_panel_is_open_to_staff_and_redirects_students_to_their_requests(): void
+    {
+        foreach ([Role::Profesor, Role::Tutor, Role::Coordinacion] as $role) {
+            $this->actingAsRole($role);
+            $this->get('/panel')->assertOk();
+        }
+
+        $this->actingAsRole(Role::Estudiante);
+        $this->get('/panel')->assertRedirect('/solicitudes');
     }
 
     public function test_login_post_without_csrf_token_returns_419(): void

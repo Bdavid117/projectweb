@@ -37,7 +37,7 @@ class ShellUserTest extends TestCase
     public function test_menu_depends_on_the_role(): void
     {
         $this->actingAsRole(Role::Estudiante);
-        $this->get('/panel')->assertSee('Mis solicitudes')->assertDontSee('Indicadores');
+        $this->get('/solicitudes')->assertSee('Mis solicitudes')->assertDontSee('Indicadores');
 
         $this->actingAsRole(Role::Tutor);
         $this->get('/estudiantes')->assertSee('Registrar tutoría')->assertSee('Mis asesorías');
