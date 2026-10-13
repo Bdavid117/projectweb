@@ -48,6 +48,11 @@ Route::middleware('auth')->group(function () {
         ->whereNumber(['solicitud', 'soporte'])
         ->name('requests.attachments.show');
 
+    Route::middleware('role:coordinacion')->group(function () {
+        Route::post('/solicitudes/{solicitud}/revision', [RequestController::class, 'startReview'])->whereNumber('solicitud')->name('requests.review');
+        Route::post('/solicitudes/{solicitud}/decision', [RequestController::class, 'decide'])->whereNumber('solicitud')->name('requests.decision');
+    });
+
     Route::get('/indicadores', [IndicatorController::class, 'index'])
         ->middleware('role:coordinacion')
         ->name('indicators.index');

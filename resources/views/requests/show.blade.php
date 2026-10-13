@@ -98,6 +98,36 @@
                         @endif
                     </div>
                 @endif
+
+                @if($canReview)
+                    <form method="POST" action="{{ route('requests.review', $solicitud['id']) }}" class="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+                        @csrf
+                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Revisión del comité</h2>
+                        <p class="text-xs text-[var(--text-secondary)]">La solicitud está radicada. Pásela a revisión para poder registrar la decisión.</p>
+                        <x-button variant="primary" type="submit" class="w-full justify-center">Pasar a revisión</x-button>
+                    </form>
+                @endif
+
+                @if($canDecide)
+                    <form method="POST" action="{{ route('requests.decision', $solicitud['id']) }}" class="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+                        @csrf
+                        <div class="flex items-center justify-between gap-3">
+                            <h2 class="text-sm font-semibold text-[var(--text-primary)]">Registrar decisión</h2>
+                            <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-restricted-bg)] px-2 py-[3px] text-[11px] font-semibold text-[var(--color-restricted)]">
+                                <x-lucide-lock class="h-3 w-3" /> Solo Coordinación
+                            </span>
+                        </div>
+                        <x-form-field label="Decisión *" name="decision" type="select" help="Aprobada, rechazada o aplazada">
+                            <option value="">Seleccione…</option>
+                            @foreach($decisionOptions as $value => $label)
+                                <option value="{{ $value }}" @selected(old('decision') === $value)>{{ $label }}</option>
+                            @endforeach
+                        </x-form-field>
+                        <x-form-field label="Número de acta *" name="numero_acta" placeholder="p. ej. 12-2026" help="Acta del comité o del consejo" />
+                        <x-form-field label="Observaciones" name="observaciones" type="textarea" :rows="4" placeholder="Motivo de la decisión…" />
+                        <x-button variant="primary" type="submit" class="w-full justify-center">Registrar decisión</x-button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Role;
+use App\Http\Requests\DecideRequestRequest;
 use App\Http\Requests\StoreSolicitudRequest;
 use App\Models\AcademicTerm;
 use App\Models\CommitteeRequest;
@@ -16,6 +17,7 @@ use App\Support\Navigation;
 use App\Support\StudentProfile;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -182,6 +184,36 @@ class RequestController extends Controller
             'canDecide' => $user->role === Role::Coordinacion && $solicitud->estado === 'en_revision',
             'decisionOptions' => ['aprobada' => 'Aprobada', 'rechazada' => 'Rechazada', 'aplazada' => 'Aplazada'],
         ]);
+    }
+
+    public function startReview(Request $request, RequestWorkflow $workflow, CommitteeRequest $solicitud): RedirectResponse
+    {
+        $this->authorize('decide', $solicitud);
+
+        try {
+            $workflow->startReview($solicitud, $request->user());
+        } catch (DomainException $e) {
+            return redirect()->route('requests.show', $solicitud)->withErrors(['estado' => $e->getMessage()]);
+        }
+
+        return redirect()->route('requests.show', $solicitud)->with('status', 'La solicitud pasó a revisión.');
+    }
+
+    public function decide(DecideRequestRequest $request, RequestWorkflow $workflow, CommitteeRequest $solicitud): RedirectResponse
+    {
+        try {
+            $workflow->decide(
+                $solicitud,
+                (string) $request->input('decision'),
+                trim((string) $request->input('numero_acta')),
+                $request->filled('observaciones') ? (string) $request->input('observaciones') : null,
+                $request->user(),
+            );
+        } catch (DomainException $e) {
+            return redirect()->route('requests.show', $solicitud)->withErrors(['estado' => $e->getMessage()])->withInput();
+        }
+
+        return redirect()->route('requests.show', $solicitud)->with('status', 'Decisión registrada correctamente.');
     }
 
     public function download(CommitteeRequest $solicitud, RequestAttachment $soporte): StreamedResponse
