@@ -47,6 +47,27 @@ class AuthTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_array_inputs_give_the_generic_error_instead_of_a_server_error(): void
+    {
+        $this->from('/login')->post('/login', ['email' => ['a@b.co'], 'password' => 'x'])
+            ->assertRedirect('/login')->assertSessionHasErrors(['email' => 'Credenciales inválidas.']);
+        $this->from('/login')->post('/login', ['email' => 'a@b.co', 'password' => ['x']])
+            ->assertRedirect('/login')->assertSessionHasErrors(['email' => 'Credenciales inválidas.']);
+        $this->assertGuest();
+    }
+
+    public function test_login_is_rate_limited_after_five_failed_attempts(): void
+    {
+        $this->user(Role::Coordinacion);
+
+        foreach (range(1, 5) as $_) {
+            $this->post('/login', ['email' => 'coordinacion@unal.edu.co', 'password' => 'mala'])->assertStatus(302);
+        }
+
+        $this->post('/login', ['email' => 'coordinacion@unal.edu.co', 'password' => 'password'])->assertStatus(429);
+        $this->assertGuest();
+    }
+
     public function test_email_is_trimmed_and_case_insensitive(): void
     {
         $this->user(Role::Coordinacion);

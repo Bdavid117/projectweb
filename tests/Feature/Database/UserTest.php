@@ -20,6 +20,13 @@ class UserTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id, 'role' => 'tutor']);
     }
 
+    public function test_email_is_stored_trimmed_and_lowercased_so_login_can_find_it(): void
+    {
+        $user = User::factory()->create(['email' => '  Ana.Gomez@UNAL.edu.co ']);
+
+        $this->assertSame('ana.gomez@unal.edu.co', $user->fresh()->email);
+    }
+
     public function test_password_is_stored_as_a_hash(): void
     {
         $user = User::factory()->create(['password' => 'secreto123']);

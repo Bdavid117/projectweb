@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Enums\Role;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -47,6 +49,11 @@ class User extends Authenticatable
         'role' => Role::class,
         'active' => 'boolean',
     ];
+
+    protected function email(): Attribute
+    {
+        return Attribute::make(set: fn (string $value) => Str::lower(trim($value)));
+    }
 
     public function student(): HasOne
     {

@@ -17,9 +17,12 @@ class LoginController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $email = $request->input('email');
+        $password = $request->input('password');
+
         $credentials = [
-            'email' => Str::lower(trim((string) $request->input('email'))),
-            'password' => (string) $request->input('password'),
+            'email' => is_string($email) ? Str::lower(trim($email)) : '',
+            'password' => is_string($password) ? $password : '',
             'active' => true,
         ];
 
