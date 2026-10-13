@@ -38,6 +38,14 @@ abstract class TestCase extends BaseTestCase
         }
     }
 
+    protected function signInSeeded(Role $role): User
+    {
+        $user = User::where('email', $role->value.'@unal.edu.co')->firstOrFail();
+        $this->actingAs($user);
+
+        return $user;
+    }
+
     protected function actingAsRole(Role $role, array $attributes = []): User
     {
         $user = User::factory()->make($attributes + ['id' => 1, 'role' => $role]);

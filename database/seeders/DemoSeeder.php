@@ -63,6 +63,7 @@ class DemoSeeder extends Seeder
         }
 
         $this->seedJuanHistory($students['2020123'], $term, $tutor, $profesor);
+        $this->seedAccompaniment($students, $term, $tutor);
         $this->seedRequests($students, $term);
     }
 
@@ -120,6 +121,39 @@ class DemoSeeder extends Seeder
         Alert::updateOrCreate(['student_id' => $juan->id, 'tipo' => 'caida_papa'], [
             'detalle' => 'Caída del PAPA frente al periodo anterior', 'fecha_deteccion' => '2026-09-12',
         ]);
+    }
+
+    private function seedAccompaniment(array $students, AcademicTerm $term, User $tutor): void
+    {
+        foreach (['2021045', '2021098', '2022011', '2022076'] as $codigo) {
+            TutorAssignment::updateOrCreate(
+                ['student_id' => $students[$codigo]->id, 'term_id' => $term->id],
+                ['tutor_id' => $tutor->id]
+            );
+        }
+
+        foreach ([
+            ['2021045', '2026-07-03', 'Seguimiento de solicitud', 'Se revisó el trámite de reingreso.'],
+            ['2021098', '2026-05-20', 'Alerta temprana', 'PAPA por debajo del umbral; se acordó plan de estudio.'],
+            ['2022011', '2026-09-01', 'Revisión de avance', 'Avance acorde con el plan.'],
+            ['2022076', '2026-08-28', 'Seguimiento a carga académica', 'Mantiene 18 créditos.'],
+        ] as [$codigo, $fecha, $motivo, $observaciones]) {
+            Tutorship::updateOrCreate(
+                ['student_id' => $students[$codigo]->id, 'tutor_id' => $tutor->id, 'fecha' => $fecha],
+                ['motivo' => $motivo, 'observaciones' => $observaciones]
+            );
+        }
+
+        foreach ([
+            ['2021045', 'solicitudes_recurrentes', 'Tercera solicitud del mismo tipo en el periodo', '2026-09-10', false],
+            ['2019087', 'matricula_sin_avance', 'Matrícula sin avance en créditos', '2026-09-05', false],
+            ['2022011', 'sin_tutoria', 'Sin registro de tutoría en dos periodos', '2026-09-01', true],
+        ] as [$codigo, $tipo, $detalle, $fecha, $atendida]) {
+            Alert::updateOrCreate(
+                ['student_id' => $students[$codigo]->id, 'tipo' => $tipo],
+                ['detalle' => $detalle, 'fecha_deteccion' => $fecha, 'atendida' => $atendida]
+            );
+        }
     }
 
     private function seedRequests(array $students, AcademicTerm $term): void

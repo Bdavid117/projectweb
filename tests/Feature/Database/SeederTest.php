@@ -47,4 +47,17 @@ class SeederTest extends TestCase
 
         $this->assertSame($counts, [User::count(), Student::count(), AcademicTerm::count(), Student::where('codigo', '2020123')->firstOrFail()->tutorships()->count()]);
     }
+
+    public function test_demo_data_includes_the_tutor_assignments_and_alerts_used_by_the_screens(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $tutor = User::where('email', 'tutor@unal.edu.co')->firstOrFail();
+        $term = AcademicTerm::where('codigo', '2026-2')->firstOrFail();
+
+        $this->assertSame(5, \App\Models\TutorAssignment::where('tutor_id', $tutor->id)->where('term_id', $term->id)->count());
+        $this->assertSame(3, \App\Models\Alert::where('atendida', false)->count());
+        $this->assertSame(4, \App\Models\Alert::count());
+        $this->assertSame(1, Student::where('codigo', '2021098')->firstOrFail()->tutorships()->count());
+    }
 }
