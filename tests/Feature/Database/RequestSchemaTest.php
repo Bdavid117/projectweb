@@ -57,6 +57,14 @@ class RequestSchemaTest extends TestCase
         $this->assertSame(1, $minute->requests()->count());
     }
 
+    public function test_filing_date_keeps_the_time_of_day(): void
+    {
+        $request = $this->makeRequest();
+        $request->update(['fecha_radicacion' => '2026-09-10 14:30:00']);
+
+        $this->assertSame('2026-09-10 14:30', $request->fresh()->fecha_radicacion->format('Y-m-d H:i'));
+    }
+
     public function test_soft_deleted_requests_are_hidden_but_kept(): void
     {
         $request = $this->makeRequest();

@@ -15,7 +15,7 @@ class CommitteeRequest extends Model
 
     protected $fillable = ['student_id', 'request_type_id', 'term_id', 'descripcion', 'estado', 'fecha_radicacion', 'minute_id', 'decision', 'observaciones'];
 
-    protected $casts = ['fecha_radicacion' => 'date'];
+    protected $casts = ['fecha_radicacion' => 'datetime'];
 
     public function student(): BelongsTo
     {

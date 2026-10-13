@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('term_id')->constrained('academic_terms')->restrictOnDelete();
             $table->text('descripcion');
             $table->string('estado')->default('radicada'); // radicada | en_revision | con_decision
-            $table->date('fecha_radicacion');
+            $table->dateTime('fecha_radicacion');
             $table->foreignId('minute_id')->nullable()->constrained('committee_minutes')->restrictOnDelete();
             $table->string('decision')->nullable();
             $table->text('observaciones')->nullable();
