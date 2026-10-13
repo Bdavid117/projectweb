@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdvisoryController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PanelController;
@@ -37,6 +38,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');
         Route::get('/estudiantes/{student}', [StudentController::class, 'show'])->whereNumber('student')->name('students.show');
     });
+
+    Route::get('/mis-asesorias', [AdvisoryController::class, 'index'])->middleware('role:tutor')->name('advisories.index');
 
     Route::middleware('role:tutor,coordinacion')->group(function () {
         Route::get('/estudiantes/{student}/tutorias/crear', [TutorshipController::class, 'create'])->whereNumber('student')->name('tutorships.create');

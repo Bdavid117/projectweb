@@ -46,4 +46,11 @@ class EmptyDatabaseScreensTest extends TestCase
 
         $this->assertSame(0, CommitteeRequest::count());
     }
+
+    public function test_advisories_render_with_an_empty_database(): void
+    {
+        $this->actingAsRole(Role::Tutor);
+
+        $this->get('/mis-asesorias')->assertOk()->assertSee('0 estudiantes asignados en sin periodo');
+    }
 }

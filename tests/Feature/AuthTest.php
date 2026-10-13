@@ -122,6 +122,7 @@ class AuthTest extends TestCase
             ['/estudiantes', [Role::Profesor, Role::Tutor, Role::Coordinacion]],
             ['/estudiantes/'.$juan->id, [Role::Profesor, Role::Tutor, Role::Coordinacion]],
             ['/solicitudes/nueva', [Role::Estudiante, Role::Coordinacion]],
+            ['/mis-asesorias', [Role::Tutor]],
             ['/indicadores', [Role::Coordinacion]],
         ];
 
