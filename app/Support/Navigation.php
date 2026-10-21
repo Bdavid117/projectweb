@@ -28,17 +28,17 @@ class Navigation
     {
         $items = [
             ['key' => 'panel', 'icon' => 'layout-dashboard', 'label' => 'Panel', 'href' => '/panel'],
-            ['key' => 'perfil', 'icon' => 'user', 'label' => 'Mi perfil', 'href' => '#'],
+            ['key' => 'perfil', 'icon' => 'user', 'label' => 'Mi perfil', 'href' => '/perfil'],
             ['key' => 'solicitudes', 'icon' => 'file-text', 'label' => 'Mis solicitudes', 'href' => '/solicitudes'],
-            ['key' => 'experiencias', 'icon' => 'sparkles', 'label' => 'Mis experiencias', 'href' => '#'],
-            ['key' => 'trabajo-grado', 'icon' => 'book-open', 'label' => 'Mi trabajo de grado', 'href' => '#'],
-            ['key' => 'historia', 'icon' => 'trending-up', 'label' => 'Mi historia académica', 'href' => '#'],
+            ['key' => 'experiencias', 'icon' => 'sparkles', 'label' => 'Mis experiencias', 'href' => '/experiencias'],
+            ['key' => 'trabajo-grado', 'icon' => 'book-open', 'label' => 'Mi trabajo de grado', 'href' => '/trabajo-de-grado'],
+            ['key' => 'historia', 'icon' => 'trending-up', 'label' => 'Mi historia académica', 'href' => '/historia-academica'],
         ];
 
         return [
             ['label' => 'GENERAL', 'items' => self::mark($items, $active)],
             ['label' => null, 'items' => self::mark([
-                ['key' => 'practica', 'icon' => 'briefcase', 'label' => 'Mi práctica', 'href' => '#'],
+                ['key' => 'practica', 'icon' => 'briefcase', 'label' => 'Mi práctica', 'href' => '/practica'],
             ], $active)],
         ];
     }

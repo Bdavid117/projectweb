@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Controllers\AcademicHistoryController;
 use App\Http\Controllers\AdvisoryController;
 use App\Http\Controllers\IndicatorController;
+use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PanelController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\ThesisController;
 use App\Http\Controllers\TutorshipController;
 use Illuminate\Support\Facades\Route;
 
@@ -63,6 +67,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/solicitudes/nueva', [RequestController::class, 'create'])->name('requests.create');
         Route::post('/solicitudes', [RequestController::class, 'store'])->name('requests.store');
     });
+
+    Route::get('/perfil', [ProfileController::class, 'show'])->middleware('role:estudiante')->name('profile.show');
+    Route::get('/trabajo-de-grado', [ThesisController::class, 'show'])->middleware('role:estudiante')->name('thesis.show');
+    Route::get('/historia-academica', [AcademicHistoryController::class, 'index'])->middleware('role:estudiante')->name('academic-history.index');
+    Route::get('/practica', [InternshipController::class, 'show'])->middleware('role:estudiante')->name('internship.show');
 
     Route::get('/solicitudes', [RequestController::class, 'index'])->name('requests.index');
     Route::get('/solicitudes/{solicitud}', [RequestController::class, 'show'])->name('requests.show');
