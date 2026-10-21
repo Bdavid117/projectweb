@@ -3,6 +3,7 @@
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\PanelController;
+use App\Http\Controllers\RequestController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TutorshipController;
 use Illuminate\Support\Facades\Route;
@@ -47,5 +48,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/tutorias/{tutoria}/editar', [TutorshipController::class, 'edit'])->name('tutorships.edit');
         Route::put('/tutorias/{tutoria}', [TutorshipController::class, 'update'])->name('tutorships.update');
         Route::delete('/tutorias/{tutoria}', [TutorshipController::class, 'destroy'])->name('tutorships.destroy');
+    });
+
+    Route::middleware('role:estudiante,coordinacion')->group(function () {
+        Route::get('/solicitudes/nueva', [RequestController::class, 'create'])->name('requests.create');
+        Route::post('/solicitudes', [RequestController::class, 'store'])->name('requests.store');
+    });
+
+    Route::get('/solicitudes', [RequestController::class, 'index'])->name('requests.index');
+    Route::get('/solicitudes/{solicitud}', [RequestController::class, 'show'])->name('requests.show');
+    Route::get('/solicitudes/{solicitud}/soportes/{soporte}', [RequestController::class, 'download'])
+        ->name('requests.attachments.show');
+
+    Route::middleware('role:coordinacion')->group(function () {
+        Route::post('/solicitudes/{solicitud}/revision', [RequestController::class, 'startReview'])->name('requests.review');
+        Route::post('/solicitudes/{solicitud}/decision', [RequestController::class, 'decide'])->name('requests.decision');
     });
 });
