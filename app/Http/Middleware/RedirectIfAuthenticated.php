@@ -6,6 +6,7 @@ use App\Providers\RouteServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 class RedirectIfAuthenticated
@@ -21,10 +22,29 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+                return redirect($this->homeUrl());
             }
         }
 
         return $next($request);
+    }
+
+    /**
+     * Destino de un usuario ya autenticado. Se prefiere la ruta de inicio del
+     * rol; si todavia no esta registrada se cae al home de la aplicacion.
+     */
+    private function homeUrl(): string
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            $route = $user->role->homeRoute();
+
+            if (Route::has($route)) {
+                return route($route);
+            }
+        }
+
+        return RouteServiceProvider::HOME;
     }
 }
