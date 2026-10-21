@@ -43,6 +43,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/experiencias', [App\Http\Controllers\ExperienceController::class, 'index'])->middleware('role:estudiante,tutor,coordinacion')->name('experiencias.index');
 
+    Route::middleware('role:estudiante,tutor,coordinacion')->group(function () {
+        Route::get('/experiencias/crear', [App\Http\Controllers\ExperienceController::class, 'create'])->name('experiencias.create');
+        Route::post('/experiencias', [App\Http\Controllers\ExperienceController::class, 'store'])->name('experiencias.store');
+        Route::get('/experiencias/{id}/editar', [App\Http\Controllers\ExperienceController::class, 'edit'])->name('experiencias.edit');
+        Route::put('/experiencias/{id}', [App\Http\Controllers\ExperienceController::class, 'update'])->name('experiencias.update');
+        Route::delete('/experiencias/{id}', [App\Http\Controllers\ExperienceController::class, 'destroy'])->name('experiencias.destroy');
+    });
+
     Route::middleware('role:tutor,coordinacion')->group(function () {
         Route::get('/estudiantes/{student}/tutorias/crear', [TutorshipController::class, 'create'])->name('tutorships.create');
         Route::post('/estudiantes/{student}/tutorias', [TutorshipController::class, 'store'])->name('tutorships.store');
