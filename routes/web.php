@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdvisoryController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\PanelController;
@@ -41,6 +42,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/indicadores', [IndicatorController::class, 'index'])
         ->middleware('role:coordinacion')
         ->name('indicators.index');
+
+    Route::get('/mis-asesorias', [AdvisoryController::class, 'index'])
+        ->middleware('role:tutor')
+        ->name('advisories.index');
 
     Route::middleware('role:tutor,coordinacion')->group(function () {
         Route::get('/estudiantes/{student}/tutorias/crear', [TutorshipController::class, 'create'])->name('tutorships.create');
