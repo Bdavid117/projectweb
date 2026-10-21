@@ -78,4 +78,26 @@ Route::middleware('auth')->group(function () {
     Route::get('/indicadores', [IndicatorController::class, 'index'])
         ->middleware('role:coordinacion')
         ->name('indicators.index');
+
+    Route::middleware('role:coordinacion')->group(function () {
+        Route::get('/admin', function () {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
+
+        Route::get('/admin/usuarios', function () {
+            return view('admin.usuarios.index');
+        })->name('users.index');
+
+        Route::get('/admin/cargas', function () {
+            return view('admin.cargas.index');
+        })->name('cargas.index');
+
+        Route::get('/admin/catalogos', function () {
+            return view('admin.catalogos.index');
+        })->name('catalogos.index');
+
+        Route::get('/admin/bitacora', function () {
+            return view('admin.bitacora.index');
+        })->name('bitacora.index');
+    });
 });
