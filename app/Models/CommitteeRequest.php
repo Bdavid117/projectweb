@@ -2,21 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class StudentRequest extends Model
+class CommitteeRequest extends Model
 {
-    use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'requests';
 
-    protected $fillable = [
-        'student_id', 'request_type_id', 'term_id', 'descripcion', 'estado',
-        'fecha_radicacion', 'minute_id', 'decision', 'observaciones',
-    ];
+    protected $fillable = ['student_id', 'request_type_id', 'term_id', 'descripcion', 'estado', 'fecha_radicacion', 'minute_id', 'decision', 'observaciones'];
 
     protected $casts = ['fecha_radicacion' => 'datetime'];
 

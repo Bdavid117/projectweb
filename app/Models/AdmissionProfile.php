@@ -2,22 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AdmissionProfile extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'student_id', 'school_id', 'puntaje_saber11', 'puntaje_admision', 'hobby_formal',
-    ];
-
-    protected $casts = [
-        'puntaje_saber11' => 'decimal:2',
-        'puntaje_admision' => 'decimal:2',
-    ];
+    protected $fillable = ['student_id', 'school_id', 'puntaje_saber11', 'puntaje_admision', 'hobby_formal'];
 
     public function student(): BelongsTo
     {

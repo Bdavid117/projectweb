@@ -2,18 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Thesis extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'student_id', 'modalidad', 'estado', 'titulo', 'director_id',
-        'codirector_id', 'term_id', 'repositorio_url',
-    ];
+    protected $fillable = ['student_id', 'modalidad', 'estado', 'titulo', 'director_id', 'codirector_id', 'term_id', 'repositorio_url'];
 
     public function student(): BelongsTo
     {

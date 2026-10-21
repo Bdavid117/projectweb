@@ -2,24 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AuditLog extends Model
 {
-    use HasFactory;
+    public const UPDATED_AT = null;
 
-    protected $fillable = [
-        'user_id', 'auditable_type', 'auditable_id', 'accion',
-        'valores_anteriores', 'valores_nuevos', 'ip',
-    ];
+    protected $fillable = ['user_id', 'auditable_type', 'auditable_id', 'accion', 'valores_anteriores', 'valores_nuevos', 'ip'];
 
-    protected $casts = [
-        'valores_anteriores' => 'array',
-        'valores_nuevos' => 'array',
-    ];
+    protected $casts = ['valores_anteriores' => 'array', 'valores_nuevos' => 'array'];
 
     public function user(): BelongsTo
     {

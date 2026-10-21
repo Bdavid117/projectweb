@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InternshipFollowUp extends Model
 {
-    use HasFactory;
-
     protected $fillable = ['internship_id', 'fecha', 'observacion', 'autor_id'];
 
     protected $casts = ['fecha' => 'date'];

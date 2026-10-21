@@ -2,30 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AcademicTerm extends Model
 {
-    use HasFactory;
+    protected $fillable = ['codigo', 'fecha_inicio', 'fecha_fin'];
 
-    protected $fillable = ['code', 'name', 'starts_on', 'ends_on', 'active'];
-
-    protected $casts = [
-        'starts_on' => 'date',
-        'ends_on' => 'date',
-        'active' => 'boolean',
-    ];
+    protected $casts = ['fecha_inicio' => 'date', 'fecha_fin' => 'date'];
 
     public function academicRecords(): HasMany
     {
         return $this->hasMany(AcademicRecord::class, 'term_id');
     }
 
-    public function tutorAssignments(): HasMany
+    public static function current(): ?self
     {
-        return $this->hasMany(TutorAssignment::class, 'term_id');
+        return static::query()->whereHas('academicRecords')->orderByDesc('fecha_inicio')->first()
+            ?? static::query()->orderByDesc('fecha_inicio')->first();
     }
 }

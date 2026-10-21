@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,15 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Student extends Model
 {
-    use HasFactory;
+    protected $fillable = ['user_id', 'codigo', 'documento', 'cohorte', 'estado', 'fecha_ingreso'];
 
-    protected $fillable = [
-        'user_id', 'codigo', 'documento', 'cohorte', 'estado', 'fecha_ingreso',
-    ];
-
-    protected $casts = [
-        'fecha_ingreso' => 'date',
-    ];
+    protected $casts = ['fecha_ingreso' => 'date'];
 
     public function user(): BelongsTo
     {
@@ -45,6 +38,11 @@ class Student extends Model
         return $this->hasMany(AcademicRecord::class);
     }
 
+    public function tutorAssignments(): HasMany
+    {
+        return $this->hasMany(TutorAssignment::class);
+    }
+
     public function theses(): HasMany
     {
         return $this->hasMany(Thesis::class);
@@ -57,17 +55,12 @@ class Student extends Model
 
     public function requests(): HasMany
     {
-        return $this->hasMany(StudentRequest::class, 'student_id');
+        return $this->hasMany(CommitteeRequest::class);
     }
 
     public function experiences(): HasMany
     {
         return $this->hasMany(Experience::class);
-    }
-
-    public function tutorAssignments(): HasMany
-    {
-        return $this->hasMany(TutorAssignment::class);
     }
 
     public function tutorships(): HasMany
