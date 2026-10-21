@@ -5,17 +5,24 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateExperienceRequest;
 use App\Http\Requests\StoreExperienceRequest;
 use App\Models\Experience;
+use App\Support\Navigation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ExperienceController extends Controller
 {
-    public function index()
+    public function index(Request $request): View
     {
+        $this->authorize('viewAny', Experience::class);
+
+        $user = $request->user();
+
         $experiences = Experience::latest('updated_at')->get();
 
         return view('experiences.index', [
+            'user' => $user->viewData(),
+            'navGroups' => Navigation::forRole($user->role, 'experiencias'),
             'experiences' => $experiences,
         ]);
     }
@@ -25,6 +32,7 @@ class ExperienceController extends Controller
         $this->authorize('create', Experience::class);
 
         return view('experiences.form', [
+            'user' => auth()->user()->viewData(),
             'navGroups' => app('app.support.Navigation')->forRole(
                 auth()->user()->role,
                 auth()->user()->role === 'tutor' ? 'registrar-tutoria' : 'estudiantes'
@@ -49,6 +57,7 @@ class ExperienceController extends Controller
 
         return view('experiences.form', [
             'experience' => $experience,
+            'user' => auth()->user()->viewData(),
             'navGroups' => app('app.support.Navigation')->forRole(
                 auth()->user()->role,
                 auth()->user()->role === 'tutor' ? 'registrar-tutoria' : 'estudiantes'
