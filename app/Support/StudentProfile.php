@@ -8,7 +8,6 @@ use App\Models\AcademicTerm;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Route;
 
 class StudentProfile
 {
@@ -76,7 +75,7 @@ class StudentProfile
                 'date' => Labels::date($t->fecha),
                 'reason' => $t->motivo,
                 'note' => (string) $t->observaciones,
-                'editUrl' => $viewer && $viewer->can('update', $t) && Route::has('tutorships.edit') ? route('tutorships.edit', $t) : null,
+                'editUrl' => $viewer && $viewer->can('update', $t) ? route('tutorships.edit', $t) : null,
             ])->all(),
         ];
     }

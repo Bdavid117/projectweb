@@ -26,7 +26,7 @@
             <div class="flex flex-wrap gap-3">
                 <x-button variant="secondary">Exportar ficha</x-button>
                 @if($canRegisterTutorship)
-                    <x-button variant="primary" :href="Route::has('tutorships.create') ? route('tutorships.create', $student['id']) : null">Registrar tutoría</x-button>
+                    <x-button variant="primary" :href="route('tutorships.create', $student['id'])">Registrar tutoría</x-button>
                 @endif
             </div>
         </div>
