@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PanelController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,4 +26,6 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+    Route::get('/panel', [PanelController::class, 'index'])->name('panel.index');
 });
