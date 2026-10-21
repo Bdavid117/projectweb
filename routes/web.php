@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
@@ -34,4 +35,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');
         Route::get('/estudiantes/{student}', [StudentController::class, 'show'])->name('students.show');
     });
+
+    Route::get('/indicadores', [IndicatorController::class, 'index'])
+        ->middleware('role:coordinacion')
+        ->name('indicators.index');
 });
