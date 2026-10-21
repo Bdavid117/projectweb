@@ -4,12 +4,10 @@
 
     @if(!empty($title))
     <div class="px-4 py-3 border-b border-[var(--border-subtle)]">
-        <h3 class="font-medium text-[var(--text-primary)] {{ $titleClass: 'text-lg' }}">{{ $title }}</h3>
+        <h3 class="font-medium text-[var(--text-primary)] {{ $titleClass ?? 'text-lg' }}">{{ $title }}</h3>
     </div>
     @endif
 
-    <div class="px-4 py-5">
-        @yield('content')
-    </div>
+    {{ $slot }}
 
 </div>
