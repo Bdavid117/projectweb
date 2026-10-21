@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -35,19 +34,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended($this->homeUrl());
-    }
-
-    /**
-     * Destino tras iniciar sesion. El destino por rol solo se usa si la ruta
-     * correspondiente ya esta registrada: durante la construccion incremental
-     * de los modulos algunas rutas todavia no existen.
-     */
-    private function homeUrl(): string
-    {
-        $route = Auth::user()->role->homeRoute();
-
-        return Route::has($route) ? route($route) : route('login.show');
+        return redirect()->intended(route(Auth::user()->role->homeRoute()));
     }
 
     public function destroy(Request $request): RedirectResponse

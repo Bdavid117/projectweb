@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdvisoryController;
-use App\Http\Controllers\LoginController;
 use App\Http\Controllers\IndicatorController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\StudentController;
@@ -39,13 +39,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/estudiantes/{student}', [StudentController::class, 'show'])->name('students.show');
     });
 
-    Route::get('/indicadores', [IndicatorController::class, 'index'])
-        ->middleware('role:coordinacion')
-        ->name('indicators.index');
-
-    Route::get('/mis-asesorias', [AdvisoryController::class, 'index'])
-        ->middleware('role:tutor')
-        ->name('advisories.index');
+    Route::get('/mis-asesorias', [AdvisoryController::class, 'index'])->middleware('role:tutor')->name('advisories.index');
 
     Route::middleware('role:tutor,coordinacion')->group(function () {
         Route::get('/estudiantes/{student}/tutorias/crear', [TutorshipController::class, 'create'])->name('tutorships.create');
@@ -63,10 +57,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/solicitudes', [RequestController::class, 'index'])->name('requests.index');
     Route::get('/solicitudes/{solicitud}', [RequestController::class, 'show'])->name('requests.show');
     Route::get('/solicitudes/{solicitud}/soportes/{soporte}', [RequestController::class, 'download'])
+        
         ->name('requests.attachments.show');
 
     Route::middleware('role:coordinacion')->group(function () {
         Route::post('/solicitudes/{solicitud}/revision', [RequestController::class, 'startReview'])->name('requests.review');
         Route::post('/solicitudes/{solicitud}/decision', [RequestController::class, 'decide'])->name('requests.decision');
     });
+
+    Route::get('/indicadores', [IndicatorController::class, 'index'])
+        ->middleware('role:coordinacion')
+        ->name('indicators.index');
 });
