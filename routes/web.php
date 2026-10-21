@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/mis-asesorias', [AdvisoryController::class, 'index'])->middleware('role:tutor')->name('advisories.index');
 
+    Route::get('/experiencias', [App\Http\Controllers\ExperienceController::class, 'index'])->middleware('role:estudiante,tutor,coordinacion')->name('experiencias.index');
+
     Route::middleware('role:tutor,coordinacion')->group(function () {
         Route::get('/estudiantes/{student}/tutorias/crear', [TutorshipController::class, 'create'])->name('tutorships.create');
         Route::post('/estudiantes/{student}/tutorias', [TutorshipController::class, 'store'])->name('tutorships.store');
