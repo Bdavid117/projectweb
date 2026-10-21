@@ -11,6 +11,8 @@ use App\Http\Controllers\RequestController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ThesisController;
 use App\Http\Controllers\TutorshipController;
+use App\Support\Navigation;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -89,24 +91,39 @@ Route::middleware('auth')->group(function () {
         ->name('indicators.index');
 
     Route::middleware('role:coordinacion')->group(function () {
-        Route::get('/admin', function () {
-            return view('admin.dashboard');
+        Route::get('/admin', function (Request $request) {
+            return view('admin.dashboard', [
+                'user' => $request->user()->viewData(),
+                'navGroups' => Navigation::forRole($request->user()->role, 'panel'),
+            ]);
         })->name('admin.dashboard');
 
-        Route::get('/admin/usuarios', function () {
-            return view('admin.usuarios.index');
+        Route::get('/admin/usuarios', function (Request $request) {
+            return view('admin.usuarios.index', [
+                'user' => $request->user()->viewData(),
+                'navGroups' => Navigation::forRole($request->user()->role, 'usuarios'),
+            ]);
         })->name('users.index');
 
-        Route::get('/admin/cargas', function () {
-            return view('admin.cargas.index');
+        Route::get('/admin/cargas', function (Request $request) {
+            return view('admin.cargas.index', [
+                'user' => $request->user()->viewData(),
+                'navGroups' => Navigation::forRole($request->user()->role, 'cargas'),
+            ]);
         })->name('cargas.index');
 
-        Route::get('/admin/catalogos', function () {
-            return view('admin.catalogos.index');
+        Route::get('/admin/catalogos', function (Request $request) {
+            return view('admin.catalogos.index', [
+                'user' => $request->user()->viewData(),
+                'navGroups' => Navigation::forRole($request->user()->role, 'catalogos'),
+            ]);
         })->name('catalogos.index');
 
-        Route::get('/admin/bitacora', function () {
-            return view('admin.bitacora.index');
+        Route::get('/admin/bitacora', function (Request $request) {
+            return view('admin.bitacora.index', [
+                'user' => $request->user()->viewData(),
+                'navGroups' => Navigation::forRole($request->user()->role, 'bitacora'),
+            ]);
         })->name('bitacora.index');
     });
 });
