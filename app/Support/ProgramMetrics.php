@@ -16,7 +16,6 @@ use App\Models\TutorAssignment;
 use App\Models\Tutorship;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Route;
 
 class ProgramMetrics
 {
@@ -139,7 +138,7 @@ class ProgramMetrics
             'date' => Labels::date($alert->fecha_deteccion),
             'status' => $alert->atendida ? 'Atendida' : 'Sin atender',
             'tone' => $alert->atendida ? 'success' : 'danger',
-            'url' => Route::has('students.show') ? route('students.show', $alert->student_id) : '/estudiantes',
+            'url' => route('students.show', $alert->student_id),
         ])->all();
     }
 

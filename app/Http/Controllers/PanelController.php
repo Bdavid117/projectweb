@@ -8,7 +8,6 @@ use App\Support\Navigation;
 use App\Support\ProgramMetrics;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Illuminate\View\View;
 
 class PanelController extends Controller
@@ -18,7 +17,7 @@ class PanelController extends Controller
         $user = $request->user();
 
         if ($user->role === Role::Estudiante) {
-            return redirect()->route(Route::has('requests.index') ? 'requests.index' : 'panel.index');
+            return redirect()->route('requests.index');
         }
 
         return view('panel.index', [

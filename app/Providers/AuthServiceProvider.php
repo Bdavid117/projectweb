@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
 use App\Models\CommitteeRequest;
 use App\Models\Tutorship;
 use App\Policies\CommitteeRequestPolicy;

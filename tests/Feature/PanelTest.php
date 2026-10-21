@@ -44,9 +44,7 @@ class PanelTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $this->signInSeeded(Role::Estudiante);
 
-        // El modulo de solicitudes todavia no esta construido: el estudiante sale
-        // del panel, aunque la ruta de destino se agrega en el commit de solicitudes.
-        $this->get('/panel')->assertRedirect();
+        $this->get('/panel')->assertRedirect('/solicitudes');
     }
 
     public function test_coordination_sees_every_alert_but_a_tutor_only_those_of_their_students(): void
