@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PanelController;
+use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,4 +29,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
     Route::get('/panel', [PanelController::class, 'index'])->name('panel.index');
+
+    Route::middleware('role:profesor,tutor,coordinacion')->group(function () {
+        Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');
+        Route::get('/estudiantes/{student}', [StudentController::class, 'show'])->name('students.show');
+    });
 });
