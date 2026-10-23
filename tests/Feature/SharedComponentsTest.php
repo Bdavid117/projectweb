@@ -25,6 +25,18 @@ class SharedComponentsTest extends TestCase
         $this->assertStringContainsString('Exportar', $html);
     }
 
+    public function test_footer_renders_brand_and_primary_navigation_links(): void
+    {
+        $html = Blade::render('<x-footer />');
+
+        $this->assertStringContainsString('Trayectoria Estudiantil', $html);
+        $this->assertStringContainsString(route('panel.index'), $html);
+        $this->assertStringContainsString(route('students.index'), $html);
+        $this->assertStringContainsString(route('requests.create'), $html);
+        $this->assertStringContainsString(route('indicators.index'), $html);
+        $this->assertStringContainsString(route('login.show'), $html);
+    }
+
     public function test_status_badge_maps_tone_to_literal_classes(): void
     {
         $html = Blade::render('<x-status-badge text="En riesgo" tone="danger" />');

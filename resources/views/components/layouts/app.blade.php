@@ -24,6 +24,9 @@
                     </div>
                 @endif
                 {{ $slot }}
+                <div class="px-4 pb-5 sm:px-7">
+                    <x-footer />
+                </div>
             </main>
         </div>
     </div>
