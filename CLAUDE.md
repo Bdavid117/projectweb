@@ -24,11 +24,6 @@ have full CRUD with Spanish validation, role/ownership policies and an audit tra
 Still out of scope: `/mi-*`, `/experiencias`, `/admin/*`, automatic alerts, Excel
 import/export.
 
-Design spec and implementation plan (superpowers-style docs, useful for
-understanding *why* the UI is structured this way):
-`docs/superpowers/specs/2026-09-23-trayectoria-estudiantil-ui-design.md`
-`docs/superpowers/plans/2026-09-23-trayectoria-estudiantil-ui.md`
-
 ## Commands
 
 ```bash
@@ -136,7 +131,7 @@ Commits use Conventional Commits with a required scope:
 `type(scope): descripción breve en español, en minúsculas`.
 
 Types in use so far: `feat` (new screens/components), `fix` (bug fixes),
-`test` (test-only additions), `docs` (spec/plan documents, `CLAUDE.md`),
+`test` (test-only additions), `docs` (`CLAUDE.md`, README),
 `chore` (tooling/config with no source-code behavior change, e.g.
 `.gitignore`). Common scopes: `add` (new screen/feature),
 `setup` (tooling/build config), `login`, `plan`, `responsive`, `nav` — pick

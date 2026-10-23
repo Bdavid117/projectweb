@@ -111,12 +111,10 @@ Se usa [Conventional Commits](https://www.conventionalcommits.org/) con scope ob
 type(scope): descripción breve en español, en minúsculas
 ```
 
-**Tipos:** `feat` (nuevas pantallas/componentes), `fix` (corrección de bugs), `test` (tests), `docs` (specs/plan/`CLAUDE.md`), `chore` (tooling/config sin cambio de comportamiento).
+**Tipos:** `feat` (nuevas pantallas/componentes), `fix` (corrección de bugs), `test` (tests), `docs` (`CLAUDE.md`, README), `chore` (tooling/config sin cambio de comportamiento).
 
 **Scopes comunes:** `add`, `setup`, `login`, `plan`, `responsive`, `nav` — son ejemplos, no una lista cerrada; se elige el scope que nombre el área realmente afectada.
 
 ## Documentación adicional
 
 - [`CLAUDE.md`](./CLAUDE.md) — guía de arquitectura y convenciones para trabajar en el repo
-- [`docs/superpowers/specs/2026-09-23-trayectoria-estudiantil-ui-design.md`](./docs/superpowers/specs/2026-09-23-trayectoria-estudiantil-ui-design.md) — spec de diseño
-- [`docs/superpowers/plans/2026-09-23-trayectoria-estudiantil-ui.md`](./docs/superpowers/plans/2026-09-23-trayectoria-estudiantil-ui.md) — plan de implementación
