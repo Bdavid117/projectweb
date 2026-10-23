@@ -12,7 +12,6 @@
         "vite": "^5.0.0"
     },
     "dependencies": {
-        "@animateicons/vanilla": "^0.1.0",
         "alpinejs": "^3.17.5"
     }
 }

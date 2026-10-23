@@ -3,11 +3,11 @@
     <div class="flex flex-col gap-5 p-4 sm:p-7">
         <div class="flex items-center gap-[6px] text-sm text-[var(--text-secondary)]">
             <a href="/panel">Inicio</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <a href="{{ route('students.index') }}">Estudiantes</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <a href="{{ route('students.show', $student['id']) }}">{{ $student['name'] }}</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <span class="text-[var(--text-primary)]">{{ $editing ? 'Editar tutoría' : 'Registrar tutoría' }}</span>
         </div>
 
@@ -81,7 +81,7 @@
                 </div>
 
                 <div class="flex items-start gap-[10px] rounded-[var(--radius-lg)] bg-[var(--color-info-bg)] p-[14px]">
-                    <x-ui-icon name="info" class="h-4 w-4 shrink-0 text-[var(--color-info)]" />
+                    <x-lucide-info class="h-4 w-4 shrink-0 text-[var(--color-info)]" />
                     <p class="text-sm text-[var(--text-secondary)]">Podrá corregir esta sesión durante {{ $hours }} horas. Después queda inmutable para conservar la continuidad del acompañamiento.</p>
                 </div>
             </div>

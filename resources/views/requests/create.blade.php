@@ -2,9 +2,9 @@
     <div class="flex flex-col gap-5 p-4 sm:p-7">
         <div class="flex items-center gap-[6px] text-sm text-[var(--text-secondary)]">
             <a href="/panel">Inicio</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <a href="{{ route('requests.index') }}">Mis solicitudes</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <span class="text-[var(--text-primary)]">Nueva solicitud</span>
         </div>
 
@@ -49,7 +49,7 @@
                 <div class="flex flex-col gap-[6px]">
                     <label for="soportes" class="text-xs font-semibold text-[var(--text-secondary)]">Soportes</label>
                     <div class="flex flex-col items-center justify-center gap-[6px] rounded-[var(--radius-md)] border border-dashed border-[var(--border-default)] p-4">
-                        <x-ui-icon name="cloud-upload" class="h-[22px] w-[22px] text-[var(--color-neutral-400)]" />
+                        <x-lucide-cloud-upload class="h-[22px] w-[22px] text-[var(--color-neutral-400)]" />
                         <p class="text-sm text-[var(--text-secondary)]">Seleccione los archivos de soporte</p>
                         <input id="soportes" name="soportes[]" type="file" multiple accept=".pdf,.jpg,.jpeg,.png" class="text-sm text-[var(--text-secondary)]" />
                         <p class="text-xs text-[var(--text-muted)]">PDF, JPG o PNG · máximo 5 MB por archivo · hasta 5 archivos</p>
@@ -61,7 +61,7 @@
 
                 @if($errors->any())
                     <div class="flex gap-[10px] rounded-[var(--radius-md)] bg-[var(--color-danger-bg)] p-3">
-                        <x-ui-icon name="circle-alert" class="h-4 w-4 shrink-0 text-[var(--color-danger)]" />
+                        <x-lucide-circle-alert class="h-4 w-4 shrink-0 text-[var(--color-danger)]" />
                         <div class="flex flex-col gap-[2px]">
                             <p class="text-sm font-semibold text-[var(--color-danger)]">Revise los campos marcados</p>
                             <ul class="list-disc pl-4 text-xs text-[var(--text-secondary)]">
@@ -98,7 +98,7 @@
                 </div>
 
                 <div class="flex gap-[10px] rounded-[var(--radius-lg)] bg-[var(--color-info-bg)] p-[14px]">
-                    <x-ui-icon name="info" class="h-4 w-4 shrink-0 text-[var(--color-info)]" />
+                    <x-lucide-info class="h-4 w-4 shrink-0 text-[var(--color-info)]" />
                     <p class="text-sm text-[var(--text-secondary)]">Cada cambio de estado queda registrado con autor y fecha, de modo que la solicitud conserva su traza completa (RNF-07).</p>
                 </div>
             </div>

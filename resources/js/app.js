@@ -1,5 +1,4 @@
 import Alpine from 'alpinejs';
-import './icons';
 
 Alpine.data('notifications', (url) => ({
     open: false,

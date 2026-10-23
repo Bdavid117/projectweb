@@ -85,7 +85,7 @@
                         @foreach($recentActivity as $activity)
                             <div class="flex items-center gap-[11px] px-4 py-[10px]">
                                 <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--surface-sunken)]">
-                                    <x-ui-icon :name="$activity['icon']" class="h-[15px] w-[15px] text-[var(--color-primary-600)]" />
+                                    <x-dynamic-component :component="'lucide-' . $activity['icon']" class="h-[15px] w-[15px] text-[var(--color-primary-600)]" />
                                 </div>
                                 <div class="flex flex-1 flex-col gap-[2px]">
                                     <p class="text-sm text-[var(--text-primary)]">{{ $activity['description'] }}</p>
@@ -103,7 +103,7 @@
                     <div class="flex flex-col gap-2 border-t border-[var(--border-subtle)] p-4">
                         @foreach($quickLinks as $link)
                             <a href="{{ $link['href'] ?? '#' }}" class="flex w-full items-center gap-[9px] rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 py-[10px] text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]">
-                                <x-ui-icon :name="$link['icon']" class="h-4 w-4 text-[var(--color-primary-600)]" />
+                                <x-dynamic-component :component="'lucide-' . $link['icon']" class="h-4 w-4 text-[var(--color-primary-600)]" />
                                 {{ $link['label'] }}
                             </a>
                         @endforeach

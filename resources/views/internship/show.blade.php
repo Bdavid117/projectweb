@@ -70,7 +70,7 @@
         </div>
         @else
         <div class="flex flex-col items-center justify-center py-20 text-center">
-            <x-ui-icon name="briefcase" class="h-16 w-16 text-[var(--text-muted)]" />
+            <x-lucide-briefcase class="h-16 w-16 text-[var(--text-muted)]" />
             <h2 class="text-lg font-semibold text-[var(--text-primary)] mt-4">No hay práctica registrada</h2>
             <p class="text-sm text-[var(--text-muted)] mt-2">Aún no se ha registrado información sobre tu práctica.</p>
         </div>

@@ -66,11 +66,7 @@ properties in a `:root` block at the top of `resources/css/app.css` (copied
 from `mokup/design-tokens.css`). Every class in Blade views references them
 via arbitrary values — `bg-[var(--color-primary-600)]`,
 `text-[var(--text-secondary)]`, `rounded-[var(--radius-md)]` — never
-hardcoded hex. Icons: always use `<x-ui-icon name="bell" class="h-4 w-4 text-[var(--...)]" />` (never `<x-icon>`, which belongs
-to Blade Icons). It renders the animated version from `@animateicons/vanilla` when the name is listed in
-`config/animated-icons.php` (and imported in `resources/js/icons.js`; `AnimatedIconsTest` keeps both in sync) and
-otherwise falls back to the static `mallardduck/blade-lucide-icons` SVG. Animated icons play when the pointer or focus
-enters the closest `a`, `button`, `label` or `[data-icon-trigger]`. Size and color come from the classes (`currentColor`).
+hardcoded hex. Icons come from `mallardduck/blade-lucide-icons` (`<x-lucide-{name} />`, or `<x-dynamic-component :component="'lucide-'.$icon" />` when the icon name is a runtime variable), colored via `text-[var(--...)]` since Lucide icons use `currentColor`. Icons are static on purpose.
 
 **Logo**: designed in Pencil (`Logo · isotipo` and `Logo · horizontal` next to the design system); the app uses the
 inline SVG component `<x-logo class="h-8 w-8" />` plus `public/logo.svg` / `public/favicon.svg`. On dark backgrounds

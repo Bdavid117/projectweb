@@ -2,9 +2,9 @@
     <div class="flex flex-col gap-5 p-4 sm:p-7">
         <div class="flex items-center gap-[6px] text-sm text-[var(--text-secondary)]">
             <a href="/panel">Inicio</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <a href="{{ route('requests.index') }}">Solicitudes</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <span class="text-[var(--text-primary)]">Solicitud {{ $solicitud['number'] }}</span>
         </div>
 
@@ -21,7 +21,7 @@
 
         @if($errors->has('estado'))
             <div class="flex gap-[10px] rounded-[var(--radius-md)] bg-[var(--color-danger-bg)] p-3">
-                <x-ui-icon name="circle-alert" class="h-4 w-4 shrink-0 text-[var(--color-danger)]" />
+                <x-lucide-circle-alert class="h-4 w-4 shrink-0 text-[var(--color-danger)]" />
                 <p class="text-sm font-semibold text-[var(--color-danger)]">{{ $errors->first('estado') }}</p>
             </div>
         @endif
@@ -37,7 +37,7 @@
                     <h2 class="text-sm font-semibold text-[var(--text-primary)]">Soportes adjuntos ({{ count($attachments) }})</h2>
                     @forelse($attachments as $file)
                         <div class="flex items-center gap-[10px] rounded-[var(--radius-md)] bg-[var(--surface-page)] px-3 py-[10px]">
-                            <x-ui-icon name="file-text" class="h-4 w-4 text-[var(--color-primary-600)]" />
+                            <x-lucide-file-text class="h-4 w-4 text-[var(--color-primary-600)]" />
                             <span class="flex-1 truncate text-sm font-semibold text-[var(--text-primary)]">{{ $file['name'] }}</span>
                             <span class="text-xs text-[var(--text-muted)]">{{ $file['size'] }}</span>
                             <a href="{{ $file['url'] }}" class="text-sm font-semibold text-[var(--color-primary-600)]">Descargar</a>
@@ -77,7 +77,7 @@
 
                 @if($repeatedWarning)
                     <div class="flex items-start gap-[10px] rounded-[var(--radius-md)] bg-[var(--color-warning-bg)] p-3">
-                        <x-ui-icon name="triangle-alert" class="h-4 w-4 shrink-0 text-[var(--color-warning)]" />
+                        <x-lucide-triangle-alert class="h-4 w-4 shrink-0 text-[var(--color-warning)]" />
                         <p class="text-xs text-[var(--color-warning)]">{{ $repeatedWarning }}</p>
                     </div>
                 @endif
@@ -114,7 +114,7 @@
                         <div class="flex items-center justify-between gap-3">
                             <h2 class="text-sm font-semibold text-[var(--text-primary)]">Registrar decisión</h2>
                             <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-restricted-bg)] px-2 py-[3px] text-[11px] font-semibold text-[var(--color-restricted)]">
-                                <x-ui-icon name="lock" class="h-3 w-3" /> Solo Coordinación
+                                <x-lucide-lock class="h-3 w-3" /> Solo Coordinación
                             </span>
                         </div>
                         <x-form-field label="Decisión *" name="decision" type="select" help="Aprobada, rechazada o aplazada">

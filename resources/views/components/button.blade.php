@@ -15,7 +15,7 @@
     {{ $attributes->merge(['class' => $classes]) }}
 >
     @if($icon)
-        <x-ui-icon :name="$icon" class="h-4 w-4" />
+        <x-dynamic-component :component="'lucide-' . $icon" class="h-4 w-4" />
     @endif
     {{ $slot }}
 </{{ $tag }}>

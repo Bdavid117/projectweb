@@ -32,14 +32,14 @@
         @elseif($type === 'password')
             <input id="{{ $name }}" name="{{ $name }}" type="password" x-bind:type="show ? 'text' : 'password'" placeholder="{{ $placeholder }}" class="w-full flex-1 bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]" />
             <button type="button" class="-mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-neutral-500)] hover:bg-[var(--surface-sunken)]" @click="show = !show" x-bind:aria-label="show ? 'Ocultar contraseña' : 'Mostrar contraseña'" x-bind:aria-pressed="show">
-                <x-ui-icon name="eye" class="h-4 w-4" x-show="show" x-cloak />
-                <x-ui-icon name="eye-off" class="h-4 w-4" x-show="!show" />
+                <x-lucide-eye class="h-4 w-4" x-show="show" x-cloak />
+                <x-lucide-eye-off class="h-4 w-4" x-show="!show" />
             </button>
         @else
             <input id="{{ $name }}" name="{{ $name }}" type="{{ $type }}" placeholder="{{ $placeholder }}" value="{{ $current }}" @if($readonly) readonly @endif class="w-full flex-1 bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]" />
         @endif
         @if($icon && $type !== 'password')
-            <x-ui-icon :name="$icon" class="h-4 w-4 shrink-0 text-[var(--color-neutral-400)]" />
+            <x-dynamic-component :component="'lucide-' . $icon" class="h-4 w-4 shrink-0 text-[var(--color-neutral-400)]" />
         @endif
     </div>
     @if($error)

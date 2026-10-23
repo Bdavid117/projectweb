@@ -5,9 +5,9 @@
     <div class="flex flex-col gap-4 p-4 sm:p-7">
         <div class="flex items-center gap-[6px] text-sm text-[var(--text-secondary)]">
             <a href="/panel">Inicio</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <a href="/estudiantes">Estudiantes</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <span class="text-[var(--text-primary)]">{{ $student['name'] }}</span>
         </div>
 
@@ -73,7 +73,7 @@
                             <div class="flex gap-3 py-2">
                                 <div class="flex w-7 flex-col items-center">
                                     <div class="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-[var(--surface-sunken)]">
-                                        <x-ui-icon :name="$item['icon']" class="h-[14px] w-[14px] text-[var(--color-primary-600)]" />
+                                        <x-dynamic-component :component="'lucide-' . $item['icon']" class="h-[14px] w-[14px] text-[var(--color-primary-600)]" />
                                     </div>
                                     @if(!$loop->last)
                                         <span class="mt-1 w-[2px] flex-1 bg-[var(--border-subtle)]"></span>
@@ -164,7 +164,7 @@
                 @endif
 
                 <div class="flex gap-[11px] rounded-[var(--radius-lg)] border border-[var(--color-restricted)] bg-[var(--color-restricted-bg)] p-[14px]">
-                    <x-ui-icon name="lock" class="h-[17px] w-[17px] shrink-0 text-[var(--color-restricted)]" />
+                    <x-lucide-lock class="h-[17px] w-[17px] shrink-0 text-[var(--color-restricted)]" />
                     <div class="flex flex-col gap-[3px]">
                         <p class="text-sm font-semibold text-[var(--color-restricted)]">Información restringida</p>
                         <p class="text-xs text-[var(--text-secondary)]">El perfil psicosocial y de salud solo es visible para Coordinación. Cada consulta queda auditada (RNF-05, RNF-07).</p>

@@ -3,9 +3,9 @@
     <div class="flex flex-col gap-5 p-4 sm:p-7">
         <div class="flex items-center gap-[6px] text-sm text-[var(--text-secondary)]">
             <a href="/panel">Inicio</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <a href="{{ route('experiencias.index') }}">Experiencias</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <x-lucide-chevron-right class="h-[13px] w-[13px]" />
             <span class="text-[var(--text-primary)]">{{ $editing ? 'Editar experiencia' : 'Registrar experiencia' }}</span>
         </div>
 
