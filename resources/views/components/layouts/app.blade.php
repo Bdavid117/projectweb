@@ -20,7 +20,7 @@
             <main class="flex-1 overflow-y-auto">
                 @if(session('status'))
                     <div role="status" class="mx-4 mt-4 flex items-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-success-bg)] p-3 text-sm font-medium text-[var(--color-success)] sm:mx-7 sm:mt-7">
-                        <x-lucide-circle-check class="h-4 w-4 shrink-0" />
+                        <x-ui-icon name="circle-check" class="h-4 w-4 shrink-0" />
                         {{ session('status') }}
                     </div>
                 @endif

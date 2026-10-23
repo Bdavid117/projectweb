@@ -13,7 +13,7 @@
         <form method="GET" action="{{ route('requests.index') }}" class="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[14px] lg:flex-row lg:items-center">
             @unless($isStudent)
                 <div class="flex h-[var(--control-height)] flex-1 items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-default)] px-3">
-                    <x-lucide-search class="h-4 w-4 text-[var(--color-neutral-400)]" />
+                    <x-ui-icon name="search" class="h-4 w-4 text-[var(--color-neutral-400)]" />
                     <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="Buscar por estudiante o código" class="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]" />
                 </div>
             @endunless

@@ -12,6 +12,7 @@
         "vite": "^5.0.0"
     },
     "dependencies": {
+        "@animated-color-icons/lucide-wc": "^1.0.0",
         "alpinejs": "^3.17.5"
     }
 }
