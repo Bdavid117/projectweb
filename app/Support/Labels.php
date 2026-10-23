@@ -35,6 +35,14 @@ class Labels
         };
     }
 
+    public static function thesisModality(string $modalidad): string
+    {
+        return match ($modalidad) {
+            'pasantia' => 'pasantía',
+            default => str_replace('_', ' ', $modalidad),
+        };
+    }
+
     public static function stateLabel(string $estado): string
     {
         return match ($estado) {

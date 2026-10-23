@@ -26,7 +26,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Modalidad</label>
-                                <p class="text-sm text-[var(--text-primary)]">{{ ucfirst(str_replace('_', ' ', $thesis->modalidad)) }}</p>
+                                <p class="text-sm text-[var(--text-primary)]">{{ ucfirst(\App\Support\Labels::thesisModality($thesis->modalidad)) }}</p>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Estado</label>

@@ -34,8 +34,8 @@
             <x-form-field label="Descripción" name="descripcion" type="textarea" :rows="4" :value="$experience?->descripcion" placeholder="Describa la experiencia formativa…" />
 
             <div class="flex flex-col gap-4 sm:flex-row">
-                <div class="flex-1"><x-form-field label="Fecha de inicio *" name="fecha_inicio" type="date" icon="calendar" :value="$experience?->fecha_inicio?->format('Y-m-d')" /></div>
-                <div class="flex-1"><x-form-field label="Fecha de fin" name="fecha_fin" type="date" icon="calendar" :value="$experience?->fecha_fin?->format('Y-m-d')" help="Déjela vacía si sigue en curso" /></div>
+                <div class="flex-1"><x-form-field label="Fecha de inicio *" name="fecha_inicio" type="date" :value="$experience?->fecha_inicio?->format('Y-m-d')" /></div>
+                <div class="flex-1"><x-form-field label="Fecha de fin" name="fecha_fin" type="date" :value="$experience?->fecha_fin?->format('Y-m-d')" help="Déjela vacía si sigue en curso" /></div>
             </div>
             <div class="flex flex-col gap-4 sm:flex-row">
                 <div class="flex-1"><x-form-field label="Alcance" name="alcance" :value="$experience?->alcance" placeholder="Ej. Nacional" /></div>

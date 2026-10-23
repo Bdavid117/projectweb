@@ -63,7 +63,7 @@ class AdminController extends Controller
                 ['title' => 'Tipos de experiencia', 'columns' => ['Nombre', 'Categoría'], 'rows' => ExperienceType::orderBy('categoria')->orderBy('nombre')->get()
                     ->map(fn (ExperienceType $t) => [$t->nombre, $t->categoria])->all()],
                 ['title' => 'Colegios', 'columns' => ['Nombre', 'Carácter', 'Municipio'], 'rows' => School::orderBy('nombre')->get()
-                    ->map(fn (School $s) => [$s->nombre, ucfirst($s->caracter), $s->municipio ?? '—'])->all()],
+                    ->map(fn (School $s) => [$s->nombre, ['publico' => 'Público', 'privado' => 'Privado'][$s->caracter] ?? ucfirst($s->caracter), $s->municipio ?? '—'])->all()],
                 ['title' => 'Empresas', 'columns' => ['Nombre', 'Sector', 'Ciudad'], 'rows' => Company::orderBy('nombre')->get()
                     ->map(fn (Company $c) => [$c->nombre, $c->sector ?? '—', $c->ciudad ?? '—'])->all()],
             ],
