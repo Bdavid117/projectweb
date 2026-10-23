@@ -1,40 +1,45 @@
-<!-- Experiences index view -->
-<x-layouts.app :user="$user" :nav-groups="$navGroups" title="Mis experiencias · Trayectoria Estudiantil">
-    <div class="max-w-2xl mx-auto py-8">
+<x-layouts.app :user="$user" :nav-groups="$navGroups" title="{{ $isStudent ? 'Mis experiencias' : 'Experiencias' }} · Trayectoria Estudiantil">
+    <div class="flex flex-col gap-5 p-4 sm:p-7">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div class="flex flex-1 flex-col gap-[3px]">
+                <h1 class="text-2xl font-semibold text-[var(--text-primary)]">{{ $isStudent ? 'Mis experiencias formativas' : 'Experiencias formativas' }}</h1>
+                <p class="text-sm text-[var(--text-secondary)]">{{ $experiences->total() }} registradas · las valida Coordinación</p>
+            </div>
+            @if($canCreate)
+                <x-button variant="primary" icon="plus" :href="route('experiencias.create')">Registrar experiencia</x-button>
+            @endif
+        </div>
 
-        <x-card>
-            <x-card-header>
-                <h2 class="text-xl font-semibold">Mis experiencias formativas</h2>
-            </x-card-header>
+        <form method="GET" action="{{ route('experiencias.index') }}" class="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[14px]">
+            <x-filter-select name="estado" all="Estado: todos" :options="$statusOptions" :selected="$filters['estado']" />
+            <x-button variant="secondary" type="submit">Filtrar</x-button>
+        </form>
 
-            <x-card-content>
-                <p class="text-base text-muted mb-4">Registradas y validadas por Coordinación</p>
-
-                @if($experiences->isEmpty())
-                    <p class="text-muted">No hay experiencias registradas.</p>
-                @else
-                    <div class="space-y-4">
-                        @foreach($experiences as $experience)
-                            <div class="p-4 border rounded [&>h3]:font-semibold [&>h3]:text-lg">
-                                <h3 class="text-primary">{{ $experience->nombre }}</h3>
-                                <p class="text-sm text-muted mt-1">{{ $experience->descripcion ?? 'Sin descripción' }}</p>
-                                <p class="text-xs text-muted mt-1">Registrada el: {{ $experience->updated_at->diffForHumans() }}</p>
-                                <div class="mt-2">
-                                    <a href="{{ route('experiencias.edit', $experience->id) }}" class="text-primary hover:underline">Editar</a>
-                                    <form action="{{ route('experiencias.destroy', $experience->id) }}" method="POST" style="display:inline">
-                                        @method('DELETE')
-                                        @csrf
-                                        <button onclick="return confirm('¿Está seguro de eliminar esta experiencia?');" class="text-danger hover:underline">Eliminar</button>
-                                    </form>
-                                </div>
-                            </div>
-                        @endforeach
+        <div class="flex flex-col gap-3">
+            @forelse($experiences as $row)
+                <div class="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 sm:flex-row sm:items-center">
+                    <div class="flex min-w-0 flex-1 flex-col gap-[3px]">
+                        <span class="text-sm font-semibold text-[var(--text-primary)]">{{ $row['name'] }}</span>
+                        <span class="text-xs text-[var(--text-secondary)]">{{ $row['type'] }} · {{ $row['period'] }}@unless($isStudent) · {{ $row['student'] }}@endunless</span>
                     </div>
-                @endif
+                    <x-status-badge :text="$row['validated'] ? 'Validada' : 'Pendiente'" :tone="$row['validated'] ? 'success' : 'warning'" />
+                    <div class="flex items-center gap-3">
+                        @if($row['canValidate'])
+                            <form method="POST" action="{{ route('experiencias.validate', $row['id']) }}">
+                                @csrf
+                                <button type="submit" class="text-sm font-semibold text-[var(--color-primary-600)]">Validar</button>
+                            </form>
+                        @endif
+                        @if($row['canEdit'])
+                            <a href="{{ route('experiencias.edit', $row['id']) }}" class="text-sm font-semibold text-[var(--color-primary-600)]">Editar</a>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <p class="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 text-center text-sm text-[var(--text-muted)]">No hay experiencias que mostrar.</p>
+            @endforelse
+        </div>
 
-                <a href="{{ route('experiencias.create') }}" class="mt-3 inline-block btn btn-primary">Registrar nueva experiencia</a>
-            </x-card-content>
-        </x-card>
-
+        <x-pagination :paginator="$experiences" noun="experiencias" />
     </div>
 </x-layouts.app>

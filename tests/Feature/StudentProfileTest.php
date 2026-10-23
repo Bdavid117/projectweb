@@ -32,7 +32,7 @@ class StudentProfileTest extends TestCase
         $response->assertSee('3.4');
         $response->assertSee('4.1');
         $response->assertSee('Semillero de investigación SIGMA');
-        $response->assertSee('Trabajo de grado · modalidad pasantia');
+        $response->assertSee('Trabajo de grado · modalidad pasantía');
         $response->assertSee('Práctica empresarial · Softlogic S.A.S.');
         $response->assertSee('115 de 160');
         $response->assertSee('Promedio anterior');

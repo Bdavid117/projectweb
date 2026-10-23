@@ -26,15 +26,15 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Fecha de inicio</label>
-                                <p class="text-sm text-[var(--text-primary)]">{{ $internship->fecha_inicio ?? '-' }}</p>
+                                <p class="text-sm text-[var(--text-primary)]">{{ \App\Support\Labels::date($internship->fecha_inicio) }}</p>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Fecha de fin</label>
-                                <p class="text-sm text-[var(--text-primary)]">{{ $internship->fecha_fin ?? '-' }}</p>
+                                <p class="text-sm text-[var(--text-primary)]">{{ $internship->fecha_fin ? \App\Support\Labels::date($internship->fecha_fin) : 'En curso' }}</p>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Estado</label>
-                                <x-status-badge :text="ucfirst($internship->estado ?? 'sin_definir')" :tone="'info'" />
+                                <x-status-badge :text="$finished ? 'Finalizada' : 'En curso'" :tone="$finished ? 'success' : 'info'" />
                             </div>
                         </div>
                     </div>
@@ -46,18 +46,31 @@
                         <h2 class="text-sm font-semibold text-[var(--text-primary)]">Información adicional</h2>
                     </div>
                     <div class="p-4">
-                        @if($internship->observaciones)
-                        <p class="text-sm text-[var(--text-secondary)]">{{ $internship->observaciones }}</p>
-                        @else
-                        <p class="text-sm text-[var(--text-muted)]">Sin observaciones registradas.</p>
-                        @endif
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Jefe inmediato</label>
+                                <p class="text-sm text-[var(--text-primary)]">{{ $internship->jefe_nombre ? $internship->jefe_nombre.($internship->jefe_cargo ? ' · '.$internship->jefe_cargo : '') : 'No registrado' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Actividades</label>
+                                <p class="text-sm text-[var(--text-primary)]">{{ $internship->actividades ?? 'Sin actividades registradas.' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Apreciación del jefe</label>
+                                <p class="text-sm text-[var(--text-primary)]">{{ $internship->apreciacion_jefe ?? 'Pendiente' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Apreciación del asesor</label>
+                                <p class="text-sm text-[var(--text-primary)]">{{ $internship->apreciacion_asesor ?? 'Pendiente' }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         @else
         <div class="flex flex-col items-center justify-center py-20 text-center">
-            <x-lucide-briefcase class="h-16 w-16 text-[var(--text-muted)]" />
+            <x-ui-icon name="briefcase" class="h-16 w-16 text-[var(--text-muted)]" />
             <h2 class="text-lg font-semibold text-[var(--text-primary)] mt-4">No hay práctica registrada</h2>
             <p class="text-sm text-[var(--text-muted)] mt-2">Aún no se ha registrado información sobre tu práctica.</p>
         </div>

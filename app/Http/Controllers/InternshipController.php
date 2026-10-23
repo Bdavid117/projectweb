@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Internship;
 use App\Support\Navigation;
-use App\Enums\Role;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -16,13 +15,14 @@ class InternshipController extends Controller
         $student = $user->student;
 
         $internship = $student ? Internship::where('student_id', $student->id)
-            ->with('company')
+            ->with(['company', 'asesor'])->latest('id')
             ->first() : null;
 
         return view('internship.show', [
             'user' => $user->viewData(),
-            'navGroups' => Navigation::forRole($user->role, 'internship'),
+            'navGroups' => Navigation::forRole($user->role, 'practica'),
             'internship' => $internship,
+            'finished' => (bool) $internship?->fecha_fin?->isPast(),
         ]);
     }
 }

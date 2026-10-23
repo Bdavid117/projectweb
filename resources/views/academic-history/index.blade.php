@@ -22,11 +22,11 @@
                 <tbody class="divide-y divide-[var(--border-subtle)]">
                     @foreach($records as $record)
                     <tr class="hover:bg-[var(--surface-sunken)]">
-                        <td class="px-4 py-3 text-[var(--text-secondary)]">{{ optional($record->term)->codigo ?? '-' }}</td>
-                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->papa ?? '-' }}</td>
-                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->promedio_periodo ?? '-' }}</td>
+                        <td class="px-4 py-3 text-[var(--text-secondary)]">{{ $record->term->codigo }}</td>
+                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ number_format((float) $record->papa, 1) }}</td>
+                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->promedio_periodo !== null ? number_format((float) $record->promedio_periodo, 1) : '-' }}</td>
                         <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->creditos_cursados ?? '-' }}</td>
-                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->porcentaje_avance ?? '-' }}%</td>
+                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ (int) round((float) $record->porcentaje_avance) }}%</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -34,7 +34,7 @@
         </div>
         @else
         <div class="flex flex-col items-center justify-center py-20 text-center">
-            <x-lucide-trending-up class="h-16 w-16 text-[var(--text-muted)]" />
+            <x-ui-icon name="trending-up" class="h-16 w-16 text-[var(--text-muted)]" />
             <h2 class="text-lg font-semibold text-[var(--text-primary)] mt-4">No hay registros académicos</h2>
             <p class="text-sm text-[var(--text-muted)] mt-2">Aún no se han registrado tus registros académicos.</p>
         </div>

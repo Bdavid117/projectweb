@@ -113,7 +113,7 @@ class StudentProfile
                 default => [ucfirst(str_replace('_', ' ', $thesis->estado)), 'info'],
             };
             $processes[] = [
-                'title' => 'Trabajo de grado · modalidad '.$thesis->modalidad,
+                'title' => 'Trabajo de grado · modalidad '.Labels::thesisModality($thesis->modalidad),
                 'meta' => 'Director: '.($thesis->director ? 'Prof. '.$thesis->director->name : 'sin asignar').' · '.$thesis->term->codigo.'S',
                 'status' => $status,
                 'tone' => $tone,

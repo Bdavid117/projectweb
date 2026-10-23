@@ -1,18 +1,19 @@
 <?php
 
 use App\Http\Controllers\AcademicHistoryController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdvisoryController;
+use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ThesisController;
 use App\Http\Controllers\TutorshipController;
-use App\Support\Navigation;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,9 +27,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/panel');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login.show');
@@ -37,6 +36,8 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+    Route::get('/notificaciones', NotificationController::class)->name('notifications.index');
 
     Route::get('/panel', [PanelController::class, 'index'])->name('panel.index');
 
@@ -47,14 +48,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/mis-asesorias', [AdvisoryController::class, 'index'])->middleware('role:tutor')->name('advisories.index');
 
-    Route::get('/experiencias', [App\Http\Controllers\ExperienceController::class, 'index'])->middleware('role:estudiante,tutor,coordinacion')->name('experiencias.index');
-
-    Route::middleware('role:estudiante,tutor,coordinacion')->group(function () {
-        Route::get('/experiencias/crear', [App\Http\Controllers\ExperienceController::class, 'create'])->name('experiencias.create');
-        Route::post('/experiencias', [App\Http\Controllers\ExperienceController::class, 'store'])->name('experiencias.store');
-        Route::get('/experiencias/{id}/editar', [App\Http\Controllers\ExperienceController::class, 'edit'])->name('experiencias.edit');
-        Route::put('/experiencias/{id}', [App\Http\Controllers\ExperienceController::class, 'update'])->name('experiencias.update');
-        Route::delete('/experiencias/{id}', [App\Http\Controllers\ExperienceController::class, 'destroy'])->name('experiencias.destroy');
+    Route::middleware('role:estudiante,coordinacion')->group(function () {
+        Route::get('/experiencias', [ExperienceController::class, 'index'])->name('experiencias.index');
+        Route::get('/experiencias/crear', [ExperienceController::class, 'create'])->name('experiencias.create');
+        Route::post('/experiencias', [ExperienceController::class, 'store'])->name('experiencias.store');
+        Route::get('/experiencias/{experiencia}/editar', [ExperienceController::class, 'edit'])->name('experiencias.edit');
+        Route::put('/experiencias/{experiencia}', [ExperienceController::class, 'update'])->name('experiencias.update');
+        Route::delete('/experiencias/{experiencia}', [ExperienceController::class, 'destroy'])->name('experiencias.destroy');
+        Route::post('/experiencias/{experiencia}/validacion', [ExperienceController::class, 'validateExperience'])->name('experiencias.validate');
     });
 
     Route::middleware('role:tutor,coordinacion')->group(function () {
@@ -78,7 +79,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/solicitudes', [RequestController::class, 'index'])->name('requests.index');
     Route::get('/solicitudes/{solicitud}', [RequestController::class, 'show'])->name('requests.show');
     Route::get('/solicitudes/{solicitud}/soportes/{soporte}', [RequestController::class, 'download'])
-        
         ->name('requests.attachments.show');
 
     Route::middleware('role:coordinacion')->group(function () {
@@ -91,39 +91,10 @@ Route::middleware('auth')->group(function () {
         ->name('indicators.index');
 
     Route::middleware('role:coordinacion')->group(function () {
-        Route::get('/admin', function (Request $request) {
-            return view('admin.dashboard', [
-                'user' => $request->user()->viewData(),
-                'navGroups' => Navigation::forRole($request->user()->role, 'panel'),
-            ]);
-        })->name('admin.dashboard');
-
-        Route::get('/admin/usuarios', function (Request $request) {
-            return view('admin.usuarios.index', [
-                'user' => $request->user()->viewData(),
-                'navGroups' => Navigation::forRole($request->user()->role, 'usuarios'),
-            ]);
-        })->name('users.index');
-
-        Route::get('/admin/cargas', function (Request $request) {
-            return view('admin.cargas.index', [
-                'user' => $request->user()->viewData(),
-                'navGroups' => Navigation::forRole($request->user()->role, 'cargas'),
-            ]);
-        })->name('cargas.index');
-
-        Route::get('/admin/catalogos', function (Request $request) {
-            return view('admin.catalogos.index', [
-                'user' => $request->user()->viewData(),
-                'navGroups' => Navigation::forRole($request->user()->role, 'catalogos'),
-            ]);
-        })->name('catalogos.index');
-
-        Route::get('/admin/bitacora', function (Request $request) {
-            return view('admin.bitacora.index', [
-                'user' => $request->user()->viewData(),
-                'navGroups' => Navigation::forRole($request->user()->role, 'bitacora'),
-            ]);
-        })->name('bitacora.index');
+        Route::redirect('/admin', '/admin/usuarios');
+        Route::get('/admin/usuarios', [AdminController::class, 'users'])->name('users.index');
+        Route::get('/admin/cargas', [AdminController::class, 'imports'])->name('cargas.index');
+        Route::get('/admin/catalogos', [AdminController::class, 'catalogs'])->name('catalogos.index');
+        Route::get('/admin/bitacora', [AdminController::class, 'audit'])->name('bitacora.index');
     });
 });

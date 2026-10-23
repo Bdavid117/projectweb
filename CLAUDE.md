@@ -21,13 +21,11 @@ table, and seeders (`php artisan migrate:fresh --seed`; demo users
 `role:...`). All screens read from PostgreSQL: students (list, profile), the panel and
 indicators (`App\Support\ProgramMetrics`), and the requests and tutorships modules
 have full CRUD with Spanish validation, role/ownership policies and an audit trail.
-Still out of scope: `/mi-*`, `/experiencias`, `/admin/*`, automatic alerts, Excel
-import/export.
-
-Design spec and implementation plan (superpowers-style docs, useful for
-understanding *why* the UI is structured this way):
-`docs/superpowers/specs/2026-09-23-trayectoria-estudiantil-ui-design.md`
-`docs/superpowers/plans/2026-09-23-trayectoria-estudiantil-ui.md`
+The student portal (`/perfil`, `/historia-academica`, `/trabajo-de-grado`, `/practica`), the
+experiences module (`/experiencias`: the student registers, Coordinación validates) and the
+read-only admin screens (`/admin/usuarios|cargas|catalogos|bitacora`) are implemented; the portal
+and admin screens have no Pencil frame yet. Still out of scope: automatic alerts, Excel
+import/export (the Cargas screen only lists `import_batches`), password recovery.
 
 ## Commands
 
@@ -68,10 +66,21 @@ properties in a `:root` block at the top of `resources/css/app.css` (copied
 from `mokup/design-tokens.css`). Every class in Blade views references them
 via arbitrary values — `bg-[var(--color-primary-600)]`,
 `text-[var(--text-secondary)]`, `rounded-[var(--radius-md)]` — never
-hardcoded hex. Icons come from `mallardduck/blade-lucide-icons`
-(`<x-lucide-{name} />`, or `<x-dynamic-component :component="'lucide-'.$icon" />`
-when the icon name is a runtime variable), colored via `text-[var(--...)]`
-since Lucide icons use `currentColor`.
+hardcoded hex. Icons: always use `<x-ui-icon name="bell" class="h-4 w-4 text-[var(--...)]" />` (never `<x-icon>`, which belongs to Blade
+Icons). It renders the animated web component from `@animated-color-icons/lucide-wc` (`<animated-lucide-bell>`) when the
+name is listed in `config/animated-icons.php` and imported in `resources/js/icons.js` (`AnimatedIconsTest` keeps both in
+sync and fails if a literal icon used by the app is missing); any other name falls back to the static
+`mallardduck/blade-lucide-icons` SVG. Size and color come from the classes (`currentColor`). Icons play when the pointer or
+focus enters the closest `a`, `button`, `label` or `[data-icon-trigger]`, and not at all under `prefers-reduced-motion`.
+`icons.js` also repairs a bug of lucide-wc 1.0.0 (it builds the strokes as HTML elements, so they never paint): keep that
+`repair()` until the package fixes it, and re-check the icons in a browser after upgrading it.
+
+**Logo**: designed in Pencil (`Logo · isotipo` and `Logo · horizontal` next to the design system); the app uses the
+inline SVG component `<x-logo class="h-8 w-8" />` plus `public/logo.svg` / `public/favicon.svg`. On dark backgrounds
+put it on a white tile (see the login).
+
+**JS**: Alpine.js (`resources/js/app.js`) drives the topbar menus (bell loads `/notificaciones` on demand), the mobile
+sidebar drawer and the password toggle. Keep it to small `x-data` blocks; add `x-cloak` to anything hidden by default.
 
 **One hard rule that isn't obvious from reading a single file**: any
 Tailwind class that maps a variant/tone/status to styling (`x-button`'s
@@ -98,8 +107,8 @@ mirror the Pencil design's reusable components 1:1.
 `<x-layouts.app :user :nav-groups title>` wraps `x-topbar` + `x-sidebar` +
 a content slot, used by every screen except login; `<x-layouts.guest>` is
 the two-panel login shell. The 260px sidebar is `hidden` below the `sm`
-breakpoint and replaced by a (currently non-functional — no JS in scope)
-hamburger icon in the topbar, since three screens have explicit 360px
+breakpoint and replaced by a
+hamburger button in the topbar that opens it as a drawer, since three screens have explicit 360px
 mockups that assume no fixed sidebar.
 
 **Navigation** (`app/Support/Navigation.php`): `Navigation::forRole($role, $active)` returns
@@ -121,7 +130,9 @@ see only their own), `/solicitudes/nueva` and `POST /solicitudes` (estudiante, c
 `/solicitudes/{id}`, `/revision` and `/decision` (the last two only coordinación),
 `/mis-asesorias` (tutor), `/estudiantes/{id}/tutorias/crear` and `/tutorias/{id}/editar` (tutor,
 coordinación; a tutor only for students assigned to them in the current term; edit/delete only by
-the author within 24 h). Tutorship notes on the profile and tutorship activity/alerts on the panel are
+the author within 24 h). `/experiencias*` (estudiante, coordinacion; the student edits only their own
+pending ones, coordinación validates), `/perfil`, `/historia-academica`, `/trabajo-de-grado` and `/practica`
+(estudiante), `/admin/*` (coordinacion). Tutorship notes on the profile and tutorship activity/alerts on the panel are
 visible only to tutor (own students) and coordinación — never to profesor; the student menu has no
 Administración block, `/indicadores` (coordinación).
 
@@ -136,7 +147,7 @@ Commits use Conventional Commits with a required scope:
 `type(scope): descripción breve en español, en minúsculas`.
 
 Types in use so far: `feat` (new screens/components), `fix` (bug fixes),
-`test` (test-only additions), `docs` (spec/plan documents, `CLAUDE.md`),
+`test` (test-only additions), `docs` (`CLAUDE.md`, README),
 `chore` (tooling/config with no source-code behavior change, e.g.
 `.gitignore`). Common scopes: `add` (new screen/feature),
 `setup` (tooling/build config), `login`, `plan`, `responsive`, `nav` — pick

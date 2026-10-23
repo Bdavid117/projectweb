@@ -1,92 +1,70 @@
-<!-- Experiences form view (create/edit) -->
-<x-layouts.app :user="$user" :nav-groups="$navGroups" title="{{ $experience ? 'Editar experiencia' : 'Nueva experiencia' }} · Trayectoria Estudiantil">
-    <div class="max-w-2xl mx-auto py-8">
+@php($editing = $experience !== null)
+<x-layouts.app :user="$user" :nav-groups="$navGroups" title="{{ $editing ? 'Editar experiencia' : 'Registrar experiencia' }} · Trayectoria Estudiantil">
+    <div class="flex flex-col gap-5 p-4 sm:p-7">
+        <div class="flex items-center gap-[6px] text-sm text-[var(--text-secondary)]">
+            <a href="/panel">Inicio</a>
+            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <a href="{{ route('experiencias.index') }}">Experiencias</a>
+            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
+            <span class="text-[var(--text-primary)]">{{ $editing ? 'Editar experiencia' : 'Registrar experiencia' }}</span>
+        </div>
 
-        <x-card>
-            <x-card-header>
-                @if($experience)
-                    <h2 class="text-xl font-semibold">Editar experiencia</h2>
-                @else
-                    <h2 class="text-xl font-semibold">Registrar nueva experiencia</h2>
-                @endif
-            </x-card-header>
+        <div class="flex flex-col gap-[3px]">
+            <h1 class="text-2xl font-semibold text-[var(--text-primary)]">{{ $editing ? 'Editar experiencia' : 'Registrar experiencia' }}</h1>
+            <p class="text-sm text-[var(--text-secondary)]">Quedará pendiente hasta que Coordinación la valide; una experiencia validada ya no puede modificarla el estudiante.</p>
+        </div>
 
-            <x-card-content>
-                <form method="POST" action="{{ $experience ? route('experiencias.update', $experience->id) : route('experiencias.store') }}">
-                    @method($experience ? 'PUT' : 'POST')
-                    @csrf
+        <form method="POST" action="{{ $editing ? route('experiencias.update', $experience) : route('experiencias.store') }}" class="flex max-w-3xl flex-col gap-[18px] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
+            @csrf
+            @if($editing)
+                @method('PUT')
+            @endif
 
-                    <div class="grid gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-muted mb-1">Nombre <span class="text-red-500">*</span></label>
-                            <input type="text" name="nombre" value="{{ old('nombre', $experience?->nombre) }}" required class="w-full rounded border-input bg-background p-2"
-                                placeholder="Ej. Práctica profesional">
-                        </div>
+            <x-form-field label="Tipo de experiencia *" name="experience_type_id" type="select">
+                <option value="">Seleccione el tipo</option>
+                @foreach($types as $category => $group)
+                    <optgroup label="{{ $category }}">
+                        @foreach($group as $type)
+                            <option value="{{ $type->id }}" @selected((string) old('experience_type_id', $experience?->experience_type_id) === (string) $type->id)>{{ $type->nombre }}</option>
+                        @endforeach
+                    </optgroup>
+                @endforeach
+            </x-form-field>
+            <x-form-field label="Nombre *" name="nombre" :value="$experience?->nombre" placeholder="Ej. Semillero de investigación SIGMA" />
+            <x-form-field label="Descripción" name="descripcion" type="textarea" :rows="4" :value="$experience?->descripcion" placeholder="Describa la experiencia formativa…" />
 
-                        <div>
-                            <label class="block text-sm font-medium text-muted mb-1">Descripción <span class="text-red-500">*</span></label>
-                            <textarea name="descripcion" rows="3" required class="w-full rounded border-input bg-background p-2"
-                                placeholder="Describa la experiencia formativa">{{ old('descripcion', $experience?->descripcion) }}</textarea>
-                        </div>
-                    </div>
+            <div class="flex flex-col gap-4 sm:flex-row">
+                <div class="flex-1"><x-form-field label="Fecha de inicio *" name="fecha_inicio" type="date" :value="$experience?->fecha_inicio?->format('Y-m-d')" /></div>
+                <div class="flex-1"><x-form-field label="Fecha de fin" name="fecha_fin" type="date" :value="$experience?->fecha_fin?->format('Y-m-d')" help="Déjela vacía si sigue en curso" /></div>
+            </div>
+            <div class="flex flex-col gap-4 sm:flex-row">
+                <div class="flex-1"><x-form-field label="Alcance" name="alcance" :value="$experience?->alcance" placeholder="Ej. Nacional" /></div>
+                <div class="flex-1"><x-form-field label="Institución" name="institucion" :value="$experience?->institucion" placeholder="Ej. Universidad Nacional" /></div>
+            </div>
+            <div class="flex flex-col gap-4 sm:flex-row">
+                <div class="flex-1"><x-form-field label="Convenio" name="convenio" :value="$experience?->convenio" /></div>
+                <div class="flex-1"><x-form-field label="Rol del estudiante" name="rol" :value="$experience?->rol" placeholder="Ej. Auxiliar de investigación" /></div>
+            </div>
+            <x-form-field label="Docente responsable" name="docente_id" type="select">
+                <option value="">Sin docente asociado</option>
+                @foreach($teachers as $id => $name)
+                    <option value="{{ $id }}" @selected((string) old('docente_id', $experience?->docente_id) === (string) $id)>{{ $name }}</option>
+                @endforeach
+            </x-form-field>
 
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-muted mb-1">Fecha de inicio <span class="text-red-500">*</span></label>
-                            <input type="date" name="fecha_inicio" value="{{ old('fecha_inicio', $experience?->fecha_inicio->format('Y-m-d') ?? '') }}" required class="w-full rounded border-input bg-background p-2">
-                        </div>
+            <div class="flex flex-col gap-[10px] sm:flex-row sm:items-center">
+                <div class="flex-1"></div>
+                <x-button variant="secondary" :href="route('experiencias.index')">Cancelar</x-button>
+                <x-button variant="primary" type="submit">{{ $editing ? 'Guardar cambios' : 'Registrar experiencia' }}</x-button>
+            </div>
+        </form>
 
-                        <div>
-                            <label class="block text-sm font-medium text-muted mb-1">Fecha de fin <span class="text-red-500">*</span></label>
-                            <input type="date" name="fecha_fin" value="{{ old('fecha_fin', $experience?->fecha_fin->format('Y-m-d') ?? '') }}" required class="w-full rounded border-input bg-background p-2">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-muted mb-1">Alcance</label>
-                            <input type="text" name="alcance" value="{{ old('alcance', $experience?->alcance) }}" class="w-full rounded border-input bg-background p-2"
-                                placeholder="Ej. Curricular, Extracurricular">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-muted mb-1">Institución</label>
-                            <input type="text" name="institucion" value="{{ old('institucion', $experience?->institucion) }}" class="w-full rounded border-input bg-background p-2"
-                                placeholder="Ej. Universidad Nacional">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-muted mb-1">Convenio</label>
-                            <input type="text" name="convenio" value="{{ old('convenio', $experience?->convenio) }}" class="w-full rounded border-input bg-background p-2"
-                                placeholder="Número de convenio">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-muted mb-1">Docente</label>
-                            <select name="docente_id" class="w-full rounded border-input bg-background p-2">
-                                <option value="">-- Seleccione --</option>
-                                @foreach(\App\Models\User::where('role', 'profesor')->get() as $docente)
-                                    <option value="{{ $docente->id }}" {{ $docente->id == $experience?->docente_id ? 'selected' : '' }}>{{ $docente->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-muted mb-1">Rol</label>
-                        <input type="text" name="rol" value="{{ old('rol', $experience?->rol) }}" class="w-full rounded border-input bg-background p-2"
-                            placeholder="Ej. Tutor, Evaluador">
-                    </div>
-
-                    <div class="mt-6 flex justify-end gap-3">
-                        <a href="{{ route('experiencias.index') }}" class="btn btn-ghost">Cancelar</a>
-                        <button type="submit" class="btn btn-primary">{{ $experience ? 'Actualizar' : 'Registrar' }}</button>
-                    </div>
-                </form>
-            </x-card-content>
-        </x-card>
-
+        @if($editing)
+            <form method="POST" action="{{ route('experiencias.destroy', $experience) }}" class="flex max-w-3xl justify-end">
+                @csrf
+                @method('DELETE')
+                <button type="submit" onclick="return confirm('¿Eliminar esta experiencia?')" class="text-sm font-semibold text-[var(--color-danger)]">Eliminar experiencia</button>
+            </form>
+        @endif
     </div>
 </x-layouts.app>

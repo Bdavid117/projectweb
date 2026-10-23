@@ -34,6 +34,18 @@
                         </div>
                     </div>
                 </div>
+                @if($student)
+                    <div class="mt-6 flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+                        <div class="px-4 py-[14px] border-b border-[var(--border-subtle)]">
+                            <h2 class="text-sm font-semibold text-[var(--text-primary)]">Información académica</h2>
+                        </div>
+                        <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            @foreach([$student['code'], $student['cohort'], $student['enrollment'], $student['tutor'], 'PAPA actual '.$student['papa']] as $line)
+                                <p class="text-sm text-[var(--text-primary)]">{{ $line }}</p>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="lg:col-span-1">
@@ -43,23 +55,23 @@
                     </div>
                     <div class="p-4 flex flex-col gap-3">
                         <a href="/solicitudes" class="flex items-center gap-[9px] rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 py-[10px] text-sm font-medium text-[var(--color-primary-600)] hover:bg-[var(--surface-sunken)]">
-                            <x-lucide-file-text class="h-4 w-4" />
+                            <x-ui-icon name="file-text" class="h-4 w-4" />
                             Mis solicitudes
                         </a>
                         <a href="/experiencias" class="flex items-center gap-[9px] rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 py-[10px] text-sm font-medium text-[var(--color-primary-600)] hover:bg-[var(--surface-sunken)]">
-                            <x-lucide-sparkles class="h-4 w-4" />
+                            <x-ui-icon name="sparkles" class="h-4 w-4" />
                             Mis experiencias
                         </a>
                         <a href="/trabajo-de-grado" class="flex items-center gap-[9px] rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 py-[10px] text-sm font-medium text-[var(--color-primary-600)] hover:bg-[var(--surface-sunken)]">
-                            <x-lucide-book-open class="h-4 w-4" />
+                            <x-ui-icon name="book-open" class="h-4 w-4" />
                             Mi trabajo de grado
                         </a>
                         <a href="/historia-academica" class="flex items-center gap-[9px] rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 py-[10px] text-sm font-medium text-[var(--color-primary-600)] hover:bg-[var(--surface-sunken)]">
-                            <x-lucide-trending-up class="h-4 w-4" />
+                            <x-ui-icon name="trending-up" class="h-4 w-4" />
                             Mi historia académica
                         </a>
                         <a href="/practica" class="flex items-center gap-[9px] rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 py-[10px] text-sm font-medium text-[var(--color-primary-600)] hover:bg-[var(--surface-sunken)]">
-                            <x-lucide-briefcase class="h-4 w-4" />
+                            <x-ui-icon name="briefcase" class="h-4 w-4" />
                             Mi práctica
                         </a>
                     </div>
