@@ -66,10 +66,18 @@ properties in a `:root` block at the top of `resources/css/app.css` (copied
 from `mokup/design-tokens.css`). Every class in Blade views references them
 via arbitrary values — `bg-[var(--color-primary-600)]`,
 `text-[var(--text-secondary)]`, `rounded-[var(--radius-md)]` — never
-hardcoded hex. Icons come from `mallardduck/blade-lucide-icons`
-(`<x-lucide-{name} />`, or `<x-dynamic-component :component="'lucide-'.$icon" />`
-when the icon name is a runtime variable), colored via `text-[var(--...)]`
-since Lucide icons use `currentColor`.
+hardcoded hex. Icons: always use `<x-ui-icon name="bell" class="h-4 w-4 text-[var(--...)]" />` (never `<x-icon>`, which belongs
+to Blade Icons). It renders the animated version from `@animateicons/vanilla` when the name is listed in
+`config/animated-icons.php` (and imported in `resources/js/icons.js`; `AnimatedIconsTest` keeps both in sync) and
+otherwise falls back to the static `mallardduck/blade-lucide-icons` SVG. Animated icons play when the pointer or focus
+enters the closest `a`, `button`, `label` or `[data-icon-trigger]`. Size and color come from the classes (`currentColor`).
+
+**Logo**: designed in Pencil (`Logo · isotipo` and `Logo · horizontal` next to the design system); the app uses the
+inline SVG component `<x-logo class="h-8 w-8" />` plus `public/logo.svg` / `public/favicon.svg`. On dark backgrounds
+put it on a white tile (see the login).
+
+**JS**: Alpine.js (`resources/js/app.js`) drives the topbar menus (bell loads `/notificaciones` on demand), the mobile
+sidebar drawer and the password toggle. Keep it to small `x-data` blocks; add `x-cloak` to anything hidden by default.
 
 **One hard rule that isn't obvious from reading a single file**: any
 Tailwind class that maps a variant/tone/status to styling (`x-button`'s
@@ -96,8 +104,8 @@ mirror the Pencil design's reusable components 1:1.
 `<x-layouts.app :user :nav-groups title>` wraps `x-topbar` + `x-sidebar` +
 a content slot, used by every screen except login; `<x-layouts.guest>` is
 the two-panel login shell. The 260px sidebar is `hidden` below the `sm`
-breakpoint and replaced by a (currently non-functional — no JS in scope)
-hamburger icon in the topbar, since three screens have explicit 360px
+breakpoint and replaced by a
+hamburger button in the topbar that opens it as a drawer, since three screens have explicit 360px
 mockups that assume no fixed sidebar.
 
 **Navigation** (`app/Support/Navigation.php`): `Navigation::forRole($role, $active)` returns

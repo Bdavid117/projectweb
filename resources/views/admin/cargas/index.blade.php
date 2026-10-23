@@ -6,7 +6,7 @@
         </div>
 
         <div class="flex items-start gap-[10px] rounded-[var(--radius-lg)] bg-[var(--color-info-bg)] p-[14px]">
-            <x-lucide-info class="h-4 w-4 shrink-0 text-[var(--color-info)]" />
+            <x-ui-icon name="info" class="h-4 w-4 shrink-0 text-[var(--color-info)]" />
             <p class="text-sm text-[var(--text-secondary)]">La importación de archivos aún no está habilitada. Aquí se listarán los lotes procesados con sus filas correctas y con error.</p>
         </div>
 

@@ -29,23 +29,23 @@
                         <a href="/estudiantes" class="text-sm font-medium text-[var(--color-primary-600)]">Ver todas</a>
                     </div>
                     <div class="overflow-x-auto">
-                        <div class="flex min-w-[620px] gap-3 border-t border-[var(--border-subtle)] px-4 py-[9px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
-                            <span class="w-[210px]">ESTUDIANTE</span>
-                            <span class="flex-1">SITUACIÓN</span>
-                            <span class="w-24">DETECTADA</span>
-                            <span class="w-[118px]">ESTADO</span>
-                            <span class="w-[70px]"></span>
+                        <div class="flex min-w-[740px] gap-3 border-t border-[var(--border-subtle)] px-4 py-[9px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
+                            <span class="shrink-0 w-[210px]">ESTUDIANTE</span>
+                            <span class="min-w-[200px] flex-1">SITUACIÓN</span>
+                            <span class="shrink-0 w-24">DETECTADA</span>
+                            <span class="shrink-0 w-[118px]">ESTADO</span>
+                            <span class="shrink-0 w-[70px]"></span>
                         </div>
                         @if(empty($attentionRows))
                             <p class="border-t border-[var(--border-subtle)] px-4 py-6 text-sm text-[var(--text-muted)]">Sin situaciones registradas.</p>
                         @endif
                         @foreach($attentionRows as $row)
-                            <div class="flex min-w-[620px] items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-3 text-sm">
-                                <span class="w-[210px] text-[var(--text-primary)]">{{ $row['name'] }}</span>
-                                <span class="flex-1 text-[var(--text-secondary)]">{{ $row['issue'] }}</span>
-                                <span class="w-24 text-[var(--text-secondary)]">{{ $row['date'] }}</span>
-                                <span class="w-[118px]"><x-status-badge :text="$row['status']" :tone="$row['tone']" /></span>
-                                <a href="{{ $row['url'] }}" class="w-[70px] text-sm font-medium text-[var(--color-primary-600)]">Ver ficha</a>
+                            <div class="flex min-w-[740px] items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-3 text-sm">
+                                <span class="shrink-0 w-[210px] text-[var(--text-primary)]">{{ $row['name'] }}</span>
+                                <span class="min-w-[200px] flex-1 text-[var(--text-secondary)]">{{ $row['issue'] }}</span>
+                                <span class="shrink-0 w-24 text-[var(--text-secondary)]">{{ $row['date'] }}</span>
+                                <span class="shrink-0 w-[118px]"><x-status-badge :text="$row['status']" :tone="$row['tone']" /></span>
+                                <a href="{{ $row['url'] }}" class="shrink-0 w-[70px] text-sm font-medium text-[var(--color-primary-600)]">Ver ficha</a>
                             </div>
                         @endforeach
                     </div>
@@ -85,7 +85,7 @@
                         @foreach($recentActivity as $activity)
                             <div class="flex items-center gap-[11px] px-4 py-[10px]">
                                 <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--surface-sunken)]">
-                                    <x-dynamic-component :component="'lucide-' . $activity['icon']" class="h-[15px] w-[15px] text-[var(--color-primary-600)]" />
+                                    <x-ui-icon :name="$activity['icon']" class="h-[15px] w-[15px] text-[var(--color-primary-600)]" />
                                 </div>
                                 <div class="flex flex-1 flex-col gap-[2px]">
                                     <p class="text-sm text-[var(--text-primary)]">{{ $activity['description'] }}</p>
@@ -103,7 +103,7 @@
                     <div class="flex flex-col gap-2 border-t border-[var(--border-subtle)] p-4">
                         @foreach($quickLinks as $link)
                             <a href="{{ $link['href'] ?? '#' }}" class="flex w-full items-center gap-[9px] rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 py-[10px] text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]">
-                                <x-dynamic-component :component="'lucide-' . $link['icon']" class="h-4 w-4 text-[var(--color-primary-600)]" />
+                                <x-ui-icon :name="$link['icon']" class="h-4 w-4 text-[var(--color-primary-600)]" />
                                 {{ $link['label'] }}
                             </a>
                         @endforeach
