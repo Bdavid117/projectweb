@@ -22,7 +22,7 @@ class ProfileController extends Controller
 
         return view('profile.show', [
             'user' => $user->viewData(),
-            'navGroups' => Navigation::forRole($user->role, 'profile'),
+            'navGroups' => Navigation::forRole($user->role, 'perfil'),
             'profile' => $profileData,
         ]);
     }

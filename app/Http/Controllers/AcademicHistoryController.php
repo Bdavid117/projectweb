@@ -22,7 +22,7 @@ class AcademicHistoryController extends Controller
 
         return view('academic-history.index', [
             'user' => $user->viewData(),
-            'navGroups' => Navigation::forRole($user->role, 'academic-history'),
+            'navGroups' => Navigation::forRole($user->role, 'historia'),
             'records' => $records,
         ]);
     }

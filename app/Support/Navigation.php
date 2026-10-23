@@ -47,7 +47,7 @@ class Navigation
     {
         $items = array_values(array_filter(
             self::coordinatorGeneralItems(),
-            static fn (array $item) => $item['key'] !== 'indicadores'
+            static fn (array $item) => ! in_array($item['key'], ['indicadores', 'experiencias'], true)
         ));
 
         $groups = [['label' => 'GENERAL', 'items' => self::mark($items, $active)]];
@@ -71,8 +71,7 @@ class Navigation
             ['key' => 'panel', 'icon' => 'layout-dashboard', 'label' => 'Panel', 'href' => '/panel'],
             ['key' => 'estudiantes', 'icon' => 'users', 'label' => 'Estudiantes', 'href' => '/estudiantes'],
             ['key' => 'solicitudes', 'icon' => 'file-text', 'label' => 'Solicitudes', 'href' => '/solicitudes'],
-            ['key' => 'experiencias', 'icon' => 'sparkles', 'label' => 'Experiencias', 'href' => '#'],
-            ['key' => 'tutorias', 'icon' => 'message-square', 'label' => 'Tutorías', 'href' => '#'],
+            ['key' => 'experiencias', 'icon' => 'sparkles', 'label' => 'Experiencias', 'href' => '/experiencias'],
             ['key' => 'indicadores', 'icon' => 'bar-chart-3', 'label' => 'Indicadores', 'href' => '/indicadores'],
         ];
     }
@@ -80,10 +79,10 @@ class Navigation
     private static function adminItems(): array
     {
         return [
-            ['key' => 'usuarios', 'icon' => 'shield', 'label' => 'Usuarios y roles', 'href' => '#'],
-            ['key' => 'cargas', 'icon' => 'upload', 'label' => 'Cargas desde Excel', 'href' => '#'],
-            ['key' => 'catalogos', 'icon' => 'list', 'label' => 'Catálogos', 'href' => '#'],
-            ['key' => 'bitacora', 'icon' => 'history', 'label' => 'Bitácora', 'href' => '#'],
+            ['key' => 'usuarios', 'icon' => 'shield', 'label' => 'Usuarios y roles', 'href' => '/admin/usuarios'],
+            ['key' => 'cargas', 'icon' => 'upload', 'label' => 'Cargas desde Excel', 'href' => '/admin/cargas'],
+            ['key' => 'catalogos', 'icon' => 'list', 'label' => 'Catálogos', 'href' => '/admin/catalogos'],
+            ['key' => 'bitacora', 'icon' => 'history', 'label' => 'Bitácora', 'href' => '/admin/bitacora'],
         ];
     }
 

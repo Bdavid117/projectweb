@@ -21,7 +21,7 @@ class InternshipController extends Controller
 
         return view('internship.show', [
             'user' => $user->viewData(),
-            'navGroups' => Navigation::forRole($user->role, 'internship'),
+            'navGroups' => Navigation::forRole($user->role, 'practica'),
             'internship' => $internship,
         ]);
     }

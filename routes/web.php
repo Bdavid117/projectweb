@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AcademicHistoryController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdvisoryController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\InternshipController;
@@ -11,8 +12,6 @@ use App\Http\Controllers\RequestController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ThesisController;
 use App\Http\Controllers\TutorshipController;
-use App\Support\Navigation;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -89,39 +88,10 @@ Route::middleware('auth')->group(function () {
         ->name('indicators.index');
 
     Route::middleware('role:coordinacion')->group(function () {
-        Route::get('/admin', function (Request $request) {
-            return view('admin.dashboard', [
-                'user' => $request->user()->viewData(),
-                'navGroups' => Navigation::forRole($request->user()->role, 'panel'),
-            ]);
-        })->name('admin.dashboard');
-
-        Route::get('/admin/usuarios', function (Request $request) {
-            return view('admin.usuarios.index', [
-                'user' => $request->user()->viewData(),
-                'navGroups' => Navigation::forRole($request->user()->role, 'usuarios'),
-            ]);
-        })->name('users.index');
-
-        Route::get('/admin/cargas', function (Request $request) {
-            return view('admin.cargas.index', [
-                'user' => $request->user()->viewData(),
-                'navGroups' => Navigation::forRole($request->user()->role, 'cargas'),
-            ]);
-        })->name('cargas.index');
-
-        Route::get('/admin/catalogos', function (Request $request) {
-            return view('admin.catalogos.index', [
-                'user' => $request->user()->viewData(),
-                'navGroups' => Navigation::forRole($request->user()->role, 'catalogos'),
-            ]);
-        })->name('catalogos.index');
-
-        Route::get('/admin/bitacora', function (Request $request) {
-            return view('admin.bitacora.index', [
-                'user' => $request->user()->viewData(),
-                'navGroups' => Navigation::forRole($request->user()->role, 'bitacora'),
-            ]);
-        })->name('bitacora.index');
+        Route::redirect('/admin', '/admin/usuarios');
+        Route::get('/admin/usuarios', [AdminController::class, 'users'])->name('users.index');
+        Route::get('/admin/cargas', [AdminController::class, 'imports'])->name('cargas.index');
+        Route::get('/admin/catalogos', [AdminController::class, 'catalogs'])->name('catalogos.index');
+        Route::get('/admin/bitacora', [AdminController::class, 'audit'])->name('bitacora.index');
     });
 });

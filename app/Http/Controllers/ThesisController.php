@@ -19,7 +19,7 @@ class ThesisController extends Controller
 
         return view('thesis.show', [
             'user' => $user->viewData(),
-            'navGroups' => Navigation::forRole($user->role, 'thesis'),
+            'navGroups' => Navigation::forRole($user->role, 'trabajo-grado'),
             'thesis' => $thesis,
         ]);
     }

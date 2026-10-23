@@ -55,4 +55,13 @@ class NavigationRolesTest extends TestCase
         $this->assertTrue($items['mis-asesorias']['active']);
         $this->assertFalse($items['panel']['active']);
     }
+
+    public function test_no_role_gets_a_dead_link(): void
+    {
+        foreach (Role::cases() as $role) {
+            foreach ($this->items($role) as $item) {
+                $this->assertNotSame('#', $item['href'], $role->value.' → '.$item['key']);
+            }
+        }
+    }
 }
