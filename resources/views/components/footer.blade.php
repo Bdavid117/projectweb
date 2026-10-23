@@ -1,3 +1,17 @@
+@php
+    // Con sesión iniciada solo se muestran los accesos que el rol puede abrir (mismos middleware role: de routes/web.php).
+    $links = [
+        ['label' => 'Panel', 'route' => 'panel.index', 'roles' => ['profesor', 'tutor', 'coordinacion']],
+        ['label' => 'Estudiantes', 'route' => 'students.index', 'roles' => ['profesor', 'tutor', 'coordinacion']],
+        ['label' => 'Solicitudes', 'route' => 'requests.create', 'roles' => ['estudiante', 'coordinacion']],
+        ['label' => 'Indicadores', 'route' => 'indicators.index', 'roles' => ['coordinacion']],
+    ];
+    $role = auth()->user()?->role?->value;
+    if ($role !== null) {
+        $links = array_filter($links, static fn (array $link) => in_array($role, $link['roles'], true));
+    }
+@endphp
+
 <footer class="rounded-[var(--radius-xl)] bg-[var(--color-primary-900)] px-6 py-7 text-white sm:px-8 sm:py-8">
     <div class="grid gap-8 sm:grid-cols-2 sm:items-start">
         <div class="flex max-w-md flex-col gap-4">
@@ -15,10 +29,9 @@
         <nav aria-label="Enlaces del pie de página" class="flex flex-col gap-3 sm:items-end">
             <h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-primary-300)]">Accesos rápidos</h2>
             <div class="flex flex-wrap gap-x-5 gap-y-3 text-sm sm:justify-end">
-                <a href="{{ route('panel.index') }}" class="rounded-sm text-[var(--color-primary-100)] transition-colors hover:text-white">Panel</a>
-                <a href="{{ route('students.index') }}" class="rounded-sm text-[var(--color-primary-100)] transition-colors hover:text-white">Estudiantes</a>
-                <a href="{{ route('requests.create') }}" class="rounded-sm text-[var(--color-primary-100)] transition-colors hover:text-white">Solicitudes</a>
-                <a href="{{ route('indicators.index') }}" class="rounded-sm text-[var(--color-primary-100)] transition-colors hover:text-white">Indicadores</a>
+                @foreach ($links as $link)
+                    <a href="{{ route($link['route']) }}" class="rounded-sm text-[var(--color-primary-100)] transition-colors hover:text-white">{{ $link['label'] }}</a>
+                @endforeach
             </div>
         </nav>
     </div>
