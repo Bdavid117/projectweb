@@ -15,5 +15,9 @@ class ExampleTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
+        $response->assertSee('Acompañamos cada paso de tu trayectoria estudiantil.');
+        $response->assertSee('Accesos principales');
+        $response->assertSee('Panel del programa');
+        $response->assertSee(route('login.show'), false);
     }
 }
