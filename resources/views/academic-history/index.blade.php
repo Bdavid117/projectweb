@@ -22,11 +22,11 @@
                 <tbody class="divide-y divide-[var(--border-subtle)]">
                     @foreach($records as $record)
                     <tr class="hover:bg-[var(--surface-sunken)]">
-                        <td class="px-4 py-3 text-[var(--text-secondary)]">{{ optional($record->term)->codigo ?? '-' }}</td>
-                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->papa ?? '-' }}</td>
-                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->promedio_periodo ?? '-' }}</td>
+                        <td class="px-4 py-3 text-[var(--text-secondary)]">{{ $record->term->codigo }}</td>
+                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ number_format((float) $record->papa, 1) }}</td>
+                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->promedio_periodo !== null ? number_format((float) $record->promedio_periodo, 1) : '-' }}</td>
                         <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->creditos_cursados ?? '-' }}</td>
-                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->porcentaje_avance ?? '-' }}%</td>
+                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ (int) round((float) $record->porcentaje_avance) }}%</td>
                     </tr>
                     @endforeach
                 </tbody>

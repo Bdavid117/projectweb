@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\Navigation;
-use App\Enums\Role;
+use App\Support\StudentProfile;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -24,6 +24,7 @@ class ProfileController extends Controller
             'user' => $user->viewData(),
             'navGroups' => Navigation::forRole($user->role, 'perfil'),
             'profile' => $profileData,
+            'student' => $user->student ? StudentProfile::header($user->student) : null,
         ]);
     }
 }

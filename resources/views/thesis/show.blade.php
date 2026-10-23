@@ -22,15 +22,15 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Director</label>
-                                <p class="text-sm text-[var(--text-primary)]">{{ $thesis->director ? optional($thesis->director)->name : 'No asignado' }}</p>
+                                <p class="text-sm text-[var(--text-primary)]">{{ $thesis->director?->name ?? 'No asignado' }}</p>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Modalidad</label>
-                                <p class="text-sm text-[var(--text-primary)]">{{ ucfirst($thesis->modalidad ?? '-') }}</p>
+                                <p class="text-sm text-[var(--text-primary)]">{{ ucfirst(str_replace('_', ' ', $thesis->modalidad)) }}</p>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Estado</label>
-                                <x-status-badge :text="ucfirst($thesis->estado ?? 'sin_definir')" :tone="'info'" />
+                                <x-status-badge :text="$status[0]" :tone="$status[1]" />
                             </div>
                         </div>
                     </div>
@@ -42,11 +42,24 @@
                         <h2 class="text-sm font-semibold text-[var(--text-primary)]">Información adicional</h2>
                     </div>
                     <div class="p-4">
-                        @if($thesis->descripcion)
-                        <p class="text-sm text-[var(--text-secondary)]">{{ $thesis->descripcion }}</p>
-                        @else
-                        <p class="text-sm text-[var(--text-muted)]">Sin descripción registrada.</p>
-                        @endif
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Codirector</label>
+                                <p class="text-sm text-[var(--text-primary)]">{{ $thesis->codirector?->name ?? 'No asignado' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Periodo de inicio</label>
+                                <p class="text-sm text-[var(--text-primary)]">{{ $thesis->term?->codigo ?? '-' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Repositorio</label>
+                                @if($thesis->repositorio_url)
+                                    <a href="{{ $thesis->repositorio_url }}" rel="noopener noreferrer" target="_blank" class="break-all text-sm font-semibold text-[var(--color-primary-600)]">{{ $thesis->repositorio_url }}</a>
+                                @else
+                                    <p class="text-sm text-[var(--text-muted)]">Sin repositorio registrado.</p>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

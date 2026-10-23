@@ -34,6 +34,18 @@
                         </div>
                     </div>
                 </div>
+                @if($student)
+                    <div class="mt-6 flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+                        <div class="px-4 py-[14px] border-b border-[var(--border-subtle)]">
+                            <h2 class="text-sm font-semibold text-[var(--text-primary)]">Información académica</h2>
+                        </div>
+                        <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            @foreach([$student['code'], $student['cohort'], $student['enrollment'], $student['tutor'], 'PAPA actual '.$student['papa']] as $line)
+                                <p class="text-sm text-[var(--text-primary)]">{{ $line }}</p>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="lg:col-span-1">

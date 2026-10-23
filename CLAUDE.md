@@ -21,8 +21,11 @@ table, and seeders (`php artisan migrate:fresh --seed`; demo users
 `role:...`). All screens read from PostgreSQL: students (list, profile), the panel and
 indicators (`App\Support\ProgramMetrics`), and the requests and tutorships modules
 have full CRUD with Spanish validation, role/ownership policies and an audit trail.
-Still out of scope: `/mi-*`, `/experiencias`, `/admin/*`, automatic alerts, Excel
-import/export.
+The student portal (`/perfil`, `/historia-academica`, `/trabajo-de-grado`, `/practica`), the
+experiences module (`/experiencias`: the student registers, Coordinación validates) and the
+read-only admin screens (`/admin/usuarios|cargas|catalogos|bitacora`) are implemented; the portal
+and admin screens have no Pencil frame yet. Still out of scope: automatic alerts, Excel
+import/export (the Cargas screen only lists `import_batches`), password recovery.
 
 ## Commands
 
@@ -116,7 +119,9 @@ see only their own), `/solicitudes/nueva` and `POST /solicitudes` (estudiante, c
 `/solicitudes/{id}`, `/revision` and `/decision` (the last two only coordinación),
 `/mis-asesorias` (tutor), `/estudiantes/{id}/tutorias/crear` and `/tutorias/{id}/editar` (tutor,
 coordinación; a tutor only for students assigned to them in the current term; edit/delete only by
-the author within 24 h). Tutorship notes on the profile and tutorship activity/alerts on the panel are
+the author within 24 h). `/experiencias*` (estudiante, coordinacion; the student edits only their own
+pending ones, coordinación validates), `/perfil`, `/historia-academica`, `/trabajo-de-grado` and `/practica`
+(estudiante), `/admin/*` (coordinacion). Tutorship notes on the profile and tutorship activity/alerts on the panel are
 visible only to tutor (own students) and coordinación — never to profesor; the student menu has no
 Administración block, `/indicadores` (coordinación).
 
