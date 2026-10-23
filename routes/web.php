@@ -3,6 +3,7 @@
 use App\Http\Controllers\AcademicHistoryController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdvisoryController;
+use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\LoginController;
@@ -44,14 +45,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/mis-asesorias', [AdvisoryController::class, 'index'])->middleware('role:tutor')->name('advisories.index');
 
-    Route::get('/experiencias', [App\Http\Controllers\ExperienceController::class, 'index'])->middleware('role:estudiante,tutor,coordinacion')->name('experiencias.index');
-
-    Route::middleware('role:estudiante,tutor,coordinacion')->group(function () {
-        Route::get('/experiencias/crear', [App\Http\Controllers\ExperienceController::class, 'create'])->name('experiencias.create');
-        Route::post('/experiencias', [App\Http\Controllers\ExperienceController::class, 'store'])->name('experiencias.store');
-        Route::get('/experiencias/{id}/editar', [App\Http\Controllers\ExperienceController::class, 'edit'])->name('experiencias.edit');
-        Route::put('/experiencias/{id}', [App\Http\Controllers\ExperienceController::class, 'update'])->name('experiencias.update');
-        Route::delete('/experiencias/{id}', [App\Http\Controllers\ExperienceController::class, 'destroy'])->name('experiencias.destroy');
+    Route::middleware('role:estudiante,coordinacion')->group(function () {
+        Route::get('/experiencias', [ExperienceController::class, 'index'])->name('experiencias.index');
+        Route::get('/experiencias/crear', [ExperienceController::class, 'create'])->name('experiencias.create');
+        Route::post('/experiencias', [ExperienceController::class, 'store'])->name('experiencias.store');
+        Route::get('/experiencias/{experiencia}/editar', [ExperienceController::class, 'edit'])->name('experiencias.edit');
+        Route::put('/experiencias/{experiencia}', [ExperienceController::class, 'update'])->name('experiencias.update');
+        Route::delete('/experiencias/{experiencia}', [ExperienceController::class, 'destroy'])->name('experiencias.destroy');
+        Route::post('/experiencias/{experiencia}/validacion', [ExperienceController::class, 'validateExperience'])->name('experiencias.validate');
     });
 
     Route::middleware('role:tutor,coordinacion')->group(function () {
@@ -75,7 +76,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/solicitudes', [RequestController::class, 'index'])->name('requests.index');
     Route::get('/solicitudes/{solicitud}', [RequestController::class, 'show'])->name('requests.show');
     Route::get('/solicitudes/{solicitud}/soportes/{soporte}', [RequestController::class, 'download'])
-        
         ->name('requests.attachments.show');
 
     Route::middleware('role:coordinacion')->group(function () {

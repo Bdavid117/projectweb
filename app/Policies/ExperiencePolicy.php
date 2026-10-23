@@ -10,36 +10,32 @@ class ExperiencePolicy
 {
     public function viewAny(User $user): bool
     {
-        return true;
+        return in_array($user->role, [Role::Estudiante, Role::Coordinacion], true);
     }
 
-    public function view(User $user, Experience $experience): bool
-    {
-        if ($user->role === Role::Coordinacion) {
-            return true;
-        }
-
-        return $experience->student_id === $user->id;
-    }
-
+    /** Solo el estudiante registra sus experiencias; Coordinación las valida. */
     public function create(User $user): bool
     {
-        return in_array($user->role, [Role::Estudiante, Role::Coordinacion], true);
+        return $user->role === Role::Estudiante && $user->student !== null;
     }
 
     public function update(User $user, Experience $experience): bool
     {
-        return $this->isOwnerWithinWindow($user, $experience);
+        return $user->role === Role::Coordinacion || $this->isPendingOwner($user, $experience);
     }
 
     public function delete(User $user, Experience $experience): bool
     {
-        return $this->isOwnerWithinWindow($user, $experience);
+        return $this->update($user, $experience);
     }
 
-    private function isOwnerWithinWindow(User $user, Experience $experience): bool
+    public function validate(User $user, Experience $experience): bool
     {
-        return $experience->student_id === $user->id
-            && $experience->updated_at->gt(now()->subHours(config('program.tutorship_edit_hours')));
+        return $user->role === Role::Coordinacion && ! $experience->validada;
+    }
+
+    private function isPendingOwner(User $user, Experience $experience): bool
+    {
+        return ! $experience->validada && $user->student?->id === $experience->student_id;
     }
 }
