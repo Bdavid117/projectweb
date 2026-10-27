@@ -68,6 +68,24 @@
                 </div>
             </div>
         </div>
+        <form method="POST" action="{{ route('internship.update') }}" class="flex max-w-3xl flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+            @csrf
+            @method('PUT')
+            <div class="border-b border-[var(--border-subtle)] px-4 py-[14px]">
+                <h2 class="text-sm font-semibold text-[var(--text-primary)]">Actualizar mi práctica</h2>
+                <p class="text-xs text-[var(--text-muted)]">Puedes cambiar el jefe inmediato y las actividades · RF-22</p>
+            </div>
+            <div class="flex flex-col gap-4 p-4">
+                <div class="flex flex-col gap-4 sm:flex-row">
+                    <div class="flex-1"><x-form-field label="Jefe inmediato *" name="jefe_nombre" :value="$internship->jefe_nombre" /></div>
+                    <div class="flex-1"><x-form-field label="Cargo del jefe" name="jefe_cargo" :value="$internship->jefe_cargo" /></div>
+                </div>
+                <x-form-field label="Actividades" name="actividades" type="textarea" :rows="5" :value="$internship->actividades" placeholder="Describe las actividades que realizas…" />
+                <div class="flex justify-end">
+                    <x-button variant="primary" type="submit">Guardar cambios</x-button>
+                </div>
+            </div>
+        </form>
         @else
         <div class="flex flex-col items-center justify-center py-20 text-center">
             <x-ui-icon name="briefcase" class="h-16 w-16 text-[var(--text-muted)]" />

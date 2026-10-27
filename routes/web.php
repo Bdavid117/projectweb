@@ -79,6 +79,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/trabajo-de-grado', [ThesisController::class, 'update'])->middleware('role:estudiante')->name('thesis.update');
     Route::get('/historia-academica', [AcademicHistoryController::class, 'index'])->middleware('role:estudiante')->name('academic-history.index');
     Route::get('/practica', [InternshipController::class, 'show'])->middleware('role:estudiante')->name('internship.show');
+    Route::put('/practica', [InternshipController::class, 'update'])->middleware('role:estudiante')->name('internship.update');
 
     Route::get('/solicitudes', [RequestController::class, 'index'])->name('requests.index');
     Route::get('/solicitudes/{solicitud}', [RequestController::class, 'show'])->name('requests.show');
