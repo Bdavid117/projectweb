@@ -64,6 +64,27 @@
                 </div>
             </div>
         </div>
+        <form method="POST" action="{{ route('thesis.update') }}" class="flex max-w-3xl flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+            @csrf
+            @method('PUT')
+            <div class="border-b border-[var(--border-subtle)] px-4 py-[14px]">
+                <h2 class="text-sm font-semibold text-[var(--text-primary)]">Actualizar mi trabajo de grado</h2>
+                <p class="text-xs text-[var(--text-muted)]">Puedes cambiar el título, el repositorio y el codirector · RF-19</p>
+            </div>
+            <div class="flex flex-col gap-4 p-4">
+                <x-form-field label="Título *" name="titulo" :value="$thesis->titulo" />
+                <x-form-field label="Repositorio" name="repositorio_url" type="url" :value="$thesis->repositorio_url" placeholder="https://…" />
+                <x-form-field label="Codirector" name="codirector_id" type="select">
+                    <option value="">Sin codirector</option>
+                    @foreach($teachers as $id => $name)
+                        <option value="{{ $id }}" @selected((string) old('codirector_id', $thesis->codirector_id) === (string) $id)>{{ $name }}</option>
+                    @endforeach
+                </x-form-field>
+                <div class="flex justify-end">
+                    <x-button variant="primary" type="submit">Guardar cambios</x-button>
+                </div>
+            </div>
+        </form>
         @else
         <div class="flex flex-col items-center justify-center py-20 text-center">
             <x-ui-icon name="book-open" class="h-16 w-16 text-[var(--text-muted)]" />
