@@ -39,12 +39,12 @@ class PanelTest extends TestCase
         }
     }
 
-    public function test_the_student_is_redirected_away_from_the_panel(): void
+    public function test_the_student_gets_their_own_panel_not_the_program_one(): void
     {
         $this->seed(DatabaseSeeder::class);
         $this->signInSeeded(Role::Estudiante);
 
-        $this->get('/panel')->assertRedirect('/solicitudes');
+        $this->get('/panel')->assertOk()->assertSee('Mi panel')->assertDontSee('ESTUDIANTES ACTIVOS');
     }
 
     public function test_coordination_sees_every_alert_but_a_tutor_only_those_of_their_students(): void
