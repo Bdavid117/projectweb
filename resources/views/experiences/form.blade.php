@@ -11,10 +11,14 @@
 
         <div class="flex flex-col gap-[3px]">
             <h1 class="text-2xl font-semibold text-[var(--text-primary)]">{{ $editing ? 'Editar experiencia' : 'Registrar experiencia' }}</h1>
-            <p class="text-sm text-[var(--text-secondary)]">Quedará pendiente hasta que Coordinación la valide; una experiencia validada ya no puede modificarla el estudiante.</p>
+            <p class="text-sm text-[var(--text-secondary)]">Quedará pendiente hasta que Coordinación la valide; una experiencia validada ya no puede modificarla el estudiante. Si la rechazan, al corregirla vuelve a quedar pendiente.</p>
         </div>
 
-        <form method="POST" action="{{ $editing ? route('experiencias.update', $experience) : route('experiencias.store') }}" class="flex max-w-3xl flex-col gap-[18px] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
+        @if($experience?->isRejected())
+            <p class="max-w-3xl rounded-[var(--radius-md)] bg-[var(--color-danger-bg)] px-4 py-3 text-sm text-[var(--color-danger)]">Rechazada por Coordinación: {{ $experience->motivo_rechazo }}</p>
+        @endif
+
+        <form method="POST" action="{{ $editing ? route('experiencias.update', $experience) : route('experiencias.store') }}" x-data="{ typeId: @js((string) old('experience_type_id', $experience?->experience_type_id)), categories: @js($typeCategories), byCategory: @js($fieldsByCategory), fields() { return this.byCategory[this.categories[this.typeId]] ?? {}; }, has(f) { return f in this.fields(); }, required(f) { return this.fields()[f] === true; } }" @change="if ($event.target.name === 'experience_type_id') typeId = $event.target.value" class="flex max-w-3xl flex-col gap-[18px] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
             @csrf
             @if($editing)
                 @method('PUT')
@@ -37,20 +41,35 @@
                 <div class="flex-1"><x-form-field label="Fecha de inicio *" name="fecha_inicio" type="date" :value="$experience?->fecha_inicio?->format('Y-m-d')" /></div>
                 <div class="flex-1"><x-form-field label="Fecha de fin" name="fecha_fin" type="date" :value="$experience?->fecha_fin?->format('Y-m-d')" help="Déjela vacía si sigue en curso" /></div>
             </div>
-            <div class="flex flex-col gap-4 sm:flex-row">
-                <div class="flex-1"><x-form-field label="Alcance" name="alcance" :value="$experience?->alcance" placeholder="Ej. Nacional" /></div>
-                <div class="flex-1"><x-form-field label="Institución" name="institucion" :value="$experience?->institucion" placeholder="Ej. Universidad Nacional" /></div>
+            <p x-show="Object.keys(fields()).length" x-cloak class="text-xs text-[var(--text-muted)]">Según el tipo elegido se piden estos datos adicionales; los marcados como obligatorios deben completarse.</p>
+            <div class="flex flex-col gap-4 sm:flex-row" x-show="has('alcance') || has('institucion')" x-cloak>
+                <div class="flex-1" x-show="has('alcance')" x-cloak>
+                    <x-form-field label="Alcance" name="alcance" :value="$experience?->alcance" placeholder="Ej. Nacional" />
+                    <p class="mt-1 text-[11px] text-[var(--text-muted)]" x-show="required('alcance')" x-cloak>Obligatorio para este tipo</p>
+                </div>
+                <div class="flex-1" x-show="has('institucion')" x-cloak>
+                    <x-form-field label="Institución" name="institucion" :value="$experience?->institucion" placeholder="Ej. Universidad Nacional" />
+                    <p class="mt-1 text-[11px] text-[var(--text-muted)]" x-show="required('institucion')" x-cloak>Obligatorio para este tipo</p>
+                </div>
             </div>
-            <div class="flex flex-col gap-4 sm:flex-row">
-                <div class="flex-1"><x-form-field label="Convenio" name="convenio" :value="$experience?->convenio" /></div>
-                <div class="flex-1"><x-form-field label="Rol del estudiante" name="rol" :value="$experience?->rol" placeholder="Ej. Auxiliar de investigación" /></div>
+            <div class="flex flex-col gap-4 sm:flex-row" x-show="has('convenio') || has('rol')" x-cloak>
+                <div class="flex-1" x-show="has('convenio')" x-cloak>
+                    <x-form-field label="Convenio" name="convenio" :value="$experience?->convenio" />
+                </div>
+                <div class="flex-1" x-show="has('rol')" x-cloak>
+                    <x-form-field label="Rol del estudiante" name="rol" :value="$experience?->rol" placeholder="Ej. Auxiliar de investigación" />
+                    <p class="mt-1 text-[11px] text-[var(--text-muted)]" x-show="required('rol')" x-cloak>Obligatorio para este tipo</p>
+                </div>
             </div>
-            <x-form-field label="Docente responsable" name="docente_id" type="select">
-                <option value="">Sin docente asociado</option>
-                @foreach($teachers as $id => $name)
-                    <option value="{{ $id }}" @selected((string) old('docente_id', $experience?->docente_id) === (string) $id)>{{ $name }}</option>
-                @endforeach
-            </x-form-field>
+            <div x-show="has('docente_id')" x-cloak>
+                <x-form-field label="Docente responsable" name="docente_id" type="select">
+                    <option value="">Sin docente asociado</option>
+                    @foreach($teachers as $id => $name)
+                        <option value="{{ $id }}" @selected((string) old('docente_id', $experience?->docente_id) === (string) $id)>{{ $name }}</option>
+                    @endforeach
+                </x-form-field>
+                <p class="mt-1 text-[11px] text-[var(--text-muted)]" x-show="required('docente_id')" x-cloak>Obligatorio para este tipo</p>
+            </div>
 
             <div class="flex flex-col gap-[10px] sm:flex-row sm:items-center">
                 <div class="flex-1"></div>

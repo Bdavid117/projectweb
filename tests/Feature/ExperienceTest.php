@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\Role;
 use App\Models\Experience;
 use App\Models\ExperienceType;
+use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CreatesStudents;
@@ -18,7 +19,7 @@ class ExperienceTest extends TestCase
     private function payload(array $overrides = []): array
     {
         return $overrides + [
-            'experience_type_id' => ExperienceType::firstOrFail()->id,
+            'experience_type_id' => ExperienceType::where('categoria', 'Deporte y cultura')->firstOrFail()->id,
             'nombre' => 'Semillero de prueba',
             'fecha_inicio' => '2026-02-01',
         ];
@@ -98,13 +99,65 @@ class ExperienceTest extends TestCase
         $this->assertSame($coordinator->id, $experience->fresh()->validada_por);
     }
 
-    public function test_tutor_and_profesor_cannot_open_experiences(): void
+    public function test_tutor_and_profesor_read_experiences_but_cannot_change_them(): void
     {
         $this->seed(DatabaseSeeder::class);
+        $experience = Experience::firstOrFail();
 
         foreach ([Role::Tutor, Role::Profesor] as $role) {
             $this->signInSeeded($role);
-            $this->get('/experiencias')->assertForbidden();
+            $this->get('/experiencias')->assertOk()->assertSee(Experience::count().' registradas')->assertSee('solo lectura')->assertDontSee('Registrar experiencia');
+            $this->get('/experiencias/crear')->assertForbidden();
+            $this->get("/experiencias/{$experience->id}/editar")->assertForbidden();
+            $this->post("/experiencias/{$experience->id}/validacion")->assertForbidden();
+            $this->post("/experiencias/{$experience->id}/rechazo", ['motivo' => 'x'])->assertForbidden();
         }
+    }
+
+    public function test_form_fields_depend_on_the_experience_type(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->signInSeeded(Role::Estudiante);
+        $internship = ExperienceType::where('categoria', 'Pasantía')->firstOrFail();
+        $research = ExperienceType::where('categoria', 'Investigación')->firstOrFail();
+
+        $this->from('/experiencias/crear')->post('/experiencias', $this->payload(['experience_type_id' => $internship->id]))
+            ->assertSessionHasErrors(['institucion' => 'Indique la institución.', 'rol' => 'Indique su rol en la experiencia.']);
+
+        $this->post('/experiencias', $this->payload([
+            'experience_type_id' => $research->id,
+            'docente_id' => User::where('role', Role::Profesor->value)->value('id'),
+            'convenio' => 'No aplica a investigación',
+            'institucion' => 'Tampoco aplica',
+        ]))->assertRedirect('/experiencias');
+
+        $saved = Experience::where('nombre', 'Semillero de prueba')->firstOrFail();
+        $this->assertNull($saved->convenio);
+        $this->assertNull($saved->institucion);
+        $this->assertNotNull($saved->docente_id);
+    }
+
+    public function test_coordination_rejects_with_reason_and_student_corrects_it(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->signInSeeded(Role::Estudiante);
+        $this->post('/experiencias', $this->payload());
+        $experience = Experience::where('nombre', 'Semillero de prueba')->firstOrFail();
+
+        $coordinator = $this->signInSeeded(Role::Coordinacion);
+        $this->post("/experiencias/{$experience->id}/rechazo", [])->assertSessionHasErrors(['motivo' => 'Indique el motivo del rechazo.']);
+        $this->post("/experiencias/{$experience->id}/rechazo", ['motivo' => 'Falta soporte'])->assertRedirect('/experiencias');
+
+        $experience->refresh();
+        $this->assertSame('rechazada', $experience->estado());
+        $this->assertSame($coordinator->id, $experience->rechazada_por);
+        $this->get('/experiencias?estado=rechazada')->assertSee('Motivo del rechazo: Falta soporte');
+        $this->get('/experiencias?estado=pendiente')->assertDontSee('Semillero de prueba');
+        $this->post("/experiencias/{$experience->id}/validacion")->assertForbidden();
+
+        $this->signInSeeded(Role::Estudiante);
+        $this->get("/experiencias/{$experience->id}/editar")->assertOk()->assertSee('Falta soporte');
+        $this->put("/experiencias/{$experience->id}", $this->payload(['nombre' => 'Corregida']))->assertRedirect('/experiencias');
+        $this->assertSame('pendiente', $experience->fresh()->estado());
     }
 }

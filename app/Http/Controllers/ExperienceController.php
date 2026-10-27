@@ -7,6 +7,7 @@ use App\Http\Requests\StoreExperienceRequest;
 use App\Models\Experience;
 use App\Models\ExperienceType;
 use App\Models\User;
+use App\Support\ExperienceFields;
 use App\Support\Input;
 use App\Support\Labels;
 use App\Support\Navigation;
@@ -28,7 +29,8 @@ class ExperienceController extends Controller
             ->with(['type', 'student.user'])
             ->when($isStudent, fn ($q) => $q->where('student_id', $user->student?->id ?? 0))
             ->when($filters['estado'] === 'validada', fn ($q) => $q->where('validada', true))
-            ->when($filters['estado'] === 'pendiente', fn ($q) => $q->where('validada', false))
+            ->when($filters['estado'] === 'pendiente', fn ($q) => $q->where('validada', false)->whereNull('motivo_rechazo'))
+            ->when($filters['estado'] === 'rechazada', fn ($q) => $q->where('validada', false)->whereNotNull('motivo_rechazo'))
             ->latest('fecha_inicio')->latest('id')
             ->paginate(config('program.page_size'))
             ->withQueryString();
@@ -42,14 +44,17 @@ class ExperienceController extends Controller
                 'type' => $e->type->nombre,
                 'student' => $e->student->user->name ?? $e->student->codigo,
                 'period' => Labels::date($e->fecha_inicio).' – '.($e->fecha_fin ? Labels::date($e->fecha_fin) : 'en curso'),
-                'validated' => $e->validada,
+                'status' => $e->estado(),
+                'reason' => $e->isRejected() ? $e->motivo_rechazo : null,
                 'canEdit' => $user->can('update', $e),
                 'canValidate' => $user->can('validate', $e),
+                'canReject' => $user->can('reject', $e),
             ]),
             'filters' => $filters,
-            'statusOptions' => ['validada' => 'Validada', 'pendiente' => 'Pendiente de validación'],
+            'statusOptions' => ['validada' => 'Validada', 'pendiente' => 'Pendiente de validación', 'rechazada' => 'Rechazada'],
             'isStudent' => $isStudent,
             'canCreate' => $user->can('create', Experience::class),
+            'canReview' => $user->role === Role::Coordinacion,
         ]);
     }
 
@@ -76,7 +81,8 @@ class ExperienceController extends Controller
 
     public function update(StoreExperienceRequest $request, Experience $experiencia): RedirectResponse
     {
-        $experiencia->update($request->validated());
+        // Al corregir una experiencia rechazada vuelve a quedar pendiente de validación.
+        $experiencia->update($request->validated() + ['motivo_rechazo' => null, 'rechazada_por' => null]);
 
         return redirect()->route('experiencias.index')->with('status', 'Experiencia actualizada correctamente.');
     }
@@ -97,6 +103,18 @@ class ExperienceController extends Controller
         return redirect()->route('experiencias.index')->with('status', 'Experiencia validada.');
     }
 
+    public function reject(Request $request, Experience $experiencia): RedirectResponse
+    {
+        $this->authorize('reject', $experiencia);
+        $data = $request->validate(
+            ['motivo' => ['required', 'string', 'max:1000']],
+            ['motivo.required' => 'Indique el motivo del rechazo.', 'motivo.max' => 'El motivo no puede superar los :max caracteres.'],
+        );
+        $experiencia->update(['motivo_rechazo' => $data['motivo'], 'rechazada_por' => $request->user()->id]);
+
+        return redirect()->route('experiencias.index')->with('status', 'Experiencia rechazada. El estudiante verá el motivo.');
+    }
+
     private function form(Request $request, ?Experience $experience): View
     {
         $user = $request->user();
@@ -106,6 +124,8 @@ class ExperienceController extends Controller
             'navGroups' => Navigation::forRole($user->role, 'experiencias'),
             'experience' => $experience,
             'types' => ExperienceType::orderBy('categoria')->orderBy('nombre')->get()->groupBy('categoria'),
+            'fieldsByCategory' => ExperienceFields::all(),
+            'typeCategories' => ExperienceType::pluck('categoria', 'id'),
             'teachers' => User::where('role', Role::Profesor->value)->orderBy('name')->pluck('name', 'id'),
         ]);
     }
