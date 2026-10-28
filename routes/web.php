@@ -48,14 +48,16 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/mis-asesorias', [AdvisoryController::class, 'index'])->middleware('role:tutor')->name('advisories.index');
 
+    Route::get('/experiencias', [ExperienceController::class, 'index'])->name('experiencias.index');
+
     Route::middleware('role:estudiante,coordinacion')->group(function () {
-        Route::get('/experiencias', [ExperienceController::class, 'index'])->name('experiencias.index');
         Route::get('/experiencias/crear', [ExperienceController::class, 'create'])->name('experiencias.create');
         Route::post('/experiencias', [ExperienceController::class, 'store'])->name('experiencias.store');
         Route::get('/experiencias/{experiencia}/editar', [ExperienceController::class, 'edit'])->name('experiencias.edit');
         Route::put('/experiencias/{experiencia}', [ExperienceController::class, 'update'])->name('experiencias.update');
         Route::delete('/experiencias/{experiencia}', [ExperienceController::class, 'destroy'])->name('experiencias.destroy');
         Route::post('/experiencias/{experiencia}/validacion', [ExperienceController::class, 'validateExperience'])->name('experiencias.validate');
+        Route::post('/experiencias/{experiencia}/rechazo', [ExperienceController::class, 'reject'])->name('experiencias.reject');
     });
 
     Route::middleware('role:tutor,coordinacion')->group(function () {
@@ -72,9 +74,12 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/perfil', [ProfileController::class, 'show'])->middleware('role:estudiante')->name('profile.show');
+    Route::put('/perfil', [ProfileController::class, 'update'])->middleware('role:estudiante')->name('profile.update');
     Route::get('/trabajo-de-grado', [ThesisController::class, 'show'])->middleware('role:estudiante')->name('thesis.show');
+    Route::put('/trabajo-de-grado', [ThesisController::class, 'update'])->middleware('role:estudiante')->name('thesis.update');
     Route::get('/historia-academica', [AcademicHistoryController::class, 'index'])->middleware('role:estudiante')->name('academic-history.index');
     Route::get('/practica', [InternshipController::class, 'show'])->middleware('role:estudiante')->name('internship.show');
+    Route::put('/practica', [InternshipController::class, 'update'])->middleware('role:estudiante')->name('internship.update');
 
     Route::get('/solicitudes', [RequestController::class, 'index'])->name('requests.index');
     Route::get('/solicitudes/{solicitud}', [RequestController::class, 'show'])->name('requests.show');

@@ -136,7 +136,7 @@ class AuthTest extends TestCase
         }
     }
 
-    public function test_panel_is_open_to_staff_and_redirects_students_to_their_requests(): void
+    public function test_panel_is_open_to_every_role_and_students_get_their_own(): void
     {
         foreach ([Role::Profesor, Role::Tutor, Role::Coordinacion] as $role) {
             $this->actingAsRole($role);
@@ -144,7 +144,7 @@ class AuthTest extends TestCase
         }
 
         $this->actingAsRole(Role::Estudiante);
-        $this->get('/panel')->assertRedirect('/solicitudes');
+        $this->get('/panel')->assertOk()->assertSee('Mi panel');
     }
 
     public function test_login_post_without_csrf_token_returns_419(): void

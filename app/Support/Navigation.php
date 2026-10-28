@@ -47,7 +47,7 @@ class Navigation
     {
         $items = array_values(array_filter(
             self::coordinatorGeneralItems(),
-            static fn (array $item) => ! in_array($item['key'], ['indicadores', 'experiencias'], true)
+            static fn (array $item) => $item['key'] !== 'indicadores'
         ));
 
         $groups = [['label' => 'GENERAL', 'items' => self::mark($items, $active)]];

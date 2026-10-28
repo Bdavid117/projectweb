@@ -96,8 +96,16 @@ class StudentProfile
                 'icon' => $icon,
                 'description' => $e->nombre,
                 'period' => Labels::period($e->fecha_inicio),
-                'tag' => $e->validada ? $e->type->categoria : 'Pendiente de verificación',
-                'tone' => $e->validada ? $tone : 'warning',
+                'tag' => match ($e->estado()) {
+                    'validada' => $e->type->categoria,
+                    'rechazada' => 'Rechazada',
+                    default => 'Pendiente de verificación',
+                },
+                'tone' => match ($e->estado()) {
+                    'validada' => $tone,
+                    'rechazada' => 'danger',
+                    default => 'warning',
+                },
             ];
         })->all();
     }

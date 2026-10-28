@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\Role;
+use App\Models\ExperienceType;
+use App\Support\ExperienceFields;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,6 +20,34 @@ class StoreExperienceRequest extends FormRequest
     }
 
     public function rules(): array
+    {
+        $applicable = ExperienceFields::for(ExperienceType::find($this->input('experience_type_id'))?->categoria);
+        $rules = $this->baseRules();
+
+        foreach (ExperienceFields::OPTIONAL as $field) {
+            if (! array_key_exists($field, $applicable)) {
+                $rules[$field] = ['prohibited'];
+            } elseif ($applicable[$field]) {
+                array_unshift($rules[$field], 'required');
+                $rules[$field] = array_values(array_diff($rules[$field], ['nullable']));
+            }
+        }
+
+        return $rules;
+    }
+
+    /** Los campos que no aplican al tipo elegido no se guardan, aunque el navegador los envíe. */
+    protected function prepareForValidation(): void
+    {
+        $applicable = ExperienceFields::for(ExperienceType::find($this->input('experience_type_id'))?->categoria);
+
+        $this->merge(collect(ExperienceFields::OPTIONAL)
+            ->reject(fn (string $field) => array_key_exists($field, $applicable))
+            ->mapWithKeys(fn (string $field) => [$field => null])
+            ->all());
+    }
+
+    private function baseRules(): array
     {
         return [
             'experience_type_id' => ['required', 'integer', 'exists:experience_types,id'],
@@ -50,6 +80,10 @@ class StoreExperienceRequest extends FormRequest
             'institucion.max' => 'La institución no puede superar los :max caracteres.',
             'convenio.max' => 'El convenio no puede superar los :max caracteres.',
             'docente_id.exists' => 'El docente seleccionado no es válido.',
+            'alcance.required' => 'Indique el alcance de la experiencia.',
+            'institucion.required' => 'Indique la institución.',
+            'docente_id.required' => 'Seleccione el docente responsable.',
+            'rol.required' => 'Indique su rol en la experiencia.',
             'rol.max' => 'El rol no puede superar los :max caracteres.',
         ];
     }

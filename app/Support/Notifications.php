@@ -37,7 +37,7 @@ class Notifications
                 'url' => route('requests.show', $r),
             ]);
 
-        $experiences = Experience::with('student.user')->where('validada', false)
+        $experiences = Experience::with('student.user')->where('validada', false)->whereNull('motivo_rechazo')
             ->latest('updated_at')->limit(self::LIMIT)->get()
             ->map(fn (Experience $e) => [
                 'at' => $e->updated_at,
