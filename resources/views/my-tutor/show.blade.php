@@ -55,10 +55,11 @@
                             <span class="text-sm font-semibold text-[var(--text-primary)]">{{ $current['name'] }}</span>
                             <span class="text-xs text-[var(--text-secondary)]">Comparte su información desde el {{ $current['since'] }}</span>
                         </div>
-                        <form method="POST" action="{{ route('my-tutor.revoke') }}">
+                        {{-- El texto viaja en un atributo data- (HTML lo escapa) y no dentro de un literal de JavaScript: el nombre del tutor es dato del usuario. --}}
+                        <form method="POST" action="{{ route('my-tutor.revoke') }}" x-data data-confirm="¿Dejar de compartir su información con {{ $current['name'] }}? Perderá el acceso de inmediato." @submit="if (! confirm($el.dataset.confirm)) $event.preventDefault()">
                             @csrf
                             @method('DELETE')
-                            <x-button variant="secondary" type="submit" onclick="return confirm('¿Dejar de compartir su información con {{ $current['name'] }}? Perderá el acceso de inmediato.')">Dejar de compartir</x-button>
+                            <x-button variant="secondary" type="submit">Dejar de compartir</x-button>
                         </form>
                     </div>
                 @else

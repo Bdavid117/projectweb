@@ -286,6 +286,20 @@ class TutorLinkTest extends TestCase
             ->assertSee('Carlos Pineda')->assertSee('Dejar de compartir')->assertSee('Aceptada');
     }
 
+    public function test_a_tutor_name_with_quotes_or_markup_can_neither_break_nor_inject_into_the_revoke_confirmation(): void
+    {
+        $evil = 'O\'Neill "Pepe" </script><img src=x onerror=alert(1)>';
+        $this->carlos->update(['name' => $evil]);
+        $juan = Student::where('codigo', '2020123')->firstOrFail();
+
+        $response = $this->actingAs($juan->user)->get(route('my-tutor.show'))->assertOk();
+
+        // El nombre solo aparece escapado, dentro de un atributo data-, y no hay ningún onclick con JavaScript interpolado.
+        $response->assertSee('data-confirm="¿Dejar de compartir su información con '.e($evil).'?', false);
+        $response->assertDontSee('onclick=', false);
+        $response->assertDontSee('<img src=x onerror=alert(1)>', false);
+    }
+
     public function test_the_student_bell_announces_a_pending_request_first(): void
     {
         $this->send($this->maria, $this->ruiz);

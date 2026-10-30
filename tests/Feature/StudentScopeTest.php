@@ -58,6 +58,13 @@ class StudentScopeTest extends TestCase
         $this->actingAs($this->coordinator)->get('/estudiantes')->assertSee('Mostrando 1–8 de 8 estudiantes');
     }
 
+    public function test_the_cohort_filter_only_offers_cohorts_of_visible_students(): void
+    {
+        $this->actingAs($this->carlos)->get('/estudiantes')->assertViewHas('cohortOptions', fn ($options) => $options->keys()->all() === ['2020-1', '2021-1', '2021-2', '2022-1', '2022-2']);
+        $this->actingAs($this->maria)->get('/estudiantes')->assertViewHas('cohortOptions', fn ($options) => $options->isEmpty());
+        $this->actingAs($this->coordinator)->get('/estudiantes')->assertViewHas('cohortOptions', fn ($options) => $options->count() === 8);
+    }
+
     public function test_the_tutor_filter_and_the_active_counter_do_not_leak_other_students(): void
     {
         $this->actingAs($this->carlos)->get('/estudiantes')->assertDontSee('Tutor: todos')->assertSee('4 estudiantes activos entre sus tutorados');

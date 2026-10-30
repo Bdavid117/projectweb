@@ -56,7 +56,7 @@ class StudentController extends Controller
             'navGroups' => Navigation::forRole($user->role, 'estudiantes'),
             'students' => $students->through(fn (Student $student) => $this->row($student)),
             'filters' => $filters,
-            'cohortOptions' => Student::query()->distinct()->orderBy('cohorte')->pluck('cohorte', 'cohorte'),
+            'cohortOptions' => Student::query()->visibleTo($user)->distinct()->orderBy('cohorte')->pluck('cohorte', 'cohorte'),
             'statusOptions' => ['activo' => 'Activo', 'en_riesgo' => 'En riesgo', 'intercambio' => 'Intercambio', 'egresado' => 'Egresado'],
             'canFilterByTutor' => $user->role === Role::Coordinacion,
             'scopedToTutor' => $user->role === Role::Profesor,
