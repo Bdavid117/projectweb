@@ -24,13 +24,19 @@ class Audit
         $old = array_intersect_key($model->getOriginal(), $dirty);
         $model->save();
 
+        self::log($request, $model, $accion, $old, $dirty);
+    }
+
+    /** Asienta un hecho que no es una actualización de campos (alta o baja de un registro). */
+    public static function log(Request $request, Model $model, string $accion, array $old = [], array $new = []): void
+    {
         AuditLog::create([
             'user_id' => $request->user()->id,
             'auditable_type' => $model->getMorphClass(),
             'auditable_id' => $model->getKey(),
             'accion' => $accion,
             'valores_anteriores' => $old,
-            'valores_nuevos' => $dirty,
+            'valores_nuevos' => $new,
             'ip' => $request->ip(),
         ]);
     }
