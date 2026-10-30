@@ -4,6 +4,7 @@ namespace Tests\Feature\Database;
 
 use App\Enums\Role;
 use App\Models\SyncLog;
+use App\Models\TutorAssignment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -40,11 +41,11 @@ class SyncLogTest extends TestCase
         $this->assertNull($log->fresh()->term_id);
     }
 
-    public function test_tutor_assignments_are_reachable_from_the_tutor_user(): void
+    public function test_tutor_assignments_are_reachable_from_the_professor(): void
     {
         $student = $this->makeStudent();
-        $tutor = User::factory()->create(['role' => Role::Tutor]);
-        \App\Models\TutorAssignment::create(['student_id' => $student->id, 'tutor_id' => $tutor->id, 'term_id' => $this->makeTerm()->id]);
+        $tutor = User::factory()->create(['role' => Role::Profesor]);
+        TutorAssignment::create(['student_id' => $student->id, 'tutor_id' => $tutor->id, 'term_id' => $this->makeTerm()->id]);
 
         $this->assertSame(1, $tutor->tutorAssignments()->count());
     }

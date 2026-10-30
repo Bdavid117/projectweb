@@ -58,7 +58,7 @@ class TutorshipController extends Controller
 
         return view('tutorships.form', [
             'user' => $user->viewData(),
-            'navGroups' => Navigation::forRole($user->role, $user->role === Role::Tutor ? 'registrar-tutoria' : 'estudiantes'),
+            'navGroups' => Navigation::forRole($user->role, $user->role === Role::Profesor ? 'mis-asesorias' : 'estudiantes'),
             'student' => StudentProfile::header($student),
             'tutorship' => $tutorship,
             'reasons' => config('program.tutorship_reasons'),

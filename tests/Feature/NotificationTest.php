@@ -27,15 +27,15 @@ class NotificationTest extends TestCase
         $this->assertStringContainsString('sin decisión', $response->json('html'));
     }
 
-    public function test_tutor_gets_open_alerts_of_assigned_students_only(): void
+    public function test_a_professor_gets_open_alerts_of_tutored_students_only(): void
     {
         $this->seed(DatabaseSeeder::class);
-        $this->signInSeeded(Role::Tutor);
+        $this->signInSeededTutor();
 
         $this->getJson('/notificaciones')->assertOk()->assertJsonPath('count', fn ($count) => $count > 0);
     }
 
-    public function test_student_sees_the_state_of_their_own_requests_and_profesor_gets_none(): void
+    public function test_student_sees_the_state_of_their_own_requests_and_a_professor_without_tutored_students_gets_none(): void
     {
         $this->seed(DatabaseSeeder::class);
 

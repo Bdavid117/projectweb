@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\Role;
 use App\Models\Student;
 use Carbon\Carbon;
 use Database\Seeders\DatabaseSeeder;
@@ -24,7 +23,7 @@ class TimezoneTest extends TestCase
         // 02:00 UTC del 13/10 = 21:00 del 12/10 en Bogotá.
         Carbon::setTestNow(Carbon::parse('2026-10-13 02:00:00', 'UTC'));
         $this->seed(DatabaseSeeder::class);
-        $this->signInSeeded(Role::Tutor);
+        $this->signInSeededTutor();
         $juan = Student::where('codigo', '2020123')->firstOrFail();
         $payload = ['motivo' => 'Revisión de avance', 'observaciones' => 'Sesión de seguimiento del semestre.'];
 

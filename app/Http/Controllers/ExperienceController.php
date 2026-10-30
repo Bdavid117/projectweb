@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Http\Requests\StoreExperienceRequest;
 use App\Models\Experience;
 use App\Models\ExperienceType;
+use App\Models\Student;
 use App\Models\User;
 use App\Support\ExperienceFields;
 use App\Support\Input;
@@ -27,7 +28,7 @@ class ExperienceController extends Controller
 
         $experiences = Experience::query()
             ->with(['type', 'student.user'])
-            ->when($isStudent, fn ($q) => $q->where('student_id', $user->student?->id ?? 0))
+            ->when($user->role !== Role::Coordinacion, fn ($q) => $q->whereIn('student_id', Student::query()->visibleTo($user)->select('students.id')))
             ->when($filters['estado'] === 'validada', fn ($q) => $q->where('validada', true))
             ->when($filters['estado'] === 'pendiente', fn ($q) => $q->where('validada', false)->whereNull('motivo_rechazo'))
             ->when($filters['estado'] === 'rechazada', fn ($q) => $q->where('validada', false)->whereNotNull('motivo_rechazo'))

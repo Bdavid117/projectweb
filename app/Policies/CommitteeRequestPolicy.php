@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Enums\Role;
 use App\Models\CommitteeRequest;
+use App\Models\Student;
 use App\Models\User;
 
 class CommitteeRequestPolicy
@@ -13,9 +14,10 @@ class CommitteeRequestPolicy
         return true;
     }
 
+    /** Coordinación ve todas; el estudiante las suyas; el profesor las de quienes aceptaron su solicitud de tutoría. */
     public function view(User $user, CommitteeRequest $request): bool
     {
-        return $user->role !== Role::Estudiante || $request->student?->user_id === $user->id;
+        return Student::query()->visibleTo($user)->whereKey($request->student_id)->exists();
     }
 
     public function create(User $user): bool

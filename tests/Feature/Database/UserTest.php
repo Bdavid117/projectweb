@@ -5,6 +5,7 @@ namespace Tests\Feature\Database;
 use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class UserTest extends TestCase
@@ -13,11 +14,22 @@ class UserTest extends TestCase
 
     public function test_role_is_persisted_and_cast_to_enum(): void
     {
-        $user = User::factory()->create(['role' => Role::Tutor]);
+        $user = User::factory()->create(['role' => Role::Profesor]);
 
-        $this->assertSame(Role::Tutor, $user->fresh()->role);
+        $this->assertSame(Role::Profesor, $user->fresh()->role);
         $this->assertTrue($user->fresh()->active);
-        $this->assertDatabaseHas('users', ['id' => $user->id, 'role' => 'tutor']);
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'role' => 'profesor']);
+    }
+
+    public function test_the_merge_migration_turns_old_tutors_into_profesores_and_leaves_the_rest(): void
+    {
+        $tutorId = DB::table('users')->insertGetId(['name' => 'Tutor antiguo', 'email' => 'viejo@unal.edu.co', 'password' => 'x', 'role' => 'tutor', 'created_at' => now(), 'updated_at' => now()]);
+        $student = User::factory()->create(['role' => Role::Estudiante]);
+
+        (require database_path('migrations/2026_10_30_000001_merge_tutor_role_into_profesor.php'))->up();
+
+        $this->assertSame(Role::Profesor, User::findOrFail($tutorId)->role);
+        $this->assertSame(Role::Estudiante, $student->fresh()->role);
     }
 
     public function test_email_is_stored_trimmed_and_lowercased_so_login_can_find_it(): void

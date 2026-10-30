@@ -18,6 +18,7 @@ use App\Models\School;
 use App\Models\Student;
 use App\Models\Thesis;
 use App\Models\TutorAssignment;
+use App\Models\TutorRequest;
 use App\Models\Tutorship;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -27,7 +28,8 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         $this->user('Ana Restrepo', 'coordinacion@unal.edu.co', Role::Coordinacion);
-        $tutor = $this->user('Carlos Pineda', 'tutor@unal.edu.co', Role::Tutor);
+        // Profesor con tutorados (vínculos aceptados); profesor@ no tiene ninguno y sirve para probar la solicitud de tutoría.
+        $tutor = $this->user('Carlos Pineda', 'profesor2@unal.edu.co', Role::Profesor);
         $profesor = $this->user('María Londoño', 'profesor@unal.edu.co', Role::Profesor);
 
         $term = AcademicTerm::where('codigo', '2026-2')->firstOrFail();
@@ -84,7 +86,7 @@ class DemoSeeder extends Seeder
             'puntaje_saber11' => 340.5, 'puntaje_admision' => 78.4,
         ]);
 
-        TutorAssignment::updateOrCreate(['student_id' => $juan->id, 'term_id' => $term->id], ['tutor_id' => $tutor->id]);
+        $this->link($juan, $tutor, $term);
 
         foreach ([
             ['2026-09-12', 'Seguimiento a carga académica', 'Acordó reducir a 15 créditos el próximo periodo.'],
@@ -123,13 +125,20 @@ class DemoSeeder extends Seeder
         ]);
     }
 
+    /** Un vínculo de tutoría nace de una solicitud aceptada por el estudiante, igual que en la aplicación. */
+    private function link(Student $student, User $tutor, AcademicTerm $term): void
+    {
+        TutorAssignment::updateOrCreate(['student_id' => $student->id, 'term_id' => $term->id], ['tutor_id' => $tutor->id]);
+        TutorRequest::updateOrCreate(
+            ['student_id' => $student->id, 'tutor_id' => $tutor->id, 'estado' => TutorRequest::ACCEPTED],
+            ['mensaje' => 'Quisiera acompañarle como tutor durante este periodo.', 'respondida_en' => now()]
+        );
+    }
+
     private function seedAccompaniment(array $students, AcademicTerm $term, User $tutor): void
     {
         foreach (['2021045', '2021098', '2022011', '2022076'] as $codigo) {
-            TutorAssignment::updateOrCreate(
-                ['student_id' => $students[$codigo]->id, 'term_id' => $term->id],
-                ['tutor_id' => $tutor->id]
-            );
+            $this->link($students[$codigo], $tutor, $term);
         }
 
         foreach ([

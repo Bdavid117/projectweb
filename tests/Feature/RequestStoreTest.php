@@ -142,10 +142,10 @@ class RequestStoreTest extends TestCase
         $this->assertSame($laura->id, CommitteeRequest::latest('id')->firstOrFail()->student_id);
     }
 
-    public function test_professors_and_tutors_cannot_file_and_guests_are_sent_to_login(): void
+    public function test_professors_cannot_file_and_guests_are_sent_to_login(): void
     {
-        foreach ([Role::Profesor, Role::Tutor] as $role) {
-            $this->signInSeeded($role);
+        foreach ([fn () => $this->signInSeeded(Role::Profesor), fn () => $this->signInSeededTutor()] as $signIn) {
+            $signIn();
             $this->post('/solicitudes', $this->payload())->assertForbidden();
             $this->get('/solicitudes/nueva')->assertForbidden();
         }

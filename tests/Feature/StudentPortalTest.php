@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Models\AuditLog;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -36,7 +37,7 @@ class StudentPortalTest extends TestCase
     public function test_portal_screens_are_students_only(): void
     {
         $this->seed(DatabaseSeeder::class);
-        $this->signInSeeded(Role::Tutor);
+        $this->signInSeededTutor();
 
         foreach (['/perfil', '/historia-academica', '/trabajo-de-grado', '/practica'] as $url) {
             $this->get($url)->assertForbidden();
@@ -53,12 +54,12 @@ class StudentPortalTest extends TestCase
             ->assertRedirect('/perfil');
 
         $this->assertSame('300 123 4567', $user->student->fresh()->telefono);
-        $log = \App\Models\AuditLog::where('accion', 'perfil.contacto_actualizado')->firstOrFail();
+        $log = AuditLog::where('accion', 'perfil.contacto_actualizado')->firstOrFail();
         $this->assertSame($user->id, $log->user_id);
         $this->assertSame('Manizales', $log->valores_nuevos['ciudad']);
 
         $this->put('/perfil', ['name' => $user->name, 'email' => $user->email, 'telefono' => '300 123 4567', 'ciudad' => 'Manizales', 'direccion' => 'Calle 1 # 2-3']);
-        $this->assertSame(1, \App\Models\AuditLog::count());
+        $this->assertSame(1, AuditLog::count());
     }
 
     public function test_profile_update_validates_in_spanish_and_is_students_only(): void
@@ -70,7 +71,7 @@ class StudentPortalTest extends TestCase
             ->assertRedirect('/perfil')
             ->assertSessionHasErrors(['name' => 'Indique su nombre completo.', 'email' => 'El correo electrónico no es válido.', 'telefono' => 'El teléfono solo puede tener números, espacios y los símbolos + ( ) -.']);
 
-        $this->signInSeeded(Role::Tutor);
+        $this->signInSeededTutor();
         $this->put('/perfil', ['name' => 'X', 'email' => 'x@unal.edu.co'])->assertForbidden();
     }
 }

@@ -28,7 +28,7 @@ class AdminTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $this->signInSeeded(Role::Coordinacion);
 
-        $this->get('/admin/usuarios?rol=tutor')->assertOk()->assertSee('tutor@unal.edu.co')->assertDontSee('estudiante@unal.edu.co');
+        $this->get('/admin/usuarios?rol=profesor')->assertOk()->assertSee('profesor@unal.edu.co')->assertSee('profesor2@unal.edu.co')->assertDontSee('estudiante@unal.edu.co');
         $this->get('/admin/usuarios?q[]=x&rol[]=y')->assertOk();
     }
 
@@ -36,11 +36,16 @@ class AdminTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        foreach ([Role::Estudiante, Role::Profesor, Role::Tutor] as $role) {
+        foreach ([Role::Estudiante, Role::Profesor] as $role) {
             $this->signInSeeded($role);
             foreach (['usuarios', 'cargas', 'catalogos', 'bitacora'] as $screen) {
                 $this->get('/admin/'.$screen)->assertForbidden();
             }
+        }
+
+        $this->signInSeededTutor();
+        foreach (['usuarios', 'cargas', 'catalogos', 'bitacora'] as $screen) {
+            $this->get('/admin/'.$screen)->assertForbidden();
         }
     }
 }

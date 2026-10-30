@@ -46,6 +46,15 @@ abstract class TestCase extends BaseTestCase
         return $user;
     }
 
+    /** Carlos Pineda: el profesor sembrado que ya tiene tutorados (profesor@ no tiene ninguno). */
+    protected function signInSeededTutor(): User
+    {
+        $user = User::where('email', 'profesor2@unal.edu.co')->firstOrFail();
+        $this->actingAs($user);
+
+        return $user;
+    }
+
     protected function actingAsRole(Role $role, array $attributes = []): User
     {
         $user = User::factory()->make($attributes + ['id' => 1, 'role' => $role]);

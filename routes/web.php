@@ -7,12 +7,14 @@ use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MyTutorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ThesisController;
+use App\Http\Controllers\TutorRequestController;
 use App\Http\Controllers\TutorshipController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,12 +43,26 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/panel', [PanelController::class, 'index'])->name('panel.index');
 
-    Route::middleware('role:profesor,tutor,coordinacion')->group(function () {
+    Route::middleware('role:profesor,coordinacion')->group(function () {
         Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');
         Route::get('/estudiantes/{student}', [StudentController::class, 'show'])->name('students.show');
     });
 
-    Route::get('/mis-asesorias', [AdvisoryController::class, 'index'])->middleware('role:tutor')->name('advisories.index');
+    Route::get('/mis-asesorias', [AdvisoryController::class, 'index'])->middleware('role:profesor')->name('advisories.index');
+
+    // El profesor pide acompañar a un estudiante; el estudiante decide en «Mi tutor» (consentimiento).
+    Route::middleware('role:profesor')->group(function () {
+        Route::get('/tutoria/solicitudes', [TutorRequestController::class, 'index'])->name('tutor-requests.index');
+        Route::post('/tutoria/solicitudes', [TutorRequestController::class, 'store'])->name('tutor-requests.store');
+        Route::delete('/tutoria/solicitudes/{solicitud}', [TutorRequestController::class, 'destroy'])->name('tutor-requests.destroy');
+    });
+
+    Route::middleware('role:estudiante')->group(function () {
+        Route::get('/mi-tutor', [MyTutorController::class, 'show'])->name('my-tutor.show');
+        Route::post('/mi-tutor/solicitudes/{solicitud}/aceptar', [MyTutorController::class, 'accept'])->name('my-tutor.accept');
+        Route::post('/mi-tutor/solicitudes/{solicitud}/rechazar', [MyTutorController::class, 'reject'])->name('my-tutor.reject');
+        Route::delete('/mi-tutor/vinculo', [MyTutorController::class, 'revoke'])->name('my-tutor.revoke');
+    });
 
     Route::get('/experiencias', [ExperienceController::class, 'index'])->name('experiencias.index');
 
@@ -60,7 +76,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/experiencias/{experiencia}/rechazo', [ExperienceController::class, 'reject'])->name('experiencias.reject');
     });
 
-    Route::middleware('role:tutor,coordinacion')->group(function () {
+    Route::middleware('role:profesor,coordinacion')->group(function () {
         Route::get('/estudiantes/{student}/tutorias/crear', [TutorshipController::class, 'create'])->name('tutorships.create');
         Route::post('/estudiantes/{student}/tutorias', [TutorshipController::class, 'store'])->name('tutorships.store');
         Route::get('/tutorias/{tutoria}/editar', [TutorshipController::class, 'edit'])->name('tutorships.edit');

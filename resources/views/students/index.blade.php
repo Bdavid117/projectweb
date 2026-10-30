@@ -3,7 +3,7 @@
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
             <div class="flex flex-1 flex-col gap-[3px]">
                 <h1 class="text-2xl font-semibold text-[var(--text-primary)]">Estudiantes</h1>
-                <p class="text-sm text-[var(--text-secondary)]">{{ $activeCount }} estudiantes activos en el programa · RF-07</p>
+                <p class="text-sm text-[var(--text-secondary)]">{{ $activeCount }} {{ $activeCount === 1 ? 'estudiante activo' : 'estudiantes activos' }} {{ $scopedToTutor ? 'entre sus tutorados' : 'en el programa' }} · RF-07</p>
             </div>
             <div class="flex gap-3">
                 <x-button variant="subtle" icon="download">Exportar</x-button>
@@ -18,7 +18,9 @@
             </div>
             <x-filter-select name="cohorte" all="Cohorte: todas" :options="$cohortOptions" :selected="$filters['cohorte']" />
             <x-filter-select name="estado" all="Estado: todos" :options="$statusOptions" :selected="$filters['estado']" />
-            <x-filter-select name="tutor" all="Tutor: todos" :options="$tutorOptions" :selected="$filters['tutor']" />
+            @if($canFilterByTutor)
+                <x-filter-select name="tutor" all="Tutor: todos" :options="$tutorOptions" :selected="$filters['tutor']" />
+            @endif
             <x-button variant="secondary" type="submit">Filtrar</x-button>
         </form>
 
@@ -50,7 +52,13 @@
                         <a href="{{ route('students.show', $student['id']) }}" class="w-[76px] text-sm font-medium text-[var(--color-primary-600)]">Ver ficha</a>
                     </div>
                 @empty
-                    <div class="border-t border-[var(--border-subtle)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">No hay estudiantes que coincidan con los filtros.</div>
+                    <div class="border-t border-[var(--border-subtle)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">
+                        @if($scopedToTutor && ! $hasFilters)
+                            Aún no tiene tutorados. Pida acompañar a un estudiante en <a href="{{ route('tutor-requests.index') }}" class="font-semibold text-[var(--color-primary-600)]">Solicitar tutoría</a>; lo verá aquí cuando acepte.
+                        @else
+                            No hay estudiantes que coincidan con los filtros.
+                        @endif
+                    </div>
                 @endforelse
             </div>
         </div>
@@ -69,7 +77,13 @@
                     </span>
                 </a>
             @empty
-                <p class="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-center text-sm text-[var(--text-muted)]">No hay estudiantes que coincidan con los filtros.</p>
+                <p class="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-center text-sm text-[var(--text-muted)]">
+                    @if($scopedToTutor && ! $hasFilters)
+                        Aún no tiene tutorados. Pida acompañar a un estudiante en <a href="{{ route('tutor-requests.index') }}" class="font-semibold text-[var(--color-primary-600)]">Solicitar tutoría</a>.
+                    @else
+                        No hay estudiantes que coincidan con los filtros.
+                    @endif
+                </p>
             @endforelse
         </div>
 

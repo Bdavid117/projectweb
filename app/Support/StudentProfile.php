@@ -48,7 +48,7 @@ class StudentProfile
     {
         $records = self::records($student);
         $latest = $records->last();
-        $seesTutorships = in_array($viewer?->role, [Role::Tutor, Role::Coordinacion], true);
+        $seesTutorships = in_array($viewer?->role, [Role::Profesor, Role::Coordinacion], true);
         $previous = $records->count() > 1 ? $records[$records->count() - 2] : null;
 
         return [

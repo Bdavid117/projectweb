@@ -10,8 +10,7 @@ class Navigation
     {
         return match ($role) {
             Role::Estudiante => self::studentPortal($active),
-            Role::Tutor => self::staff($active, true),
-            Role::Profesor => self::staff($active),
+            Role::Profesor => self::professor($active),
             Role::Coordinacion => self::coordinator($active),
         };
     }
@@ -33,6 +32,7 @@ class Navigation
             ['key' => 'experiencias', 'icon' => 'sparkles', 'label' => 'Mis experiencias', 'href' => '/experiencias'],
             ['key' => 'trabajo-grado', 'icon' => 'book-open', 'label' => 'Mi trabajo de grado', 'href' => '/trabajo-de-grado'],
             ['key' => 'historia', 'icon' => 'trending-up', 'label' => 'Mi historia académica', 'href' => '/historia-academica'],
+            ['key' => 'mi-tutor', 'icon' => 'users', 'label' => 'Mi tutor', 'href' => '/mi-tutor'],
         ];
 
         return [
@@ -43,26 +43,21 @@ class Navigation
         ];
     }
 
-    private static function staff(string $active, bool $withTutorExtras = false): array
+    /** El profesor es también tutor: el grupo TUTORÍA reúne lo que antes tenía el rol aparte. */
+    private static function professor(string $active): array
     {
         $items = array_values(array_filter(
             self::coordinatorGeneralItems(),
             static fn (array $item) => $item['key'] !== 'indicadores'
         ));
 
-        $groups = [['label' => 'GENERAL', 'items' => self::mark($items, $active)]];
-
-        if ($withTutorExtras) {
-            $groups[] = [
-                'label' => null,
-                'items' => self::mark([
-                    ['key' => 'registrar-tutoria', 'icon' => 'message-square', 'label' => 'Registrar tutoría', 'href' => '/mis-asesorias'],
-                    ['key' => 'mis-asesorias', 'icon' => 'clipboard-list', 'label' => 'Mis asesorías', 'href' => '/mis-asesorias'],
-                ], $active),
-            ];
-        }
-
-        return $groups;
+        return [
+            ['label' => 'GENERAL', 'items' => self::mark($items, $active)],
+            ['label' => 'TUTORÍA', 'items' => self::mark([
+                ['key' => 'mis-asesorias', 'icon' => 'clipboard-list', 'label' => 'Mis asesorías', 'href' => '/mis-asesorias'],
+                ['key' => 'solicitar-tutoria', 'icon' => 'user-plus', 'label' => 'Solicitar tutoría', 'href' => '/tutoria/solicitudes'],
+            ], $active)],
+        ];
     }
 
     private static function coordinatorGeneralItems(): array

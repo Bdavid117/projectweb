@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Support\ProgramMetrics;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -33,10 +34,13 @@ class PanelTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        foreach ([Role::Profesor, Role::Tutor, Role::Coordinacion] as $role) {
+        foreach ([Role::Profesor, Role::Coordinacion] as $role) {
             $this->signInSeeded($role);
             $this->get('/panel')->assertOk();
         }
+
+        $this->signInSeededTutor();
+        $this->get('/panel')->assertOk();
     }
 
     public function test_the_student_gets_their_own_panel_not_the_program_one(): void
@@ -47,21 +51,21 @@ class PanelTest extends TestCase
         $this->get('/panel')->assertOk()->assertSee('Mi panel')->assertDontSee('ESTUDIANTES ACTIVOS');
     }
 
-    public function test_coordination_sees_every_alert_but_a_tutor_only_those_of_their_students(): void
+    public function test_coordination_sees_every_alert_but_a_professor_only_those_of_their_tutored_students(): void
     {
         $this->seed(DatabaseSeeder::class);
 
         $this->signInSeeded(Role::Coordinacion);
         $this->get('/panel')->assertSee('Ruiz Salazar, Andrés')->assertSee('Gómez Ruiz, Laura')->assertSee('Pérez Rojas, Juan Sebastián');
 
-        $this->signInSeeded(Role::Tutor);
+        $this->signInSeededTutor();
         $tutor = $this->get('/panel');
         $tutor->assertSee('Gómez Ruiz, Laura')->assertSee('Pérez Rojas, Juan Sebastián');
         $tutor->assertDontSee('Ruiz Salazar, Andrés');
         $tutor->assertSee('Tutoría registrada a');
     }
 
-    public function test_a_professor_does_not_see_the_alert_table_nor_tutorship_activity(): void
+    public function test_a_professor_without_tutored_students_sees_no_student_in_alerts_nor_in_recent_activity(): void
     {
         $this->seed(DatabaseSeeder::class);
         $this->signInSeeded(Role::Profesor);
@@ -70,19 +74,23 @@ class PanelTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('ESTUDIANTES ACTIVOS');
-        $response->assertDontSee('Situaciones que requieren atención');
-        $response->assertDontSee('Ruiz Salazar, Andrés');
+        $response->assertSee('Situaciones que requieren atención')->assertSee('Sin situaciones registradas.');
+        foreach (['Ruiz Salazar, Andrés', 'Gómez Ruiz, Laura', 'Pérez Rojas, Juan Sebastián'] as $name) {
+            $response->assertDontSee($name);
+        }
         $response->assertDontSee('Tutoría registrada a');
+        $response->assertDontSee('Experiencia validada:');
+        $response->assertDontSee('radicada');
     }
 
     public function test_alert_counter_follows_the_same_scope(): void
     {
         $this->seed(DatabaseSeeder::class);
 
-        $this->signInSeeded(Role::Tutor);
-        $this->assertSame('2', collect((new \App\Support\ProgramMetrics)->panel(auth()->user())['indicators'])->firstWhere('label', 'ALERTAS ABIERTAS')['value']);
+        $this->signInSeededTutor();
+        $this->assertSame('2', collect((new ProgramMetrics)->panel(auth()->user())['indicators'])->firstWhere('label', 'ALERTAS ABIERTAS')['value']);
 
         $this->signInSeeded(Role::Coordinacion);
-        $this->assertSame('3', collect((new \App\Support\ProgramMetrics)->panel(auth()->user())['indicators'])->firstWhere('label', 'ALERTAS ABIERTAS')['value']);
+        $this->assertSame('3', collect((new ProgramMetrics)->panel(auth()->user())['indicators'])->firstWhere('label', 'ALERTAS ABIERTAS')['value']);
     }
 }

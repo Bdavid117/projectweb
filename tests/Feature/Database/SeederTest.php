@@ -4,7 +4,10 @@ namespace Tests\Feature\Database;
 
 use App\Enums\Role;
 use App\Models\AcademicTerm;
+use App\Models\Alert;
 use App\Models\Student;
+use App\Models\TutorAssignment;
+use App\Models\TutorRequest;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -52,12 +55,16 @@ class SeederTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $tutor = User::where('email', 'tutor@unal.edu.co')->firstOrFail();
+        $tutor = User::where('email', 'profesor2@unal.edu.co')->firstOrFail();
         $term = AcademicTerm::where('codigo', '2026-2')->firstOrFail();
 
-        $this->assertSame(5, \App\Models\TutorAssignment::where('tutor_id', $tutor->id)->where('term_id', $term->id)->count());
-        $this->assertSame(3, \App\Models\Alert::where('atendida', false)->count());
-        $this->assertSame(4, \App\Models\Alert::count());
+        $this->assertSame(Role::Profesor, $tutor->role);
+        $this->assertSame(5, TutorAssignment::where('tutor_id', $tutor->id)->where('term_id', $term->id)->count());
+        // Cada vínculo sembrado nace de una solicitud aceptada, y profesor@ arranca sin tutorados para probar el flujo.
+        $this->assertSame(5, TutorRequest::where('tutor_id', $tutor->id)->where('estado', 'aceptada')->count());
+        $this->assertSame(0, TutorAssignment::where('tutor_id', User::where('email', 'profesor@unal.edu.co')->value('id'))->count());
+        $this->assertSame(3, Alert::where('atendida', false)->count());
+        $this->assertSame(4, Alert::count());
         $this->assertSame(1, Student::where('codigo', '2021098')->firstOrFail()->tutorships()->count());
     }
 }
