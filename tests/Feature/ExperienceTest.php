@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\Role;
 use App\Models\Experience;
 use App\Models\ExperienceType;
+use App\Models\Student;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -99,14 +100,27 @@ class ExperienceTest extends TestCase
         $this->assertSame($coordinator->id, $experience->fresh()->validada_por);
     }
 
-    public function test_tutor_and_profesor_read_experiences_but_cannot_change_them(): void
+    public function test_a_professor_reads_only_the_experiences_of_their_tutored_students_and_cannot_change_any(): void
     {
         $this->seed(DatabaseSeeder::class);
         $experience = Experience::firstOrFail();
+        // Ruiz Salazar no tiene tutor: su experiencia no debe verla ningún profesor.
+        Experience::create([
+            'student_id' => Student::where('codigo', '2019087')->firstOrFail()->id,
+            'experience_type_id' => ExperienceType::firstOrFail()->id,
+            'nombre' => 'Monitoría de Ruiz',
+            'fecha_inicio' => '2026-02-01',
+        ]);
+        $tutored = Experience::count() - 1;
 
-        foreach ([Role::Tutor, Role::Profesor] as $role) {
-            $this->signInSeeded($role);
-            $this->get('/experiencias')->assertOk()->assertSee(Experience::count().' registradas')->assertSee('solo lectura')->assertDontSee('Registrar experiencia');
+        $this->signInSeededTutor();
+        $this->get('/experiencias')->assertOk()->assertSee($tutored.' registradas')->assertSee('solo lectura')->assertDontSee('Monitoría de Ruiz')->assertDontSee('Registrar experiencia');
+
+        $this->signInSeeded(Role::Profesor);
+        $this->get('/experiencias')->assertOk()->assertSee('0 registradas')->assertDontSee('Monitoría de Ruiz')->assertDontSee($experience->nombre);
+
+        foreach ([fn () => $this->signInSeededTutor(), fn () => $this->signInSeeded(Role::Profesor)] as $signIn) {
+            $signIn();
             $this->get('/experiencias/crear')->assertForbidden();
             $this->get("/experiencias/{$experience->id}/editar")->assertForbidden();
             $this->post("/experiencias/{$experience->id}/validacion")->assertForbidden();

@@ -37,7 +37,7 @@ class InternshipEditTest extends TestCase
             ->assertRedirect('/practica')
             ->assertSessionHasErrors(['jefe_nombre' => 'Indique el nombre del jefe inmediato.']);
 
-        $this->signInSeeded(Role::Tutor);
+        $this->signInSeededTutor();
         $this->put('/practica', ['jefe_nombre' => 'X'])->assertForbidden();
     }
 }

@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Models\Student;
 use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -29,10 +31,10 @@ class AuthTest extends TestCase
 
     public function test_unknown_email_and_wrong_password_give_the_same_generic_error(): void
     {
-        $this->user(Role::Tutor);
+        $this->user(Role::Profesor);
 
         $unknown = $this->from('/login')->post('/login', ['email' => 'nadie@unal.edu.co', 'password' => 'password']);
-        $wrong = $this->from('/login')->post('/login', ['email' => 'tutor@unal.edu.co', 'password' => 'incorrecta']);
+        $wrong = $this->from('/login')->post('/login', ['email' => 'profesor@unal.edu.co', 'password' => 'incorrecta']);
 
         $unknown->assertRedirect('/login')->assertSessionHasErrors(['email' => 'Credenciales inválidas.']);
         $wrong->assertRedirect('/login')->assertSessionHasErrors(['email' => 'Credenciales inválidas.']);
@@ -42,7 +44,7 @@ class AuthTest extends TestCase
     public function test_empty_or_missing_fields_give_the_generic_error_instead_of_failing(): void
     {
         $this->from('/login')->post('/login', [])->assertRedirect('/login')->assertSessionHasErrors(['email' => 'Credenciales inválidas.']);
-        $this->from('/login')->post('/login', ['email' => 'tutor@unal.edu.co'])->assertSessionHasErrors(['email' => 'Credenciales inválidas.']);
+        $this->from('/login')->post('/login', ['email' => 'profesor@unal.edu.co'])->assertSessionHasErrors(['email' => 'Credenciales inválidas.']);
         $this->from('/login')->post('/login', ['email' => '', 'password' => ''])->assertSessionHasErrors(['email' => 'Credenciales inválidas.']);
         $this->assertGuest();
     }
@@ -99,7 +101,7 @@ class AuthTest extends TestCase
         $this->get('/estudiantes')->assertRedirect('/login');
         $this->post('/logout')->assertRedirect('/login');
 
-        $this->actingAsRole(Role::Tutor);
+        $this->actingAsRole(Role::Profesor);
         $this->get('/login')->assertRedirect('/panel');
     }
 
@@ -114,15 +116,18 @@ class AuthTest extends TestCase
 
     public function test_role_matrix_returns_403_on_foreign_routes_and_200_on_own(): void
     {
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
-        $juan = \App\Models\Student::where('codigo', '2020123')->firstOrFail();
+        $this->seed(DatabaseSeeder::class);
+        $juan = Student::where('codigo', '2020123')->firstOrFail();
 
         $matrix = [
-            ['/solicitudes', [Role::Estudiante, Role::Profesor, Role::Tutor, Role::Coordinacion]],
-            ['/estudiantes', [Role::Profesor, Role::Tutor, Role::Coordinacion]],
-            ['/estudiantes/'.$juan->id, [Role::Profesor, Role::Tutor, Role::Coordinacion]],
+            ['/solicitudes', [Role::Estudiante, Role::Profesor, Role::Coordinacion]],
+            ['/estudiantes', [Role::Profesor, Role::Coordinacion]],
+            // Un profesor sin vínculo aceptado no abre la ficha por URL; el vinculado sí (StudentScopeTest).
+            ['/estudiantes/'.$juan->id, [Role::Coordinacion]],
             ['/solicitudes/nueva', [Role::Estudiante, Role::Coordinacion]],
-            ['/mis-asesorias', [Role::Tutor]],
+            ['/mis-asesorias', [Role::Profesor]],
+            ['/tutoria/solicitudes', [Role::Profesor]],
+            ['/mi-tutor', [Role::Estudiante]],
             ['/indicadores', [Role::Coordinacion]],
         ];
 
@@ -138,7 +143,7 @@ class AuthTest extends TestCase
 
     public function test_panel_is_open_to_every_role_and_students_get_their_own(): void
     {
-        foreach ([Role::Profesor, Role::Tutor, Role::Coordinacion] as $role) {
+        foreach ([Role::Profesor, Role::Coordinacion] as $role) {
             $this->actingAsRole($role);
             $this->get('/panel')->assertOk();
         }

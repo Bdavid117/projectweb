@@ -30,7 +30,6 @@ class PanelController extends Controller
             'navGroups' => Navigation::forRole($user->role, 'panel'),
             'cutoff' => $metrics->cutoff(),
             'termLabel' => Labels::termLabel($metrics->term()),
-            'showAttention' => $user->role !== Role::Profesor,
             ...$metrics->panel($user),
             'quickLinks' => [
                 ['icon' => 'upload', 'label' => 'Cargar archivo de Excel'],

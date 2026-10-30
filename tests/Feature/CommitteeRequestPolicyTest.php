@@ -4,57 +4,79 @@ namespace Tests\Feature;
 
 use App\Enums\Role;
 use App\Models\CommitteeRequest;
-use App\Models\Student;
 use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Tests\TestCase;
 
 class CommitteeRequestPolicyTest extends TestCase
 {
-    private function request(int $ownerUserId): CommitteeRequest
-    {
-        $student = new Student(['codigo' => 'X']);
-        $student->user_id = $ownerUserId;
-        $request = new CommitteeRequest;
-        $request->setRelation('student', $student);
+    use RefreshDatabase;
 
-        return $request;
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(DatabaseSeeder::class);
     }
 
-    private function allows(Role $role, string $ability, mixed $argument, int $id = 1): bool
+    private function requestOf(string $codigo): CommitteeRequest
     {
-        return Gate::forUser(User::factory()->make(['id' => $id, 'role' => $role]))->allows($ability, $argument);
+        return CommitteeRequest::whereHas('student', fn ($q) => $q->where('codigo', $codigo))->firstOrFail();
+    }
+
+    private function user(string $email): User
+    {
+        return User::where('email', $email)->firstOrFail();
+    }
+
+    private function allows(User $user, string $ability, mixed $argument): bool
+    {
+        return Gate::forUser($user)->allows($ability, $argument);
+    }
+
+    private function withRole(Role $role): User
+    {
+        return User::factory()->make(['id' => 1, 'role' => $role]);
     }
 
     public function test_a_student_views_only_their_own_requests(): void
     {
-        $this->assertTrue($this->allows(Role::Estudiante, 'view', $this->request(5), 5));
-        $this->assertFalse($this->allows(Role::Estudiante, 'view', $this->request(5), 6));
+        $juan = $this->requestOf('2020123');
+
+        $this->assertTrue($this->allows($this->user('estudiante@unal.edu.co'), 'view', $juan));
+        $this->assertFalse($this->allows($this->user('est2021045@unal.edu.co'), 'view', $juan));
     }
 
-    public function test_staff_roles_view_any_request(): void
+    public function test_coordination_views_any_request_and_a_professor_only_those_of_their_tutored_students(): void
     {
-        foreach ([Role::Profesor, Role::Tutor, Role::Coordinacion] as $role) {
-            $this->assertTrue($this->allows($role, 'view', $this->request(5)));
+        foreach (['2020123', '2021045'] as $codigo) {
+            $request = $this->requestOf($codigo);
+
+            $this->assertTrue($this->allows($this->user('coordinacion@unal.edu.co'), 'view', $request));
+            // Juan y Laura son tutorados de Carlos Pineda; profesor@ no tiene vínculo con ninguno.
+            $this->assertTrue($this->allows($this->user('profesor2@unal.edu.co'), 'view', $request));
+            $this->assertFalse($this->allows($this->user('profesor@unal.edu.co'), 'view', $request));
         }
     }
 
     public function test_everyone_can_list_but_only_student_and_coordination_create(): void
     {
         foreach (Role::cases() as $role) {
-            $this->assertTrue($this->allows($role, 'viewAny', CommitteeRequest::class));
+            $this->assertTrue($this->allows($this->withRole($role), 'viewAny', CommitteeRequest::class));
         }
-        $this->assertTrue($this->allows(Role::Estudiante, 'create', CommitteeRequest::class));
-        $this->assertTrue($this->allows(Role::Coordinacion, 'create', CommitteeRequest::class));
-        $this->assertFalse($this->allows(Role::Profesor, 'create', CommitteeRequest::class));
-        $this->assertFalse($this->allows(Role::Tutor, 'create', CommitteeRequest::class));
+        $this->assertTrue($this->allows($this->withRole(Role::Estudiante), 'create', CommitteeRequest::class));
+        $this->assertTrue($this->allows($this->withRole(Role::Coordinacion), 'create', CommitteeRequest::class));
+        $this->assertFalse($this->allows($this->withRole(Role::Profesor), 'create', CommitteeRequest::class));
     }
 
     public function test_only_coordination_decides(): void
     {
-        $this->assertTrue($this->allows(Role::Coordinacion, 'decide', $this->request(5)));
-        foreach ([Role::Estudiante, Role::Profesor, Role::Tutor] as $role) {
-            $this->assertFalse($this->allows($role, 'decide', $this->request(5), 5));
+        $request = $this->requestOf('2020123');
+
+        $this->assertTrue($this->allows($this->user('coordinacion@unal.edu.co'), 'decide', $request));
+        foreach (['estudiante@unal.edu.co', 'profesor@unal.edu.co', 'profesor2@unal.edu.co'] as $email) {
+            $this->assertFalse($this->allows($this->user($email), 'decide', $request), $email);
         }
     }
 }

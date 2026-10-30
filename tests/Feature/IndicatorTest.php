@@ -32,9 +32,12 @@ class IndicatorTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        foreach ([Role::Profesor, Role::Tutor, Role::Estudiante] as $role) {
+        foreach ([Role::Profesor, Role::Estudiante] as $role) {
             $this->signInSeeded($role);
             $this->get('/indicadores')->assertForbidden();
         }
+
+        $this->signInSeededTutor();
+        $this->get('/indicadores')->assertForbidden();
     }
 }

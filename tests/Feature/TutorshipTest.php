@@ -25,7 +25,7 @@ class TutorshipTest extends TestCase
         Carbon::setTestNow('2026-10-12 12:00:00');
         $this->seed(DatabaseSeeder::class);
         $this->juan = Student::where('codigo', '2020123')->firstOrFail();
-        $this->tutor = $this->signInSeeded(Role::Tutor);
+        $this->tutor = $this->signInSeededTutor();
     }
 
     protected function tearDown(): void
@@ -88,7 +88,7 @@ class TutorshipTest extends TestCase
 
     public function test_the_author_is_always_the_signed_in_user_even_if_another_is_sent(): void
     {
-        $other = User::factory()->create(['role' => Role::Tutor]);
+        $other = User::factory()->create(['role' => Role::Profesor]);
 
         $this->post($this->storeUrl(), $this->valid(['tutor_id' => $other->id]))->assertRedirect();
 
@@ -117,7 +117,7 @@ class TutorshipTest extends TestCase
         $this->post($this->storeUrl(), $this->valid(['compromisos' => null]))->assertSessionHasNoErrors();
     }
 
-    public function test_coordination_can_register_but_professors_and_students_cannot(): void
+    public function test_coordination_can_register_but_unlinked_professors_and_students_cannot(): void
     {
         $coordinator = $this->signInSeeded(Role::Coordinacion);
         $this->post($this->storeUrl(), $this->valid())->assertRedirect();
@@ -168,11 +168,11 @@ class TutorshipTest extends TestCase
         $this->assertNull($tutorship->fresh()->deleted_at);
     }
 
-    public function test_another_tutor_or_coordination_cannot_touch_it(): void
+    public function test_another_professor_or_coordination_cannot_touch_it(): void
     {
         $tutorship = $this->createTutorship();
 
-        foreach ([User::factory()->create(['role' => Role::Tutor]), $this->signInSeeded(Role::Coordinacion)] as $user) {
+        foreach ([User::factory()->create(['role' => Role::Profesor]), $this->signInSeeded(Role::Coordinacion)] as $user) {
             $this->actingAs($user);
             $this->get('/tutorias/'.$tutorship->id.'/editar')->assertForbidden();
             $this->put('/tutorias/'.$tutorship->id, $this->valid())->assertForbidden();
@@ -216,7 +216,7 @@ class TutorshipTest extends TestCase
             ->assertSee('href="'.route('tutorships.edit', $tutorship).'"', false);
     }
 
-    public function test_a_tutor_can_only_register_sessions_for_their_assigned_students(): void
+    public function test_a_professor_can_only_register_sessions_for_students_who_accepted_them(): void
     {
         $andres = Student::where('codigo', '2019087')->firstOrFail();
         $count = Tutorship::count();
@@ -225,7 +225,8 @@ class TutorshipTest extends TestCase
         $this->post('/estudiantes/'.$andres->id.'/tutorias', $this->valid())->assertForbidden();
         $this->assertSame($count, Tutorship::count());
 
-        $this->get(route('students.show', $andres))->assertOk()->assertDontSee('href="'.route('tutorships.create', $andres).'"', false);
+        // Sin vínculo tampoco puede abrir la ficha, así que no ve ningún botón para registrar.
+        $this->get(route('students.show', $andres))->assertForbidden();
     }
 
     public function test_coordination_can_register_for_any_student_even_if_not_assigned(): void
@@ -251,9 +252,9 @@ class TutorshipTest extends TestCase
         $this->get(route('students.show', $this->juan))->assertSee($create, false)->assertDontSee($edit, false);
 
         $this->signInSeeded(Role::Profesor);
-        $this->get(route('students.show', $this->juan))->assertDontSee($create, false)->assertDontSee($edit, false);
+        $this->get(route('students.show', $this->juan))->assertForbidden();
 
-        $this->signInSeeded(Role::Tutor);
+        $this->signInSeededTutor();
         Carbon::setTestNow('2026-10-13 12:01:00');
         $this->get(route('students.show', $this->juan))->assertSee($create, false)->assertDontSee($edit, false);
     }

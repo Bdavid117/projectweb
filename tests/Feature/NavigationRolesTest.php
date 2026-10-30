@@ -13,23 +13,37 @@ class NavigationRolesTest extends TestCase
         return collect(Navigation::forRole($role, 'panel'))->pluck('items')->flatten(1)->keyBy('key')->all();
     }
 
-    public function test_tutor_and_profesor_do_not_see_coordination_only_links(): void
+    public function test_profesor_does_not_see_coordination_only_links(): void
     {
-        foreach ([Role::Tutor, Role::Profesor] as $role) {
-            $items = $this->items($role);
-            $this->assertArrayNotHasKey('indicadores', $items);
-            $this->assertArrayNotHasKey('usuarios', $items);
-            $this->assertArrayNotHasKey('bitacora', $items);
-            $this->assertSame('/solicitudes', $items['solicitudes']['href']);
+        $items = $this->items(Role::Profesor);
+        $this->assertArrayNotHasKey('indicadores', $items);
+        $this->assertArrayNotHasKey('usuarios', $items);
+        $this->assertArrayNotHasKey('bitacora', $items);
+        $this->assertSame('/solicitudes', $items['solicitudes']['href']);
+    }
+
+    public function test_the_profesor_gets_the_tutor_group_as_an_extra_menu_section_and_nobody_else_does(): void
+    {
+        $groups = collect(Navigation::forRole(Role::Profesor, 'panel'));
+        $tutoring = $groups->firstWhere('label', 'TUTORÍA');
+
+        $this->assertNotNull($tutoring);
+        $this->assertSame(['mis-asesorias', 'solicitar-tutoria'], collect($tutoring['items'])->pluck('key')->all());
+        $this->assertSame('/mis-asesorias', $this->items(Role::Profesor)['mis-asesorias']['href']);
+        $this->assertSame('/tutoria/solicitudes', $this->items(Role::Profesor)['solicitar-tutoria']['href']);
+        // «Registrar tutoría» apuntaba a la misma página que «Mis asesorías»: ahora se registra desde cada estudiante vinculado.
+        $this->assertArrayNotHasKey('registrar-tutoria', $this->items(Role::Profesor));
+
+        foreach ([Role::Coordinacion, Role::Estudiante] as $role) {
+            $this->assertArrayNotHasKey('mis-asesorias', $this->items($role));
+            $this->assertArrayNotHasKey('solicitar-tutoria', $this->items($role));
         }
     }
 
-    public function test_only_tutor_gets_the_tutor_extras(): void
+    public function test_the_student_gets_my_tutor_to_decide_who_sees_their_information(): void
     {
-        $this->assertSame('/mis-asesorias', $this->items(Role::Tutor)['mis-asesorias']['href']);
-        $this->assertSame('/mis-asesorias', $this->items(Role::Tutor)['registrar-tutoria']['href']);
-        $this->assertArrayNotHasKey('mis-asesorias', $this->items(Role::Profesor));
-        $this->assertArrayNotHasKey('mis-asesorias', $this->items(Role::Coordinacion));
+        $this->assertSame('/mi-tutor', $this->items(Role::Estudiante)['mi-tutor']['href']);
+        $this->assertArrayNotHasKey('mi-tutor', $this->items(Role::Profesor));
     }
 
     public function test_coordinacion_keeps_the_full_menu_and_student_keeps_the_portal(): void
@@ -50,7 +64,7 @@ class NavigationRolesTest extends TestCase
 
     public function test_active_item_is_marked(): void
     {
-        $items = collect(Navigation::forRole(Role::Tutor, 'mis-asesorias'))->pluck('items')->flatten(1)->keyBy('key');
+        $items = collect(Navigation::forRole(Role::Profesor, 'mis-asesorias'))->pluck('items')->flatten(1)->keyBy('key');
 
         $this->assertTrue($items['mis-asesorias']['active']);
         $this->assertFalse($items['panel']['active']);

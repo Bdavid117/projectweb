@@ -15,12 +15,12 @@ use App\Support\Input;
 use App\Support\Labels;
 use App\Support\Navigation;
 use App\Support\StudentProfile;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RequestController extends Controller
 {
@@ -84,7 +84,7 @@ class RequestController extends Controller
         ];
 
         $scope = fn () => CommitteeRequest::query()
-            ->when($isStudent, fn ($q) => $q->whereHas('student', fn ($s) => $s->where('user_id', $user->id)));
+            ->when($user->role !== Role::Coordinacion, fn ($q) => $q->whereIn('student_id', Student::query()->visibleTo($user)->select('students.id')));
 
         $requests = $scope()
             ->with(['student.user', 'type', 'term'])

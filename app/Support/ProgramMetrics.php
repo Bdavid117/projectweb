@@ -115,12 +115,12 @@ class ProgramMetrics
             : null;
     }
 
-    /** Estudiantes cuyas alertas y tutorías puede ver: todos (null), los asignados (tutor) o ninguno (profesor). */
+    /** Estudiantes cuya información individual puede ver: todos (null), los vinculados al profesor o ninguno. */
     private function visibleStudentIds(?User $viewer): ?array
     {
         return match ($viewer?->role) {
             null, Role::Coordinacion => null,
-            Role::Tutor => TutorAssignment::where('tutor_id', $viewer->id)->where('term_id', $this->term()?->id ?? 0)->pluck('student_id')->all(),
+            Role::Profesor => TutorAssignment::studentIdsOf($viewer),
             default => [],
         };
     }
@@ -167,10 +167,10 @@ class ProgramMetrics
         foreach ($tutorships as $t) {
             $items->push(['at' => $t->created_at, 'icon' => 'message-square', 'description' => 'Tutoría registrada a '.($t->student->user?->name ?? $t->student->codigo), 'meta' => $t->created_at->diffForHumans().' · '.$t->tutor->name]);
         }
-        foreach (CommitteeRequest::with(['student.user', 'type'])->latest('fecha_radicacion')->limit(5)->get() as $r) {
+        foreach (CommitteeRequest::with(['student.user', 'type'])->when($ids !== null, fn ($q) => $q->whereIn('student_id', $ids))->latest('fecha_radicacion')->limit(5)->get() as $r) {
             $items->push(['at' => $r->fecha_radicacion, 'icon' => 'file-text', 'description' => 'Solicitud de '.mb_strtolower($r->type->nombre).' radicada', 'meta' => $r->fecha_radicacion->diffForHumans().' · '.($r->student->user?->name ?? $r->student->codigo)]);
         }
-        foreach (Experience::with('validador')->where('validada', true)->latest('updated_at')->limit(5)->get() as $e) {
+        foreach (Experience::with('validador')->when($ids !== null, fn ($q) => $q->whereIn('student_id', $ids))->where('validada', true)->latest('updated_at')->limit(5)->get() as $e) {
             $items->push(['at' => $e->updated_at, 'icon' => 'sparkles', 'description' => 'Experiencia validada: '.$e->nombre, 'meta' => $e->updated_at->diffForHumans().' · '.($e->validador?->name ?? 'Coordinación')]);
         }
 

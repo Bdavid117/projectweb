@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\AcademicTerm;
 use App\Models\CommitteeRequest;
+use App\Models\TutorRequest;
 use Carbon\CarbonInterface;
 
 class Labels
@@ -50,6 +51,19 @@ class Labels
             'en_revision' => 'En revisión',
             'con_decision' => 'Con decisión',
             default => ucfirst(str_replace('_', ' ', $estado)),
+        };
+    }
+
+    /** @return array{0: string, 1: string} */
+    public static function tutorRequestStatus(string $estado): array
+    {
+        return match ($estado) {
+            TutorRequest::PENDING => ['Pendiente', 'warning'],
+            TutorRequest::ACCEPTED => ['Aceptada', 'success'],
+            TutorRequest::REJECTED => ['Rechazada', 'danger'],
+            TutorRequest::CANCELLED => ['Retirada', 'info'],
+            TutorRequest::REVOKED => ['Revocada', 'info'],
+            default => [ucfirst($estado), 'info'],
         };
     }
 

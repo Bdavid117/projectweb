@@ -19,7 +19,6 @@
 
         <div class="flex flex-col gap-4 lg:flex-row">
             <div class="flex min-w-0 flex-1 flex-col gap-4">
-                @if($showAttention)
                 <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
                     <div class="flex items-center gap-3 px-4 py-[14px]">
                         <div class="flex flex-1 flex-col gap-[2px]">
@@ -50,7 +49,6 @@
                         @endforeach
                     </div>
                 </div>
-                @endif
 
                 <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
                     <div class="flex flex-col gap-[2px] px-4 py-[14px]">

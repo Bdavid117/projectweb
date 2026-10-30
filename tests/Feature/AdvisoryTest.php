@@ -19,7 +19,7 @@ class AdvisoryTest extends TestCase
         parent::setUp();
         Carbon::setTestNow('2026-10-12 12:00:00');
         $this->seed(DatabaseSeeder::class);
-        $this->signInSeeded(Role::Tutor);
+        $this->signInSeededTutor();
     }
 
     protected function tearDown(): void
@@ -28,7 +28,7 @@ class AdvisoryTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_the_tutor_sees_only_the_students_assigned_to_them(): void
+    public function test_the_professor_sees_only_the_students_who_accepted_them(): void
     {
         $response = $this->get('/mis-asesorias');
 
@@ -82,18 +82,21 @@ class AdvisoryTest extends TestCase
         $response->assertSee('href="'.route('tutorships.create', $juan).'"', false);
     }
 
-    public function test_a_tutor_without_assignments_sees_the_empty_state(): void
+    public function test_a_professor_without_tutored_students_sees_the_empty_state(): void
     {
-        $this->actingAs(User::factory()->create(['role' => Role::Tutor]));
+        $this->actingAs(User::factory()->create(['role' => Role::Profesor]));
 
         $this->get('/mis-asesorias')->assertOk()->assertSee('0 estudiantes asignados')->assertSee('No hay estudiantes que coincidan');
     }
 
-    public function test_only_tutors_can_open_it(): void
+    public function test_only_professors_can_open_it(): void
     {
-        foreach ([Role::Coordinacion, Role::Profesor, Role::Estudiante] as $role) {
+        foreach ([Role::Coordinacion, Role::Estudiante] as $role) {
             $this->signInSeeded($role);
             $this->get('/mis-asesorias')->assertForbidden();
         }
+
+        $this->signInSeeded(Role::Profesor);
+        $this->get('/mis-asesorias')->assertOk()->assertSee('0 estudiantes asignados');
     }
 }

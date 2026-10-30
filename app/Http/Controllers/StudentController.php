@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Role;
 use App\Models\AcademicTerm;
 use App\Models\Student;
 use App\Models\Tutorship;
@@ -27,6 +28,7 @@ class StudentController extends Controller
         ];
 
         $students = Student::query()
+            ->visibleTo($user)
             ->select('students.*')
             ->join('users', 'users.id', '=', 'students.user_id')
             ->with(['user', 'academicRecords' => fn ($q) => $q->where('term_id', $term?->id)])
@@ -54,10 +56,13 @@ class StudentController extends Controller
             'navGroups' => Navigation::forRole($user->role, 'estudiantes'),
             'students' => $students->through(fn (Student $student) => $this->row($student)),
             'filters' => $filters,
-            'cohortOptions' => Student::query()->distinct()->orderBy('cohorte')->pluck('cohorte', 'cohorte'),
+            'cohortOptions' => Student::query()->visibleTo($user)->distinct()->orderBy('cohorte')->pluck('cohorte', 'cohorte'),
             'statusOptions' => ['activo' => 'Activo', 'en_riesgo' => 'En riesgo', 'intercambio' => 'Intercambio', 'egresado' => 'Egresado'],
-            'tutorOptions' => User::where('role', 'tutor')->orderBy('name')->pluck('name', 'id'),
-            'activeCount' => Student::where('estado', 'activo')->count(),
+            'canFilterByTutor' => $user->role === Role::Coordinacion,
+            'scopedToTutor' => $user->role === Role::Profesor,
+            'hasFilters' => collect($filters)->contains(fn ($value) => $value !== '' && $value !== 0),
+            'tutorOptions' => User::where('role', Role::Profesor->value)->whereHas('tutorAssignments')->orderBy('name')->pluck('name', 'id'),
+            'activeCount' => Student::query()->visibleTo($user)->where('estado', 'activo')->count(),
         ]);
     }
 
@@ -82,6 +87,8 @@ class StudentController extends Controller
 
     public function show(Request $request, Student $student): View
     {
+        $this->authorize('view', $student);
+
         $user = $request->user();
 
         return view('students.show', [

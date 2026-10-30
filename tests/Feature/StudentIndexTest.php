@@ -59,7 +59,7 @@ class StudentIndexTest extends TestCase
 
     public function test_filters_by_status_cohort_and_tutor_combine(): void
     {
-        $tutor = User::where('email', 'tutor@unal.edu.co')->firstOrFail();
+        $tutor = User::where('email', 'profesor2@unal.edu.co')->firstOrFail();
 
         $this->get('/estudiantes?estado=en_riesgo')->assertSee('Cardona Vélez, Mateo')->assertDontSee('Pérez Rojas, Juan');
         $this->get('/estudiantes?cohorte=2021-1')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Cardona Vélez, Mateo');
@@ -87,9 +87,10 @@ class StudentIndexTest extends TestCase
         $this->signInSeeded(Role::Estudiante);
         $this->get('/estudiantes')->assertForbidden();
 
-        foreach ([Role::Profesor, Role::Tutor] as $role) {
-            $this->signInSeeded($role);
-            $this->get('/estudiantes')->assertOk();
-        }
+        $this->signInSeeded(Role::Profesor);
+        $this->get('/estudiantes')->assertOk();
+
+        $this->signInSeededTutor();
+        $this->get('/estudiantes')->assertOk();
     }
 }

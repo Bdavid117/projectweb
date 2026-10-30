@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\Role;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +14,21 @@ class Student extends Model
     protected $fillable = ['user_id', 'codigo', 'documento', 'cohorte', 'estado', 'fecha_ingreso', 'telefono', 'direccion', 'ciudad'];
 
     protected $casts = ['fecha_ingreso' => 'date'];
+
+    /**
+     * Estudiantes cuya información puede ver el usuario: Coordinación todos, el estudiante a sí mismo y el
+     * profesor solo a quienes aceptaron su solicitud de tutoría en el periodo vigente. Único punto de verdad
+     * del alcance: listados, fichas, solicitudes y experiencias pasan por aquí.
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return match ($user->role) {
+            Role::Coordinacion => $query,
+            Role::Profesor => $query->whereIn('students.id', TutorAssignment::query()->inCurrentTerm()
+                ->where('tutor_id', $user->id)->select('student_id')),
+            Role::Estudiante => $query->where('students.user_id', $user->id),
+        };
+    }
 
     public function user(): BelongsTo
     {

@@ -49,7 +49,7 @@ class EmptyDatabaseScreensTest extends TestCase
 
     public function test_advisories_render_with_an_empty_database(): void
     {
-        $this->actingAsRole(Role::Tutor);
+        $this->actingAsRole(Role::Profesor);
 
         $this->get('/mis-asesorias')->assertOk()->assertSee('0 estudiantes asignados en sin periodo');
     }

@@ -114,11 +114,15 @@ class RequestDecisionTest extends TestCase
     {
         $url = '/solicitudes/'.$this->laura->id;
 
-        foreach ([Role::Estudiante, Role::Profesor, Role::Tutor] as $role) {
+        foreach ([Role::Estudiante, Role::Profesor] as $role) {
             $this->signInSeeded($role);
             $this->post($url.'/revision')->assertForbidden();
             $this->post($url.'/decision', $this->decision())->assertForbidden();
         }
+
+        $this->signInSeededTutor();
+        $this->post($url.'/revision')->assertForbidden();
+        $this->post($url.'/decision', $this->decision())->assertForbidden();
 
         $this->actingAs(User::where('email', 'est2021045@unal.edu.co')->firstOrFail());
         $this->post($url.'/decision', $this->decision())->assertForbidden();

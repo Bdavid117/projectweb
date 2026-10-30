@@ -16,7 +16,7 @@ class StudentProfileTest extends TestCase
     public function test_profile_shows_the_real_data_of_a_student(): void
     {
         $this->seed(DatabaseSeeder::class);
-        $this->signInSeeded(Role::Tutor);
+        $this->signInSeededTutor();
         $juan = Student::where('codigo', '2020123')->firstOrFail();
 
         $response = $this->get('/estudiantes/'.$juan->id);
@@ -84,17 +84,19 @@ class StudentProfileTest extends TestCase
         $this->get('/estudiantes/'.$juan->id)->assertForbidden();
     }
 
-    public function test_tutorship_notes_are_visible_only_to_tutors_and_coordination(): void
+    public function test_tutorship_notes_are_visible_to_the_linked_professor_and_coordination_and_the_unlinked_one_cannot_open_the_profile(): void
     {
         $this->seed(DatabaseSeeder::class);
         $juan = Student::where('codigo', '2020123')->firstOrFail();
 
-        foreach ([Role::Tutor, Role::Coordinacion] as $role) {
-            $this->signInSeeded($role);
-            $this->get('/estudiantes/'.$juan->id)->assertSee('Últimas tutorías')->assertSee('Acordó reducir a 15 créditos');
-        }
+        $this->signInSeededTutor();
+        $this->get('/estudiantes/'.$juan->id)->assertSee('Últimas tutorías')->assertSee('Acordó reducir a 15 créditos');
 
+        $this->signInSeeded(Role::Coordinacion);
+        $this->get('/estudiantes/'.$juan->id)->assertSee('Últimas tutorías')->assertSee('Acordó reducir a 15 créditos');
+
+        // profesor@ no tiene vínculo con Juan: ni la ficha ni las notas.
         $this->signInSeeded(Role::Profesor);
-        $this->get('/estudiantes/'.$juan->id)->assertOk()->assertDontSee('Últimas tutorías')->assertDontSee('Acordó reducir a 15 créditos')->assertDontSee('Seguimiento a carga académica');
+        $this->get('/estudiantes/'.$juan->id)->assertForbidden();
     }
 }

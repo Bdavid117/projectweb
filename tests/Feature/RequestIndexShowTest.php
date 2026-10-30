@@ -82,12 +82,20 @@ class RequestIndexShowTest extends TestCase
         $this->get('/solicitudes?q=Laura')->assertSee('Cancelación de asignatura')->assertDontSee('Gómez Ruiz, Laura');
     }
 
-    public function test_professor_and_tutor_see_all_without_the_create_button(): void
+    public function test_a_professor_sees_only_the_requests_of_their_tutored_students_and_never_the_create_button(): void
     {
-        foreach ([Role::Profesor, Role::Tutor] as $role) {
-            $this->signInSeeded($role);
-            $this->get('/solicitudes')->assertOk()->assertSee('Gómez Ruiz, Laura')->assertSee('Pérez Rojas, Juan Sebastián')->assertDontSee('Nueva solicitud');
-        }
+        // Ruiz Salazar no tiene tutor: su solicitud no debe verla ningún profesor.
+        $this->makeRequest(Student::where('codigo', '2019087')->firstOrFail());
+
+        $this->signInSeededTutor();
+        $this->get('/solicitudes')->assertOk()
+            ->assertSee('Gómez Ruiz, Laura')->assertSee('Pérez Rojas, Juan Sebastián')
+            ->assertDontSee('Ruiz Salazar, Andrés')->assertDontSee('Nueva solicitud');
+
+        $this->signInSeeded(Role::Profesor);
+        $this->get('/solicitudes')->assertOk()
+            ->assertDontSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián')->assertDontSee('Ruiz Salazar, Andrés')
+            ->assertDontSee('Nueva solicitud');
     }
 
     public function test_filters_by_status_type_and_search(): void
@@ -135,17 +143,22 @@ class RequestIndexShowTest extends TestCase
         $response->assertSee('Código 2020123');
     }
 
-    public function test_the_owner_staff_can_open_but_another_student_cannot(): void
+    public function test_the_owner_coordination_and_the_linked_professor_can_open_but_nobody_else(): void
     {
         $request = $this->juanRequest();
 
         $this->signInSeeded(Role::Estudiante);
         $this->get('/solicitudes/'.$request->id)->assertOk()->assertDontSee('Ver ficha del estudiante');
 
-        foreach ([Role::Profesor, Role::Tutor] as $role) {
-            $this->signInSeeded($role);
-            $this->get('/solicitudes/'.$request->id)->assertOk();
-        }
+        $this->signInSeeded(Role::Coordinacion);
+        $this->get('/solicitudes/'.$request->id)->assertOk();
+
+        // Juan es tutorado de Carlos Pineda; profesor@ no tiene vínculo con él.
+        $this->signInSeededTutor();
+        $this->get('/solicitudes/'.$request->id)->assertOk();
+
+        $this->signInSeeded(Role::Profesor);
+        $this->get('/solicitudes/'.$request->id)->assertForbidden();
 
         $this->signInAs('est2021045@unal.edu.co');
         $this->get('/solicitudes/'.$request->id)->assertForbidden();
