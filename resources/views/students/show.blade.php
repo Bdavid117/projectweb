@@ -33,8 +33,21 @@
             </div>
         </div>
 
-        <div x-data="tabs(@js(array_keys($tabs)))" class="flex flex-col gap-4">
-            <div role="tablist" aria-label="Secciones de la ficha del estudiante" class="flex gap-1 overflow-x-auto border-b border-[var(--border-subtle)]">
+        <div x-data="tabs(@js(array_keys($tabs)), @js($tabs))" class="flex flex-col gap-4">
+            {{-- Móvil: las pestañas se colapsan en un menú «Más» (issue #15). --}}
+            <div class="relative sm:hidden" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
+                <button type="button" class="flex w-full items-center justify-between gap-2 rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-[10px] text-sm font-medium text-[var(--text-primary)]" aria-haspopup="true" :aria-expanded="open" @click="open = !open">
+                    <span>Sección: <span class="font-semibold" x-text="activeLabel()"></span></span>
+                    <x-ui-icon name="chevron-down" class="h-4 w-4 shrink-0 text-[var(--color-neutral-400)] transition-transform" ::class="open && 'rotate-180'" />
+                </button>
+                <div x-show="open" x-cloak x-transition.origin.top class="absolute left-0 right-0 z-30 mt-1 flex flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-lg">
+                    @foreach($tabs as $key => $label)
+                        <button type="button" @click="select('{{ $key }}'); open = false" class="w-full px-4 py-[10px] text-left text-sm hover:bg-[var(--surface-page)]" :class="active === '{{ $key }}' ? 'font-semibold text-[var(--color-primary-700)]' : 'text-[var(--text-secondary)]'">{{ $label }}</button>
+                    @endforeach
+                </div>
+            </div>
+
+            <div role="tablist" aria-label="Secciones de la ficha del estudiante" class="hidden gap-1 overflow-x-auto border-b border-[var(--border-subtle)] sm:flex">
                 @foreach($tabs as $key => $label)
                     <button
                         type="button"

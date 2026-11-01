@@ -19,9 +19,15 @@ Alpine.data('notifications', (url) => ({
 }));
 
 // Pestañas accesibles (RNF-12): roles tab/tablist/tabpanel con navegación por teclado.
-Alpine.data('tabs', (keys, initial = null) => ({
+// `labels` (clave → etiqueta) alimenta el menú «Más» en móvil.
+Alpine.data('tabs', (keys, labels = {}, initial = null) => ({
     keys,
+    labels,
     active: initial ?? keys[0],
+
+    activeLabel() {
+        return this.labels[this.active] ?? '';
+    },
 
     select(key) {
         this.active = key;
