@@ -224,6 +224,44 @@
                 </div>
             </div>
 
+            {{-- Solicitudes --}}
+            <div role="tabpanel" id="panel-solicitudes" aria-labelledby="tab-solicitudes" tabindex="0" x-show="active === 'solicitudes'" class="outline-none">
+                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+                    <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
+                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Solicitudes ante el comité</h2>
+                        <p class="text-xs text-[var(--text-muted)]">Radicadas por el estudiante, con su estado actual · RF-08</p>
+                    </div>
+                    <div class="overflow-x-auto border-t border-[var(--border-subtle)]">
+                        @if(empty($requests))
+                            <p class="px-4 py-6 text-sm text-[var(--text-muted)]">Sin solicitudes radicadas.</p>
+                        @else
+                            <table class="w-full min-w-[560px] text-left text-sm">
+                                <thead>
+                                    <tr class="text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
+                                        <th scope="col" class="px-4 py-[11px] font-semibold">RADICADA</th>
+                                        <th scope="col" class="px-4 py-[11px] font-semibold">TIPO</th>
+                                        <th scope="col" class="px-4 py-[11px] font-semibold">PERIODO</th>
+                                        <th scope="col" class="px-4 py-[11px] font-semibold">ESTADO</th>
+                                        <th scope="col" class="px-4 py-[11px] font-semibold"><span class="sr-only">Acciones</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($requests as $row)
+                                        <tr class="border-t border-[var(--border-subtle)]">
+                                            <td class="px-4 py-[11px] text-[var(--text-muted)]">{{ $row['date'] }}</td>
+                                            <td class="px-4 py-[11px] font-semibold text-[var(--text-primary)]">{{ $row['type'] }}</td>
+                                            <td class="px-4 py-[11px] text-[var(--text-secondary)]">{{ $row['period'] }}</td>
+                                            <td class="px-4 py-[11px]"><x-status-badge :text="$row['status']" :tone="$row['tone']" /></td>
+                                            <td class="px-4 py-[11px]"><a href="{{ $row['url'] }}" class="text-sm font-semibold text-[var(--color-primary-600)]">Ver detalle</a></td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
             @if($showTutorials)
             {{-- Tutorías --}}
             <div role="tabpanel" id="panel-tutorias" aria-labelledby="tab-tutorias" tabindex="0" x-show="active === 'tutorias'" class="outline-none">

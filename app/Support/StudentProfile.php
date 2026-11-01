@@ -59,6 +59,7 @@ class StudentProfile
             'experiencias' => 'Experiencias',
             'trabajo-grado' => 'Trabajo de grado',
             'practica' => 'Práctica',
+            'solicitudes' => 'Solicitudes',
         ];
         if ($seesTutorships) {
             $tabs['tutorias'] = 'Tutorías';
