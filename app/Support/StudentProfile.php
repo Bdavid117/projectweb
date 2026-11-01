@@ -51,16 +51,36 @@ class StudentProfile
         $seesTutorships = in_array($viewer?->role, [Role::Profesor, Role::Coordinacion], true);
         $previous = $records->count() > 1 ? $records[$records->count() - 2] : null;
 
+        // Orden de la issue: General, Académica, Experiencias, Trabajo de grado, Práctica, [Solicitudes], [Tutorías].
+        $tabs = [
+            'general' => 'General',
+            'academica' => 'Académica',
+            'experiencias' => 'Experiencias',
+            'trabajo-grado' => 'Trabajo de grado',
+            'practica' => 'Práctica',
+        ];
+        if ($seesTutorships) {
+            $tabs['tutorias'] = 'Tutorías';
+        }
+
         return [
             'student' => self::header($student),
-            'tabs' => ['General', 'Académica', 'Experiencias', 'Trabajo de grado', 'Práctica', 'Solicitudes', 'Tutorías'],
+            'tabs' => $tabs,
             'papaChart' => $records->map(fn (AcademicRecord $r) => [
                 'period' => $r->term->codigo,
                 'value' => number_format((float) $r->papa, 1),
                 'height' => (int) round((float) $r->papa / 5 * self::PAPA_BAR_HEIGHT),
             ])->all(),
+            'academicRows' => $records->reverse()->values()->map(fn (AcademicRecord $r) => [
+                'period' => $r->term->codigo,
+                'papa' => number_format((float) $r->papa, 1),
+                'average' => $r->promedio_periodo !== null ? number_format((float) $r->promedio_periodo, 1) : '—',
+                'credits' => $r->creditos_cursados !== null ? $r->creditos_cursados.' de '.config('program.total_credits') : '—',
+                'advance' => (int) round((float) $r->porcentaje_avance),
+            ])->all(),
             'timeline' => self::timeline($student),
-            'processes' => self::processes($student),
+            'theses' => self::theses($student),
+            'internships' => self::internships($student),
             'progress' => [
                 'percent' => $latest ? (int) round((float) $latest->porcentaje_avance) : 0,
                 'details' => [
@@ -110,27 +130,30 @@ class StudentProfile
         })->all();
     }
 
-    private static function processes(Student $student): array
+    private static function theses(Student $student): array
     {
-        $processes = [];
-
-        foreach ($student->theses()->with(['director', 'term'])->get() as $thesis) {
+        return $student->theses()->with(['director', 'term'])->get()->map(function ($thesis) {
             [$status, $tone] = match ($thesis->estado) {
                 'en_desarrollo' => ['En desarrollo', 'warning'],
                 'finalizado' => ['Finalizado', 'success'],
                 default => [ucfirst(str_replace('_', ' ', $thesis->estado)), 'info'],
             };
-            $processes[] = [
+
+            return [
                 'title' => 'Trabajo de grado · modalidad '.Labels::thesisModality($thesis->modalidad),
                 'meta' => 'Director: '.($thesis->director ? 'Prof. '.$thesis->director->name : 'sin asignar').' · '.$thesis->term->codigo.'S',
                 'status' => $status,
                 'tone' => $tone,
             ];
-        }
+        })->all();
+    }
 
-        foreach ($student->internships()->with(['company', 'asesor'])->get() as $internship) {
+    private static function internships(Student $student): array
+    {
+        return $student->internships()->with(['company', 'asesor'])->get()->map(function ($internship) {
             $finished = $internship->fecha_fin && $internship->fecha_fin->isPast();
-            $processes[] = [
+
+            return [
                 'title' => 'Práctica empresarial · '.$internship->company->nombre,
                 'meta' => 'Asesor: '.($internship->asesor ? 'Prof. '.$internship->asesor->name : 'sin asignar')
                     .' · '.$internship->fecha_inicio->isoFormat('MMM YYYY').' – '
@@ -138,8 +161,6 @@ class StudentProfile
                 'status' => $finished ? 'Finalizada' : 'En curso',
                 'tone' => $finished ? 'success' : 'info',
             ];
-        }
-
-        return $processes;
+        })->all();
     }
 }

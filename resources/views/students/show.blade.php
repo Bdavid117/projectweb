@@ -1,5 +1,7 @@
-@php($ringCircumference = 2 * pi() * 58)
-@php($ringOffset = $ringCircumference * (1 - $progress['percent'] / 100))
+@php
+    $ringCircumference = 2 * pi() * 58;
+    $ringOffset = $ringCircumference * (1 - $progress['percent'] / 100);
+@endphp
 
 <x-layouts.app :user="$user" :nav-groups="$navGroups" title="{{ $student['name'] }} · Trayectoria Estudiantil">
     <div class="flex flex-col gap-4 p-4 sm:p-7">
@@ -31,45 +33,129 @@
             </div>
         </div>
 
-        <div class="flex gap-1 overflow-x-auto border-b border-[var(--border-subtle)]">
-            @foreach($tabs as $index => $tab)
-                <span class="shrink-0 border-b-2 px-[14px] py-[10px] text-sm font-medium {{ $index === 0 ? 'border-[var(--color-primary-600)] text-[var(--color-primary-700)]' : 'border-transparent text-[var(--text-secondary)]' }}">
-                    {{ $tab }}
-                </span>
-            @endforeach
-        </div>
+        <div x-data="tabs(@js(array_keys($tabs)))" class="flex flex-col gap-4">
+            <div role="tablist" aria-label="Secciones de la ficha del estudiante" class="flex gap-1 overflow-x-auto border-b border-[var(--border-subtle)]">
+                @foreach($tabs as $key => $label)
+                    <button
+                        type="button"
+                        role="tab"
+                        id="tab-{{ $key }}"
+                        x-ref="tab-{{ $key }}"
+                        aria-controls="panel-{{ $key }}"
+                        :aria-selected="active === '{{ $key }}' ? 'true' : 'false'"
+                        :tabindex="active === '{{ $key }}' ? 0 : -1"
+                        @click="select('{{ $key }}')"
+                        @keydown="onKey($event, '{{ $key }}')"
+                        class="shrink-0 border-b-2 px-[14px] py-[10px] text-sm font-medium outline-none focus-visible:rounded-t-[var(--radius-sm)] focus-visible:bg-[var(--surface-sunken)]"
+                        :class="active === '{{ $key }}' ? 'border-[var(--color-primary-600)] text-[var(--color-primary-700)]' : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'"
+                    >{{ $label }}</button>
+                @endforeach
+            </div>
 
-        <div class="flex flex-col gap-4 lg:flex-row">
-            <div class="flex flex-1 flex-col gap-4">
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+            {{-- General --}}
+            <div role="tabpanel" id="panel-general" aria-labelledby="tab-general" tabindex="0" x-show="active === 'general'" class="flex flex-col gap-4 outline-none lg:flex-row">
+                <div class="flex flex-1 flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
                     <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
                         <h2 class="text-sm font-semibold text-[var(--text-primary)]">Evolución del PAPA por periodo</h2>
                         <p class="text-xs text-[var(--text-muted)]">Historia conservada por periodo, no sobrescrita · RNF-08</p>
                     </div>
                     <div class="flex items-end gap-[14px] overflow-x-auto border-t border-[var(--border-subtle)] px-4 py-4">
-                        @if(empty($papaChart))
-                            <p class="text-sm text-[var(--text-muted)]">Sin historia académica registrada.</p>
-                        @endif
-                        @foreach($papaChart as $bar)
+                        @forelse($papaChart as $bar)
                             <div class="flex min-w-[36px] flex-1 flex-col items-center justify-end gap-[7px]">
                                 <span class="text-xs font-medium text-[var(--text-secondary)]">{{ $bar['value'] }}</span>
                                 <div class="w-full rounded-t-[var(--radius-sm)] bg-[var(--color-primary-500)]" style="height: {{ $bar['height'] }}px"></div>
                                 <span class="text-xs text-[var(--text-muted)]">{{ $bar['period'] }}</span>
                             </div>
-                        @endforeach
+                        @empty
+                            <p class="text-sm text-[var(--text-muted)]">Sin historia académica registrada.</p>
+                        @endforelse
                     </div>
                 </div>
 
+                <div class="flex flex-col gap-4 lg:w-[340px]">
+                    <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+                        <div class="px-4 pb-[10px] pt-[14px]">
+                            <h2 class="text-sm font-semibold text-[var(--text-primary)]">Avance en el plan de estudios</h2>
+                        </div>
+                        <div class="flex flex-col items-center gap-[18px] border-t border-[var(--border-subtle)] px-4 pb-[18px] pt-1">
+                            <svg width="132" height="132" viewBox="0 0 132 132" class="shrink-0" role="img" aria-label="Avance del {{ $progress['percent'] }} por ciento del plan de estudios">
+                                <circle cx="66" cy="66" r="58" fill="none" stroke="var(--color-neutral-200)" stroke-width="12" />
+                                <circle
+                                    cx="66" cy="66" r="58" fill="none" stroke="var(--color-primary-600)" stroke-width="12"
+                                    stroke-linecap="round" transform="rotate(-90 66 66)"
+                                    stroke-dasharray="{{ $ringCircumference }}" stroke-dashoffset="{{ $ringOffset }}"
+                                />
+                                <text x="66" y="62" text-anchor="middle" class="fill-[var(--text-primary)] text-[22px] font-bold">{{ $progress['percent'] }}%</text>
+                                <text x="66" y="80" text-anchor="middle" class="fill-[var(--text-muted)] text-[11px]">cursado</text>
+                            </svg>
+                            <div class="flex w-full flex-col gap-[9px]">
+                                @foreach($progress['details'] as $detail)
+                                    <div class="flex items-center gap-2">
+                                        <span class="flex-1 text-sm text-[var(--text-secondary)]">{{ $detail['label'] }}</span>
+                                        <span class="text-sm font-medium text-[var(--text-primary)]">{{ $detail['value'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-[11px] rounded-[var(--radius-lg)] border border-[var(--color-restricted)] bg-[var(--color-restricted-bg)] p-[14px]">
+                        <x-ui-icon name="lock" class="h-[17px] w-[17px] shrink-0 text-[var(--color-restricted)]" />
+                        <div class="flex flex-col gap-[3px]">
+                            <p class="text-sm font-semibold text-[var(--color-restricted)]">Información restringida</p>
+                            <p class="text-xs text-[var(--text-secondary)]">El perfil psicosocial y de salud solo es visible para Coordinación. Cada consulta queda auditada (RNF-05, RNF-07).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Académica --}}
+            <div role="tabpanel" id="panel-academica" aria-labelledby="tab-academica" tabindex="0" x-show="active === 'academica'" class="outline-none">
+                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+                    <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
+                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Historia académica por periodo</h2>
+                        <p class="text-xs text-[var(--text-muted)]">PAPA, promedio del periodo y avance en créditos · RF-16</p>
+                    </div>
+                    <div class="overflow-x-auto border-t border-[var(--border-subtle)]">
+                        @if(empty($academicRows))
+                            <p class="px-4 py-6 text-sm text-[var(--text-muted)]">Sin historia académica registrada.</p>
+                        @else
+                            <table class="w-full min-w-[520px] text-left text-sm">
+                                <thead>
+                                    <tr class="text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
+                                        <th scope="col" class="px-4 py-[11px] font-semibold">PERIODO</th>
+                                        <th scope="col" class="px-4 py-[11px] font-semibold">PAPA</th>
+                                        <th scope="col" class="px-4 py-[11px] font-semibold">PROMEDIO</th>
+                                        <th scope="col" class="px-4 py-[11px] font-semibold">CRÉDITOS</th>
+                                        <th scope="col" class="px-4 py-[11px] font-semibold">AVANCE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($academicRows as $row)
+                                        <tr class="border-t border-[var(--border-subtle)]">
+                                            <td class="px-4 py-[11px] font-semibold text-[var(--text-primary)]">{{ $row['period'] }}</td>
+                                            <td class="px-4 py-[11px] text-[var(--text-secondary)]">{{ $row['papa'] }}</td>
+                                            <td class="px-4 py-[11px] text-[var(--text-secondary)]">{{ $row['average'] }}</td>
+                                            <td class="px-4 py-[11px] text-[var(--text-secondary)]">{{ $row['credits'] }}</td>
+                                            <td class="px-4 py-[11px] text-[var(--text-secondary)]">{{ $row['advance'] }}%</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Experiencias --}}
+            <div role="tabpanel" id="panel-experiencias" aria-labelledby="tab-experiencias" tabindex="0" x-show="active === 'experiencias'" class="outline-none">
                 <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
                     <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
                         <h2 class="text-sm font-semibold text-[var(--text-primary)]">Línea de tiempo de experiencias formativas</h2>
                         <p class="text-xs text-[var(--text-muted)]">Registradas y validadas por Coordinación · RF-30, RF-33</p>
                     </div>
                     <div class="flex flex-col border-t border-[var(--border-subtle)] px-4 pb-4">
-                        @if(empty($timeline))
-                            <p class="py-3 text-sm text-[var(--text-muted)]">Sin experiencias registradas.</p>
-                        @endif
-                        @foreach($timeline as $item)
+                        @forelse($timeline as $item)
                             <div class="flex gap-3 py-2">
                                 <div class="flex w-7 flex-col items-center">
                                     <div class="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-[var(--surface-sunken)]">
@@ -87,19 +173,21 @@
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <p class="py-3 text-sm text-[var(--text-muted)]">Sin experiencias registradas.</p>
+                        @endforelse
                     </div>
                 </div>
+            </div>
 
+            {{-- Trabajo de grado --}}
+            <div role="tabpanel" id="panel-trabajo-grado" aria-labelledby="tab-trabajo-grado" tabindex="0" x-show="active === 'trabajo-grado'" class="outline-none">
                 <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
                     <div class="px-4 pb-[10px] pt-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Procesos en curso</h2>
+                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Trabajo de grado</h2>
                     </div>
                     <div class="flex flex-col gap-[10px] border-t border-[var(--border-subtle)] p-4">
-                        @if(empty($processes))
-                            <p class="text-sm text-[var(--text-muted)]">Sin procesos en curso.</p>
-                        @endif
-                        @foreach($processes as $process)
+                        @forelse($theses as $process)
                             <div class="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3">
                                 <div class="flex flex-1 flex-col gap-[3px]">
                                     <p class="text-sm font-medium text-[var(--text-primary)]">{{ $process['title'] }}</p>
@@ -107,49 +195,45 @@
                                 </div>
                                 <x-status-badge :text="$process['status']" :tone="$process['tone']" />
                             </div>
-                        @endforeach
+                        @empty
+                            <p class="text-sm text-[var(--text-muted)]">Sin trabajo de grado registrado.</p>
+                        @endforelse
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-4 lg:w-[340px]">
+            {{-- Práctica --}}
+            <div role="tabpanel" id="panel-practica" aria-labelledby="tab-practica" tabindex="0" x-show="active === 'practica'" class="outline-none">
                 <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
                     <div class="px-4 pb-[10px] pt-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Avance en el plan de estudios</h2>
-                    </div>
-                    <div class="flex flex-col items-center gap-[18px] border-t border-[var(--border-subtle)] px-4 pb-[18px] pt-1">
-                        <svg width="132" height="132" viewBox="0 0 132 132" class="shrink-0">
-                            <circle cx="66" cy="66" r="58" fill="none" stroke="var(--color-neutral-200)" stroke-width="12" />
-                            <circle
-                                cx="66" cy="66" r="58" fill="none" stroke="var(--color-primary-600)" stroke-width="12"
-                                stroke-linecap="round" transform="rotate(-90 66 66)"
-                                stroke-dasharray="{{ $ringCircumference }}" stroke-dashoffset="{{ $ringOffset }}"
-                            />
-                            <text x="66" y="62" text-anchor="middle" class="fill-[var(--text-primary)] text-[22px] font-bold">{{ $progress['percent'] }}%</text>
-                            <text x="66" y="80" text-anchor="middle" class="fill-[var(--text-muted)] text-[11px]">cursado</text>
-                        </svg>
-                        <div class="flex w-full flex-col gap-[9px]">
-                            @foreach($progress['details'] as $detail)
-                                <div class="flex items-center gap-2">
-                                    <span class="flex-1 text-sm text-[var(--text-secondary)]">{{ $detail['label'] }}</span>
-                                    <span class="text-sm font-medium text-[var(--text-primary)]">{{ $detail['value'] }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-
-                @if($showTutorials)
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Últimas tutorías</h2>
-                        <p class="text-xs text-[var(--text-muted)]">Visibles para tutores y Coordinación</p>
+                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Práctica empresarial</h2>
                     </div>
                     <div class="flex flex-col gap-[10px] border-t border-[var(--border-subtle)] p-4">
-                        @if(empty($tutorials))
-                            <p class="text-sm text-[var(--text-muted)]">Sin tutorías registradas.</p>
-                        @endif
-                        @foreach($tutorials as $tutorial)
+                        @forelse($internships as $process)
+                            <div class="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3">
+                                <div class="flex flex-1 flex-col gap-[3px]">
+                                    <p class="text-sm font-medium text-[var(--text-primary)]">{{ $process['title'] }}</p>
+                                    <p class="text-xs text-[var(--text-muted)]">{{ $process['meta'] }}</p>
+                                </div>
+                                <x-status-badge :text="$process['status']" :tone="$process['tone']" />
+                            </div>
+                        @empty
+                            <p class="text-sm text-[var(--text-muted)]">Sin práctica registrada.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            @if($showTutorials)
+            {{-- Tutorías --}}
+            <div role="tabpanel" id="panel-tutorias" aria-labelledby="tab-tutorias" tabindex="0" x-show="active === 'tutorias'" class="outline-none">
+                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+                    <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
+                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Tutorías</h2>
+                        <p class="text-xs text-[var(--text-muted)]">Visibles para Coordinación y el profesor con vínculo vigente</p>
+                    </div>
+                    <div class="flex flex-col gap-[10px] border-t border-[var(--border-subtle)] p-4">
+                        @forelse($tutorials as $tutorial)
                             <div class="flex flex-col gap-1 rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-[11px]">
                                 <span class="text-xs text-[var(--text-muted)]">{{ $tutorial['date'] }}</span>
                                 <span class="text-sm font-medium text-[var(--text-primary)]">{{ $tutorial['reason'] }}</span>
@@ -158,19 +242,13 @@
                                     <a href="{{ $tutorial['editUrl'] }}" class="text-xs font-semibold text-[var(--color-primary-600)]">Editar</a>
                                 @endif
                             </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-
-                <div class="flex gap-[11px] rounded-[var(--radius-lg)] border border-[var(--color-restricted)] bg-[var(--color-restricted-bg)] p-[14px]">
-                    <x-ui-icon name="lock" class="h-[17px] w-[17px] shrink-0 text-[var(--color-restricted)]" />
-                    <div class="flex flex-col gap-[3px]">
-                        <p class="text-sm font-semibold text-[var(--color-restricted)]">Información restringida</p>
-                        <p class="text-xs text-[var(--text-secondary)]">El perfil psicosocial y de salud solo es visible para Coordinación. Cada consulta queda auditada (RNF-05, RNF-07).</p>
+                        @empty
+                            <p class="text-sm text-[var(--text-muted)]">Sin tutorías registradas.</p>
+                        @endforelse
                     </div>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </x-layouts.app>
