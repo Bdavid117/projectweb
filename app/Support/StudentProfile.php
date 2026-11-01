@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\Role;
 use App\Models\AcademicRecord;
 use App\Models\AcademicTerm;
+use App\Models\CommitteeRequest;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -81,6 +82,7 @@ class StudentProfile
             'timeline' => self::timeline($student),
             'theses' => self::theses($student),
             'internships' => self::internships($student),
+            'requests' => self::requests($student),
             'progress' => [
                 'percent' => $latest ? (int) round((float) $latest->porcentaje_avance) : 0,
                 'details' => [
@@ -128,6 +130,24 @@ class StudentProfile
                 },
             ];
         })->all();
+    }
+
+    /** Solicitudes del estudiante ante el comité, para la pestaña Solicitudes (RF-08). */
+    private static function requests(Student $student): array
+    {
+        return $student->requests()->with(['type', 'term'])->latest('fecha_radicacion')->latest('id')->get()
+            ->map(function (CommitteeRequest $request) {
+                [$status, $tone] = Labels::requestStatus($request);
+
+                return [
+                    'date' => Labels::date($request->fecha_radicacion),
+                    'type' => $request->type->nombre,
+                    'period' => $request->term->codigo,
+                    'status' => $status,
+                    'tone' => $tone,
+                    'url' => route('requests.show', $request),
+                ];
+            })->all();
     }
 
     private static function theses(Student $student): array
