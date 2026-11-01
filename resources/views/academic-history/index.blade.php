@@ -8,6 +8,40 @@
         </div>
 
         @if($records->count() > 0)
+        <div class="grid gap-4 lg:grid-cols-2">
+            <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+                <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
+                    <h2 class="text-sm font-semibold text-[var(--text-primary)]">Evolución del PAPA por periodo</h2>
+                    <p class="text-xs text-[var(--text-muted)]">Escala de 0 a 5 · RF-16</p>
+                </div>
+                <div class="flex items-end gap-[14px] overflow-x-auto border-t border-[var(--border-subtle)] px-4 py-4" style="min-height: 180px">
+                    @foreach($papaSeries as $bar)
+                        <div class="flex min-w-[36px] flex-1 flex-col items-center justify-end gap-[7px]">
+                            <span class="text-xs font-medium text-[var(--text-secondary)]">{{ $bar['label'] }}</span>
+                            <div class="w-full rounded-t-[var(--radius-sm)] bg-[var(--color-primary-500)]" style="height: {{ $bar['height'] }}px"></div>
+                            <span class="text-xs text-[var(--text-muted)]">{{ $bar['period'] }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+                <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
+                    <h2 class="text-sm font-semibold text-[var(--text-primary)]">Avance en créditos por periodo</h2>
+                    <p class="text-xs text-[var(--text-muted)]">Porcentaje del plan cursado acumulado · RF-16</p>
+                </div>
+                <div class="flex items-end gap-[14px] overflow-x-auto border-t border-[var(--border-subtle)] px-4 py-4" style="min-height: 180px">
+                    @foreach($creditSeries as $bar)
+                        <div class="flex min-w-[36px] flex-1 flex-col items-center justify-end gap-[7px]">
+                            <span class="text-xs font-medium text-[var(--text-secondary)]">{{ $bar['label'] }}</span>
+                            <div class="w-full rounded-t-[var(--radius-sm)] bg-[var(--color-accent-500)]" style="height: {{ $bar['height'] }}px"></div>
+                            <span class="text-xs text-[var(--text-muted)]">{{ $bar['period'] }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
         <div class="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] overflow-hidden">
             <table class="w-full text-left text-sm">
                 <thead>
