@@ -7,7 +7,7 @@
     $retry = is_numeric($retry) ? (int) $retry : null;
 @endphp
 
-<x-layouts.error code="429" title="Demasiados intentos" icon="circle-alert" tone="warning">
+<x-layouts.error code="429" title="Demasiados intentos" tone="warning">
     <p>Hizo demasiados intentos seguidos. Para proteger las cuentas, el sistema los bloquea por un momento.</p>
 
     @if($retry)

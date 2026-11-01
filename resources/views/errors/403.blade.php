@@ -1,4 +1,4 @@
-<x-layouts.error code="403" title="No tiene acceso a esta información" icon="lock" tone="danger">
+<x-layouts.error code="403" title="No tiene acceso a esta información" tone="danger">
     <p>Su cuenta no tiene permiso para ver esta página o este recurso. Si cree que debería tenerlo, comuníquese con la coordinación del programa.</p>
 
     @if(auth()->user()?->role === \App\Enums\Role::Profesor)

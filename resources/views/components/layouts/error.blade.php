@@ -1,9 +1,10 @@
-@props(['code', 'title', 'icon' => 'triangle-alert', 'tone' => 'muted'])
+@props(['code', 'title', 'tone' => 'muted'])
 
 @php
     $account = auth()->user();
 
     // Clases completas por tono (nunca concatenar variables en el nombre de la clase).
+    // Sin íconos: las páginas de error solo cargan el CSS para ser robustas (útiles también en 500/503).
     $toneClasses = match ($tone) {
         'danger' => 'bg-[var(--color-danger-bg)] text-[var(--color-danger)]',
         'warning' => 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
@@ -40,10 +41,7 @@
             </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="flex items-center gap-1 rounded-[var(--radius-md)] px-2 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]" aria-label="Cerrar sesión">
-                    <x-ui-icon name="log-out" class="h-4 w-4" />
-                    <span>Salir</span>
-                </button>
+                <button type="submit" class="rounded-[var(--radius-md)] px-2 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]">Salir</button>
             </form>
         @else
             <a href="{{ route('login.show') }}" class="rounded-[var(--radius-md)] px-2 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]">Iniciar sesión</a>
@@ -52,12 +50,7 @@
 
     <main class="flex flex-1 items-center justify-center p-4">
         <div class="flex w-full max-w-[480px] flex-col gap-4 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8">
-            <div class="flex items-center gap-3">
-                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full {{ $toneClasses }}">
-                    <x-ui-icon :name="$icon" class="h-[22px] w-[22px]" />
-                </span>
-                <span class="text-sm font-semibold text-[var(--text-muted)]">Error {{ $code }}</span>
-            </div>
+            <span class="inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold {{ $toneClasses }}">Error {{ $code }}</span>
 
             <h1 class="text-xl font-semibold text-[var(--text-primary)]">{{ $title }}</h1>
 
