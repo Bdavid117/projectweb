@@ -51,7 +51,8 @@ class StudentProfileTest extends TestCase
         $response->assertSee('Sin tutor asignado');
         $response->assertSee('Sin matrícula registrada');
         $response->assertSee('Sin experiencias registradas.');
-        $response->assertSee('Sin procesos en curso.');
+        $response->assertSee('Sin trabajo de grado registrado.');
+        $response->assertSee('Sin práctica registrada.');
         $response->assertSee('Sin tutorías registradas.');
     }
 
@@ -90,10 +91,10 @@ class StudentProfileTest extends TestCase
         $juan = Student::where('codigo', '2020123')->firstOrFail();
 
         $this->signInSeededTutor();
-        $this->get('/estudiantes/'.$juan->id)->assertSee('Últimas tutorías')->assertSee('Acordó reducir a 15 créditos');
+        $this->get('/estudiantes/'.$juan->id)->assertSee('Tutorías')->assertSee('Acordó reducir a 15 créditos');
 
         $this->signInSeeded(Role::Coordinacion);
-        $this->get('/estudiantes/'.$juan->id)->assertSee('Últimas tutorías')->assertSee('Acordó reducir a 15 créditos');
+        $this->get('/estudiantes/'.$juan->id)->assertSee('Tutorías')->assertSee('Acordó reducir a 15 créditos');
 
         // profesor@ no tiene vínculo con Juan: ni la ficha ni las notas.
         $this->signInSeeded(Role::Profesor);

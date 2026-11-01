@@ -6,7 +6,7 @@
     $canOpenProfile = $account?->role === \App\Enums\Role::Estudiante;
 @endphp
 
-<header class="relative z-40 flex h-[var(--topbar-height)] w-full shrink-0 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--surface-card)] px-5">
+<header class="sticky top-0 z-40 flex h-[var(--topbar-height)] w-full shrink-0 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--surface-card)] px-5">
     <button type="button" class="-ml-1 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--color-neutral-600)] hover:bg-[var(--surface-sunken)] sm:hidden" aria-label="Abrir menú de navegación" x-data @click="$dispatch('sidebar-toggle')">
         <x-ui-icon name="menu" class="h-5 w-5" />
     </button>
