@@ -17,14 +17,14 @@
             </div>
         @endif
 
-        <div class="grid items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_420px]">
+        <div class="grid grid-cols-1 items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_420px]">
             <form method="POST" action="{{ route('requests.store') }}" enctype="multipart/form-data" class="flex flex-col gap-6">
                 @csrf
                 @if($isStaff)
                     <x-form-field label="Código del estudiante *" name="codigo_estudiante" icon="user" placeholder="p. ej. 2020123" help="La solicitud se radica a nombre de este estudiante." />
                 @endif
 
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div class="flex flex-col gap-2">
                         <x-form-field label="Tipo de solicitud *" name="tipo" type="select" help="Cancelación de asignatura, reingreso, homologación, cupo de créditos…">
                             <option value="">Seleccione…</option>
@@ -77,7 +77,7 @@
             </form>
 
             <aside class="flex flex-col gap-6" aria-labelledby="despues">
-                <h2 id="despues" class="text-2xl font-semibold text-[var(--trz-tinta)] sm:text-[26px]">¿Qué pasa después?</h2>
+                <h2 id="despues" class="text-[22px] font-semibold text-[var(--trz-tinta)] sm:text-[26px]">¿Qué pasa después?</h2>
                 <x-thread :steps="collect($steps)->values()->map(fn ($s, $i) => ['title' => $s['number'].'. '.$s['title'], 'detail' => $s['detail'], 'done' => $i === 0])->all()" />
                 <p class="text-sm leading-relaxed text-[var(--trz-texto-2)]">Cada cambio de estado queda registrado con autor y fecha, de modo que la solicitud conserva su traza completa.</p>
             </aside>

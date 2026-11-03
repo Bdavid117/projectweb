@@ -46,7 +46,7 @@
             </div>
             <span class="sr-only">Error {{ $code }}</span>
 
-            <h1 class="text-2xl font-semibold leading-tight text-[var(--trz-tinta)] sm:text-[26px]">{{ $title }}</h1>
+            <h1 class="text-[22px] font-semibold leading-tight text-[var(--trz-tinta)] sm:text-[26px]">{{ $title }}</h1>
 
             <div class="flex flex-col gap-3 text-base leading-relaxed text-[var(--trz-texto-2)]">
                 {{ $slot }}

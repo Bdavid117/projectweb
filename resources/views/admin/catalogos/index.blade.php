@@ -7,7 +7,7 @@
             <p class="text-[15px] leading-snug text-[var(--trz-tinta)]">Solo lectura por ahora. Dar de alta, editar y dar de baja cada catálogo está planeado.</p>
         </div>
 
-        <div class="grid items-start gap-x-16 gap-y-8 lg:grid-cols-[220px_minmax(0,1fr)]">
+        <div class="grid grid-cols-1 items-start gap-x-16 gap-y-8 lg:grid-cols-[220px_minmax(0,1fr)]">
             <nav aria-label="Catálogos" class="flex gap-2 overflow-x-auto pb-1 lg:sticky lg:top-24 lg:flex-col lg:gap-0 lg:overflow-visible lg:border-l-[3px] lg:border-[var(--trz-linea)] lg:pb-0">
                 @foreach($catalogs as $catalog)
                     <a href="#{{ \Illuminate\Support\Str::slug($catalog['title']) }}" class="whitespace-nowrap rounded-full border-[1.5px] border-[var(--trz-borde-control)] px-4 py-2 text-[15px] font-semibold text-[var(--trz-tinta)] hover:bg-[var(--trz-hilo-fondo)] lg:rounded-none lg:border-0 lg:px-4 lg:py-2.5 lg:font-medium lg:text-[var(--trz-texto-2)]">{{ $catalog['title'] }}</a>
@@ -18,7 +18,7 @@
                 @foreach($catalogs as $catalog)
                     <section id="{{ \Illuminate\Support\Str::slug($catalog['title']) }}" class="flex flex-col gap-3.5" aria-labelledby="h-{{ \Illuminate\Support\Str::slug($catalog['title']) }}">
                         <div class="flex items-baseline gap-3">
-                            <h2 id="h-{{ \Illuminate\Support\Str::slug($catalog['title']) }}" class="text-2xl font-semibold text-[var(--trz-tinta)] sm:text-[26px]">{{ $catalog['title'] }}</h2>
+                            <h2 id="h-{{ \Illuminate\Support\Str::slug($catalog['title']) }}" class="text-[22px] font-semibold text-[var(--trz-tinta)] sm:text-[26px]">{{ $catalog['title'] }}</h2>
                             <span class="text-sm text-[var(--trz-texto-2)]">{{ count($catalog['rows']) }} {{ count($catalog['rows']) === 1 ? 'registro' : 'registros' }}</span>
                         </div>
                         <div class="overflow-x-auto">

@@ -13,7 +13,7 @@
             </div>
         @endif
 
-        <div class="grid items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_420px]">
+        <div class="grid grid-cols-1 items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_420px]">
             <div class="flex flex-col gap-6">
                 <form method="POST" action="{{ $editing ? route('experiencias.update', $experience) : route('experiencias.store') }}" class="flex flex-col gap-6"
                     x-data="{ typeId: @js((string) old('experience_type_id', $experience?->experience_type_id)), categories: @js($typeCategories), byCategory: @js($fieldsByCategory), fields() { return this.byCategory[this.categories[this.typeId]] ?? {}; }, has(f) { return f in this.fields(); }, required(f) { return this.fields()[f] === true; } }"
@@ -36,7 +36,7 @@
                     <x-form-field label="Nombre *" name="nombre" :value="$experience?->nombre" placeholder="Ej. Semillero de investigación SIGMA" />
                     <x-form-field label="Descripción" name="descripcion" type="textarea" :rows="4" :value="$experience?->descripcion" placeholder="Describa la experiencia formativa…" />
 
-                    <div class="grid gap-5 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <x-form-field label="Fecha de inicio *" name="fecha_inicio" type="date" :value="$experience?->fecha_inicio?->format('Y-m-d')" />
                         <x-form-field label="Fecha de fin" name="fecha_fin" type="date" :value="$experience?->fecha_fin?->format('Y-m-d')" help="Déjela vacía si sigue en curso" />
                     </div>
@@ -46,7 +46,7 @@
                             <h2 class="text-[22px] font-semibold text-[var(--trz-tinta)]">Datos adicionales de este tipo</h2>
                             <p class="text-sm leading-relaxed text-[var(--trz-texto-2)]">Según el tipo elegido se piden estos datos adicionales; los marcados como obligatorios deben completarse.</p>
                         </div>
-                        <div class="grid gap-5 sm:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                             <div x-show="has('alcance')" x-cloak class="flex flex-col gap-1.5">
                                 <x-form-field label="Alcance" name="alcance" :value="$experience?->alcance" placeholder="Ej. Nacional" />
                                 <p x-show="required('alcance')" x-cloak class="text-[13px] text-[var(--trz-texto-2)]">Obligatorio para este tipo</p>
@@ -88,7 +88,7 @@
             </div>
 
             <aside class="flex flex-col gap-5" aria-labelledby="estados">
-                <h2 id="estados" class="text-2xl font-semibold text-[var(--trz-tinta)] sm:text-[26px]">Qué pasa con la experiencia</h2>
+                <h2 id="estados" class="text-[22px] font-semibold text-[var(--trz-tinta)] sm:text-[26px]">Qué pasa con la experiencia</h2>
                 @foreach([['warning', 'Pendiente', $editing && $experience?->isRejected() ? 'Vuelve a la cola de Coordinación al guardar.' : 'Queda a la espera de Coordinación. Puede editarla.'], ['success', 'Validada', 'Coordinación la aprueba y ya no puede modificarla.'], ['danger', 'Rechazada', 'Verá el motivo. Al corregirla vuelve a quedar pendiente.']] as [$tone, $label, $detail])
                     <div class="flex flex-col gap-2 border-b border-[var(--trz-linea)] pb-4">
                         <div><x-status-badge :text="$label" :tone="$tone" /></div>

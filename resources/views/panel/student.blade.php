@@ -26,7 +26,7 @@
                 <x-journey :steps="$dashboard['journey']['steps']" :progress="$dashboard['journey']['progress']" class="pt-2" />
             </x-section>
 
-            <div class="grid items-start gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,1fr)_520px]">
+            <div class="grid grid-cols-1 items-start gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,1fr)_520px]">
                 <x-section title="Mis solicitudes recientes">
                     <x-slot:aside><x-link-arrow href="/solicitudes">Ver todas</x-link-arrow></x-slot:aside>
                     @forelse($dashboard['requests'] as $row)

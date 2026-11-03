@@ -2,16 +2,16 @@
     <x-page>
         <x-page-header title="Mi perfil" subtitle="Sus datos personales y de contacto, y su situación académica." />
 
-        <div class="grid items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_440px]">
+        <div class="grid grid-cols-1 items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_440px]">
             <form method="POST" action="{{ route('profile.update') }}" class="flex flex-col gap-6">
                 @csrf
                 @method('PUT')
                 <div class="flex flex-col gap-1.5">
-                    <h2 class="text-2xl font-semibold text-[var(--trz-tinta)] sm:text-[26px]">Información personal y de contacto</h2>
+                    <h2 class="text-[22px] font-semibold text-[var(--trz-tinta)] sm:text-[26px]">Información personal y de contacto</h2>
                     <p class="text-[15px] text-[var(--trz-texto-2)]">Cada cambio queda registrado en la bitácora. Los campos con * son obligatorios.</p>
                 </div>
 
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <x-form-field label="Nombre completo *" name="name" autocomplete="name" :value="$profile['name']" />
                     <x-form-field label="Correo electrónico *" name="email" type="email" autocomplete="email" :value="$profile['email']" />
                     <x-form-field label="Teléfono" name="telefono" autocomplete="tel" :value="$contact?->telefono" placeholder="Ej. 300 123 4567" />
@@ -19,7 +19,7 @@
                 </div>
                 <x-form-field label="Dirección" name="direccion" autocomplete="street-address" :value="$contact?->direccion" />
 
-                <dl class="grid gap-5 border-y border-[var(--trz-linea)] py-4 sm:grid-cols-2">
+                <dl class="grid grid-cols-1 gap-5 border-y border-[var(--trz-linea)] py-4 sm:grid-cols-2">
                     <div class="flex flex-col gap-1">
                         <dt class="text-sm font-semibold text-[var(--trz-tinta)]">Rol</dt>
                         <dd class="text-base text-[var(--trz-texto-2)]">{{ $profile['role'] }}</dd>
