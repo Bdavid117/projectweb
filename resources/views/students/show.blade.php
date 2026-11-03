@@ -1,305 +1,250 @@
-@php
-    $ringCircumference = 2 * pi() * 58;
-    $ringOffset = $ringCircumference * (1 - $progress['percent'] / 100);
-@endphp
-
 <x-layouts.app :user="$user" :nav-groups="$navGroups" title="{{ $student['name'] }} · Trayectoria Estudiantil">
-    <div class="flex flex-col gap-4 p-4 sm:p-7">
-        <div class="flex items-center gap-[6px] text-sm text-[var(--text-secondary)]">
-            <a href="/panel">Inicio</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
-            <a href="/estudiantes">Estudiantes</a>
-            <x-ui-icon name="chevron-right" class="h-[13px] w-[13px]" />
-            <span class="text-[var(--text-primary)]">{{ $student['name'] }}</span>
-        </div>
+    <x-page class="print:gap-6 print:px-0 print:pt-0">
+        <div class="flex flex-col gap-6">
+            <x-back-link href="/estudiantes" class="print:hidden">Estudiantes</x-back-link>
 
-        <div class="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[18px] sm:flex-row sm:items-center">
-            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary-100)] text-lg font-semibold text-[var(--color-primary-700)]">
-                {{ $student['initials'] }}
-            </div>
-            <div class="flex flex-1 flex-col gap-[6px]">
-                <h1 class="text-xl font-semibold text-[var(--text-primary)]">{{ $student['name'] }}</h1>
-                <div class="flex flex-wrap gap-2">
-                    @foreach([$student['code'], $student['cohort'], $student['enrollment'], $student['tutor']] as $chip)
-                        <span class="rounded-full bg-[var(--surface-sunken)] px-[9px] py-1 text-xs text-[var(--text-secondary)]">{{ $chip }}</span>
-                    @endforeach
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
+                <div class="flex min-w-0 items-center gap-5">
+                    <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--trz-hilo-fondo)] text-lg font-bold text-[var(--trz-hilo-texto)] sm:h-16 sm:w-16" aria-hidden="true">{{ $student['initials'] }}</span>
+                    <div class="flex min-w-0 flex-col gap-2">
+                        <h1 class="text-[30px] font-semibold leading-[1.08] text-[var(--trz-tinta)] sm:text-[42px]">{{ $student['name'] }}</h1>
+                        <p class="text-[15px] leading-relaxed text-[var(--trz-texto-2)]">{{ $student['code'] }} · {{ $student['cohort'] }} · {{ $student['enrollment'] }} · {{ $student['tutor'] }}</p>
+                    </div>
+                </div>
+                <div class="flex shrink-0 flex-wrap items-center gap-3 print:hidden">
+                    <x-button variant="secondary" icon="printer" x-data @click="window.print()">Imprimir ficha</x-button>
+                    @if($canRegisterTutorship)
+                        <x-button variant="primary" icon="message-square" :href="route('tutorships.create', $student['id'])">Registrar tutoría</x-button>
+                    @endif
                 </div>
             </div>
-            <div class="flex flex-wrap gap-3">
-                <x-button variant="secondary">Exportar ficha</x-button>
-                @if($canRegisterTutorship)
-                    <x-button variant="primary" :href="route('tutorships.create', $student['id'])">Registrar tutoría</x-button>
-                @endif
+
+            <div class="flex flex-col gap-2.5 border-y border-[var(--trz-linea)] py-4 sm:flex-row sm:items-center sm:gap-8" role="group" aria-label="Avance en el plan de estudios">
+                <div class="flex items-baseline gap-3">
+                    <span class="font-display text-[44px] font-semibold leading-none text-[var(--trz-tinta)]">{{ $progress['percent'] }} %</span>
+                    <span class="text-sm text-[var(--trz-texto-2)]">{{ $progress['details'][0]['value'] }} créditos</span>
+                </div>
+                <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-[var(--trz-linea)]" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percent'] }}" aria-label="Avance del plan: {{ $progress['percent'] }} por ciento">
+                    <span class="block h-full rounded-full bg-[var(--trz-hilo)]" style="width: {{ $progress['percent'] }}%"></span>
+                </div>
             </div>
         </div>
 
-        <div x-data="tabs(@js(array_keys($tabs)), @js($tabs))" class="flex flex-col gap-4">
-            {{-- Móvil: las pestañas se colapsan en un menú «Más» (issue #15). --}}
-            <div class="relative sm:hidden" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
-                <button type="button" class="flex w-full items-center justify-between gap-2 rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-[10px] text-sm font-medium text-[var(--text-primary)]" aria-haspopup="true" :aria-expanded="open" @click="open = !open">
-                    <span>Sección: <span class="font-semibold" x-text="activeLabel()"></span></span>
-                    <x-ui-icon name="chevron-down" class="h-4 w-4 shrink-0 text-[var(--color-neutral-400)] transition-transform" ::class="open && 'rotate-180'" />
-                </button>
-                <div x-show="open" x-cloak x-transition.origin.top class="absolute left-0 right-0 z-30 mt-1 flex flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-lg">
+        <div x-data="tabs(@js(array_keys($tabs)), @js($tabs))" class="flex flex-col gap-8">
+            {{-- Índice de la ficha: chips que se deslizan en pantallas chicas. --}}
+            <div class="-mx-[18px] overflow-x-auto px-[18px] sm:mx-0 sm:px-0 print:hidden">
+                <div role="tablist" aria-label="Secciones de la ficha del estudiante" class="flex w-max gap-2.5 pb-1">
                     @foreach($tabs as $key => $label)
-                        <button type="button" @click="select('{{ $key }}'); open = false" class="w-full px-4 py-[10px] text-left text-sm hover:bg-[var(--surface-page)]" :class="active === '{{ $key }}' ? 'font-semibold text-[var(--color-primary-700)]' : 'text-[var(--text-secondary)]'">{{ $label }}</button>
+                        <button type="button" role="tab" id="tab-{{ $key }}" x-ref="tab-{{ $key }}" aria-controls="panel-{{ $key }}"
+                            :aria-selected="active === '{{ $key }}' ? 'true' : 'false'"
+                            :tabindex="active === '{{ $key }}' ? 0 : -1"
+                            @click="select('{{ $key }}')" @keydown="onKey($event, '{{ $key }}')"
+                            :class="active === '{{ $key }}' ? 'border-[var(--trz-hilo)] bg-[var(--trz-hilo-fondo)] text-[var(--trz-hilo-texto)]' : 'border-[var(--trz-borde-control)] bg-[var(--trz-superficie)] text-[var(--trz-tinta)] hover:bg-[var(--trz-hilo-fondo)]'"
+                            class="inline-flex min-h-11 items-center whitespace-nowrap rounded-full border-[1.5px] px-[18px] text-[15px] font-semibold">{{ $label }}</button>
                     @endforeach
                 </div>
             </div>
 
-            <div role="tablist" aria-label="Secciones de la ficha del estudiante" class="hidden gap-1 overflow-x-auto border-b border-[var(--border-subtle)] sm:flex">
-                @foreach($tabs as $key => $label)
-                    <button
-                        type="button"
-                        role="tab"
-                        id="tab-{{ $key }}"
-                        x-ref="tab-{{ $key }}"
-                        aria-controls="panel-{{ $key }}"
-                        :aria-selected="active === '{{ $key }}' ? 'true' : 'false'"
-                        :tabindex="active === '{{ $key }}' ? 0 : -1"
-                        @click="select('{{ $key }}')"
-                        @keydown="onKey($event, '{{ $key }}')"
-                        class="shrink-0 border-b-2 px-[14px] py-[10px] text-sm font-medium outline-none focus-visible:rounded-t-[var(--radius-sm)] focus-visible:bg-[var(--surface-sunken)]"
-                        :class="active === '{{ $key }}' ? 'border-[var(--color-primary-600)] text-[var(--color-primary-700)]' : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'"
-                    >{{ $label }}</button>
-                @endforeach
-            </div>
-
-            {{-- General --}}
-            <div role="tabpanel" id="panel-general" aria-labelledby="tab-general" tabindex="0" x-show="active === 'general'" class="flex flex-col gap-4 outline-none lg:flex-row">
-                <div class="flex flex-1 flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Evolución del PAPA por periodo</h2>
-                        <p class="text-xs text-[var(--text-muted)]">Historia conservada por periodo, no sobrescrita · RNF-08</p>
-                    </div>
-                    <div class="flex items-end gap-[14px] overflow-x-auto border-t border-[var(--border-subtle)] px-4 py-4">
-                        @forelse($papaChart as $bar)
-                            <div class="flex min-w-[36px] flex-1 flex-col items-center justify-end gap-[7px]">
-                                <span class="text-xs font-medium text-[var(--text-secondary)]">{{ $bar['value'] }}</span>
-                                <div class="w-full rounded-t-[var(--radius-sm)] bg-[var(--color-primary-500)]" style="height: {{ $bar['height'] }}px"></div>
-                                <span class="text-xs text-[var(--text-muted)]">{{ $bar['period'] }}</span>
-                            </div>
-                        @empty
-                            <p class="text-sm text-[var(--text-muted)]">Sin historia académica registrada.</p>
-                        @endforelse
-                    </div>
-                </div>
-
-                <div class="flex flex-col gap-4 lg:w-[340px]">
-                    <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                        <div class="px-4 pb-[10px] pt-[14px]">
-                            <h2 class="text-sm font-semibold text-[var(--text-primary)]">Avance en el plan de estudios</h2>
+            {{-- General: cuaderno de ruta + datos del avance --}}
+            <div role="tabpanel" id="panel-general" aria-labelledby="tab-general" tabindex="0" x-show="active === 'general'" class="grid items-start gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,1fr)_380px]">
+                <x-section title="Cuaderno de ruta" note="El PAPA de cada periodo, las experiencias y las tutorías en un solo eje. La historia se conserva por periodo, no se sobrescribe.">
+                    @if(empty($notebook))
+                        <x-empty-state kind="historia" title="Sin historia registrada" text="Cuando haya registros académicos, experiencias o tutorías, el cuaderno de ruta las mostrará aquí." />
+                    @else
+                        <div class="flex flex-col gap-7">
+                            @foreach($notebook as $group)
+                                <div class="flex flex-col gap-3">
+                                    <h3 class="font-sans text-[13px] font-bold tracking-[0.08em] text-[var(--trz-texto-2)]">{{ $group['period'] }}</h3>
+                                    <ul class="flex flex-col gap-3 border-l-[3px] border-[var(--trz-linea)] pl-5">
+                                        @foreach($group['items'] as $item)
+                                            <li class="relative flex items-start gap-3">
+                                                <x-stream-mark :kind="$item['kind']" class="mt-[5px] -ml-[30px] bg-clip-padding ring-[6px] ring-[var(--trz-papel)]" />
+                                                <span class="text-base leading-snug text-[var(--trz-tinta)]">{{ $item['text'] }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endforeach
+                            <p class="flex flex-wrap items-center gap-x-5 gap-y-1 text-[13px] text-[var(--trz-texto-2)]">
+                                <span class="inline-flex items-center gap-2"><x-stream-mark kind="academico" />Académico</span>
+                                <span class="inline-flex items-center gap-2"><x-stream-mark kind="experiencia" />Experiencia</span>
+                                @if($showTutorials)<span class="inline-flex items-center gap-2"><x-stream-mark kind="acompanamiento" />Acompañamiento</span>@endif
+                            </p>
                         </div>
-                        <div class="flex flex-col items-center gap-[18px] border-t border-[var(--border-subtle)] px-4 pb-[18px] pt-1">
-                            <svg width="132" height="132" viewBox="0 0 132 132" class="shrink-0" role="img" aria-label="Avance del {{ $progress['percent'] }} por ciento del plan de estudios">
-                                <circle cx="66" cy="66" r="58" fill="none" stroke="var(--color-neutral-200)" stroke-width="12" />
-                                <circle
-                                    cx="66" cy="66" r="58" fill="none" stroke="var(--color-primary-600)" stroke-width="12"
-                                    stroke-linecap="round" transform="rotate(-90 66 66)"
-                                    stroke-dasharray="{{ $ringCircumference }}" stroke-dashoffset="{{ $ringOffset }}"
-                                />
-                                <text x="66" y="62" text-anchor="middle" class="fill-[var(--text-primary)] text-[22px] font-bold">{{ $progress['percent'] }}%</text>
-                                <text x="66" y="80" text-anchor="middle" class="fill-[var(--text-muted)] text-[11px]">cursado</text>
-                            </svg>
-                            <div class="flex w-full flex-col gap-[9px]">
-                                @foreach($progress['details'] as $detail)
-                                    <div class="flex items-center gap-2">
-                                        <span class="flex-1 text-sm text-[var(--text-secondary)]">{{ $detail['label'] }}</span>
-                                        <span class="text-sm font-medium text-[var(--text-primary)]">{{ $detail['value'] }}</span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
+                    @endif
+                </x-section>
 
-                    <div class="flex gap-[11px] rounded-[var(--radius-lg)] border border-[var(--color-restricted)] bg-[var(--color-restricted-bg)] p-[14px]">
-                        <x-ui-icon name="lock" class="h-[17px] w-[17px] shrink-0 text-[var(--color-restricted)]" />
-                        <div class="flex flex-col gap-[3px]">
-                            <p class="text-sm font-semibold text-[var(--color-restricted)]">Información restringida</p>
-                            <p class="text-xs text-[var(--text-secondary)]">El perfil psicosocial y de salud solo es visible para Coordinación. Cada consulta queda auditada (RNF-05, RNF-07).</p>
+                <div class="flex flex-col gap-8">
+                    <x-section title="Avance en el plan">
+                        <dl class="flex flex-col border-t border-[var(--trz-linea)]">
+                            @foreach($progress['details'] as $detail)
+                                <div class="flex items-center justify-between gap-4 border-b border-[var(--trz-linea)] py-3">
+                                    <dt class="text-sm text-[var(--trz-texto-2)]">{{ $detail['label'] }}</dt>
+                                    <dd class="text-[15px] font-semibold text-[var(--trz-tinta)]">{{ $detail['value'] }}</dd>
+                                </div>
+                            @endforeach
+                        </dl>
+                    </x-section>
+
+                    <div class="flex items-start gap-3.5 rounded-[var(--radius-lg)] bg-[var(--trz-brote-fondo)] p-4">
+                        <x-ui-icon name="lock" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--trz-brote)]" />
+                        <div class="flex flex-col gap-1">
+                            <p class="text-[15px] font-bold text-[var(--trz-tinta)]">Información restringida</p>
+                            <p class="text-sm leading-relaxed text-[var(--trz-texto-2)]">El perfil psicosocial y de salud solo es visible para Coordinación. Cada consulta queda auditada.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {{-- Académica --}}
-            <div role="tabpanel" id="panel-academica" aria-labelledby="tab-academica" tabindex="0" x-show="active === 'academica'" class="outline-none">
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Historia académica por periodo</h2>
-                        <p class="text-xs text-[var(--text-muted)]">PAPA, promedio del periodo y avance en créditos · RF-16</p>
-                    </div>
-                    <div class="overflow-x-auto border-t border-[var(--border-subtle)]">
-                        @if(empty($academicRows))
-                            <p class="px-4 py-6 text-sm text-[var(--text-muted)]">Sin historia académica registrada.</p>
-                        @else
-                            <table class="w-full min-w-[520px] text-left text-sm">
+            <div role="tabpanel" id="panel-academica" aria-labelledby="tab-academica" tabindex="0" x-show="active === 'academica'" x-cloak>
+                <x-section title="Historia académica por periodo" note="PAPA, promedio del periodo y avance en créditos.">
+                    @if(empty($academicRows))
+                        <x-empty-state kind="historia" title="Sin historia académica registrada." />
+                    @else
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[520px] text-[15px]">
                                 <thead>
-                                    <tr class="text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
-                                        <th scope="col" class="px-4 py-[11px] font-semibold">PERIODO</th>
-                                        <th scope="col" class="px-4 py-[11px] font-semibold">PAPA</th>
-                                        <th scope="col" class="px-4 py-[11px] font-semibold">PROMEDIO</th>
-                                        <th scope="col" class="px-4 py-[11px] font-semibold">CRÉDITOS</th>
-                                        <th scope="col" class="px-4 py-[11px] font-semibold">AVANCE</th>
+                                    <tr class="border-b-[1.5px] border-[var(--trz-linea)] text-[13px] font-semibold text-[var(--trz-texto-2)]">
+                                        <th scope="col" class="py-2.5 pr-4 text-left font-semibold">Periodo</th>
+                                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">PAPA</th>
+                                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Promedio</th>
+                                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Créditos</th>
+                                        <th scope="col" class="py-2.5 pl-4 text-left font-semibold">Avance</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($academicRows as $row)
-                                        <tr class="border-t border-[var(--border-subtle)]">
-                                            <td class="px-4 py-[11px] font-semibold text-[var(--text-primary)]">{{ $row['period'] }}</td>
-                                            <td class="px-4 py-[11px] text-[var(--text-secondary)]">{{ $row['papa'] }}</td>
-                                            <td class="px-4 py-[11px] text-[var(--text-secondary)]">{{ $row['average'] }}</td>
-                                            <td class="px-4 py-[11px] text-[var(--text-secondary)]">{{ $row['credits'] }}</td>
-                                            <td class="px-4 py-[11px] text-[var(--text-secondary)]">{{ $row['advance'] }}%</td>
+                                        <tr class="border-b border-[var(--trz-linea)]">
+                                            <th scope="row" class="py-3.5 pr-4 text-left font-semibold text-[var(--trz-tinta)]">{{ $row['period'] }}</th>
+                                            <td class="px-4 py-3.5 font-semibold text-[var(--trz-tinta)]">{{ $row['papa'] }}</td>
+                                            <td class="px-4 py-3.5 text-[var(--trz-texto-2)]">{{ $row['average'] }}</td>
+                                            <td class="px-4 py-3.5 text-[var(--trz-texto-2)]">{{ $row['credits'] }}</td>
+                                            <td class="py-3.5 pl-4 text-[var(--trz-tinta)]">{{ $row['advance'] }} %</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                        @endif
-                    </div>
-                </div>
+                        </div>
+                    @endif
+                </x-section>
             </div>
 
             {{-- Experiencias --}}
-            <div role="tabpanel" id="panel-experiencias" aria-labelledby="tab-experiencias" tabindex="0" x-show="active === 'experiencias'" class="outline-none">
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Línea de tiempo de experiencias formativas</h2>
-                        <p class="text-xs text-[var(--text-muted)]">Registradas y validadas por Coordinación · RF-30, RF-33</p>
-                    </div>
-                    <div class="flex flex-col border-t border-[var(--border-subtle)] px-4 pb-4">
-                        @forelse($timeline as $item)
-                            <div class="flex gap-3 py-2">
-                                <div class="flex w-7 flex-col items-center">
-                                    <div class="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-[var(--surface-sunken)]">
-                                        <x-ui-icon :name="$item['icon']" class="h-[14px] w-[14px] text-[var(--color-primary-600)]" />
-                                    </div>
-                                    @if(!$loop->last)
-                                        <span class="mt-1 w-[2px] flex-1 bg-[var(--border-subtle)]"></span>
-                                    @endif
-                                </div>
-                                <div class="flex flex-1 flex-col gap-[3px] pb-2 pt-[3px]">
-                                    <p class="text-sm text-[var(--text-primary)]">{{ $item['description'] }}</p>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-[var(--text-muted)]">{{ $item['period'] }}</span>
-                                        <x-status-badge :text="$item['tag']" :tone="$item['tone']" />
-                                    </div>
-                                </div>
+            <div role="tabpanel" id="panel-experiencias" aria-labelledby="tab-experiencias" tabindex="0" x-show="active === 'experiencias'" x-cloak>
+                <x-section title="Línea de tiempo de experiencias formativas" note="Registradas por el estudiante y validadas por Coordinación.">
+                    @forelse($timeline as $item)
+                        @if($loop->first)<ul class="flex flex-col border-t border-[var(--trz-linea)]">@endif
+                        <li class="flex items-center gap-4 border-b border-[var(--trz-linea)] py-4">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--trz-hito-fondo)] text-[var(--trz-hito-texto)]"><x-ui-icon :name="$item['icon']" class="h-[18px] w-[18px]" /></span>
+                            <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                <p class="text-base font-semibold text-[var(--trz-tinta)]">{{ $item['description'] }}</p>
+                                <p class="text-sm text-[var(--trz-texto-2)]">{{ $item['period'] }}</p>
                             </div>
-                        @empty
-                            <p class="py-3 text-sm text-[var(--text-muted)]">Sin experiencias registradas.</p>
-                        @endforelse
-                    </div>
-                </div>
+                            <x-status-badge :text="$item['tag']" :tone="$item['tone']" />
+                        </li>
+                        @if($loop->last)</ul>@endif
+                    @empty
+                        <x-empty-state kind="experiencias" title="Sin experiencias registradas." />
+                    @endforelse
+                </x-section>
             </div>
 
             {{-- Trabajo de grado --}}
-            <div role="tabpanel" id="panel-trabajo-grado" aria-labelledby="tab-trabajo-grado" tabindex="0" x-show="active === 'trabajo-grado'" class="outline-none">
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="px-4 pb-[10px] pt-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Trabajo de grado</h2>
-                    </div>
-                    <div class="flex flex-col gap-[10px] border-t border-[var(--border-subtle)] p-4">
-                        @forelse($theses as $process)
-                            <div class="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3">
-                                <div class="flex flex-1 flex-col gap-[3px]">
-                                    <p class="text-sm font-medium text-[var(--text-primary)]">{{ $process['title'] }}</p>
-                                    <p class="text-xs text-[var(--text-muted)]">{{ $process['meta'] }}</p>
-                                </div>
-                                <x-status-badge :text="$process['status']" :tone="$process['tone']" />
+            <div role="tabpanel" id="panel-trabajo-grado" aria-labelledby="tab-trabajo-grado" tabindex="0" x-show="active === 'trabajo-grado'" x-cloak>
+                <x-section title="Trabajo de grado">
+                    @forelse($theses as $process)
+                        @if($loop->first)<ul class="flex flex-col border-t border-[var(--trz-linea)]">@endif
+                        <li class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--trz-linea)] py-4">
+                            <div class="flex flex-col gap-0.5">
+                                <p class="text-base font-semibold text-[var(--trz-tinta)]">{{ $process['title'] }}</p>
+                                <p class="text-sm text-[var(--trz-texto-2)]">{{ $process['meta'] }}</p>
                             </div>
-                        @empty
-                            <p class="text-sm text-[var(--text-muted)]">Sin trabajo de grado registrado.</p>
-                        @endforelse
-                    </div>
-                </div>
+                            <x-status-badge :text="$process['status']" :tone="$process['tone']" />
+                        </li>
+                        @if($loop->last)</ul>@endif
+                    @empty
+                        <x-empty-state kind="tesis" title="Sin trabajo de grado registrado." />
+                    @endforelse
+                </x-section>
             </div>
 
             {{-- Práctica --}}
-            <div role="tabpanel" id="panel-practica" aria-labelledby="tab-practica" tabindex="0" x-show="active === 'practica'" class="outline-none">
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="px-4 pb-[10px] pt-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Práctica empresarial</h2>
-                    </div>
-                    <div class="flex flex-col gap-[10px] border-t border-[var(--border-subtle)] p-4">
-                        @forelse($internships as $process)
-                            <div class="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-3">
-                                <div class="flex flex-1 flex-col gap-[3px]">
-                                    <p class="text-sm font-medium text-[var(--text-primary)]">{{ $process['title'] }}</p>
-                                    <p class="text-xs text-[var(--text-muted)]">{{ $process['meta'] }}</p>
-                                </div>
-                                <x-status-badge :text="$process['status']" :tone="$process['tone']" />
+            <div role="tabpanel" id="panel-practica" aria-labelledby="tab-practica" tabindex="0" x-show="active === 'practica'" x-cloak>
+                <x-section title="Práctica empresarial">
+                    @forelse($internships as $process)
+                        @if($loop->first)<ul class="flex flex-col border-t border-[var(--trz-linea)]">@endif
+                        <li class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--trz-linea)] py-4">
+                            <div class="flex flex-col gap-0.5">
+                                <p class="text-base font-semibold text-[var(--trz-tinta)]">{{ $process['title'] }}</p>
+                                <p class="text-sm text-[var(--trz-texto-2)]">{{ $process['meta'] }}</p>
                             </div>
-                        @empty
-                            <p class="text-sm text-[var(--text-muted)]">Sin práctica registrada.</p>
-                        @endforelse
-                    </div>
-                </div>
+                            <x-status-badge :text="$process['status']" :tone="$process['tone']" />
+                        </li>
+                        @if($loop->last)</ul>@endif
+                    @empty
+                        <x-empty-state kind="practica" title="Sin práctica registrada." />
+                    @endforelse
+                </x-section>
             </div>
 
             {{-- Solicitudes --}}
-            <div role="tabpanel" id="panel-solicitudes" aria-labelledby="tab-solicitudes" tabindex="0" x-show="active === 'solicitudes'" class="outline-none">
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Solicitudes ante el comité</h2>
-                        <p class="text-xs text-[var(--text-muted)]">Radicadas por el estudiante, con su estado actual · RF-08</p>
-                    </div>
-                    <div class="overflow-x-auto border-t border-[var(--border-subtle)]">
-                        @if(empty($requests))
-                            <p class="px-4 py-6 text-sm text-[var(--text-muted)]">Sin solicitudes radicadas.</p>
-                        @else
-                            <table class="w-full min-w-[560px] text-left text-sm">
+            <div role="tabpanel" id="panel-solicitudes" aria-labelledby="tab-solicitudes" tabindex="0" x-show="active === 'solicitudes'" x-cloak>
+                <x-section title="Solicitudes ante el comité" note="Radicadas por el estudiante, con su estado actual.">
+                    @if(empty($requests))
+                        <x-empty-state kind="solicitudes" title="Sin solicitudes radicadas." />
+                    @else
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[560px] text-[15px]">
                                 <thead>
-                                    <tr class="text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
-                                        <th scope="col" class="px-4 py-[11px] font-semibold">RADICADA</th>
-                                        <th scope="col" class="px-4 py-[11px] font-semibold">TIPO</th>
-                                        <th scope="col" class="px-4 py-[11px] font-semibold">PERIODO</th>
-                                        <th scope="col" class="px-4 py-[11px] font-semibold">ESTADO</th>
-                                        <th scope="col" class="px-4 py-[11px] font-semibold"><span class="sr-only">Acciones</span></th>
+                                    <tr class="border-b-[1.5px] border-[var(--trz-linea)] text-[13px] font-semibold text-[var(--trz-texto-2)]">
+                                        <th scope="col" class="py-2.5 pr-4 text-left font-semibold">Radicada</th>
+                                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Tipo</th>
+                                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Periodo</th>
+                                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Estado</th>
+                                        <th scope="col" class="py-2.5 pl-4 text-right font-semibold"><span class="sr-only">Acciones</span></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($requests as $row)
-                                        <tr class="border-t border-[var(--border-subtle)]">
-                                            <td class="px-4 py-[11px] text-[var(--text-muted)]">{{ $row['date'] }}</td>
-                                            <td class="px-4 py-[11px] font-semibold text-[var(--text-primary)]">{{ $row['type'] }}</td>
-                                            <td class="px-4 py-[11px] text-[var(--text-secondary)]">{{ $row['period'] }}</td>
-                                            <td class="px-4 py-[11px]"><x-status-badge :text="$row['status']" :tone="$row['tone']" /></td>
-                                            <td class="px-4 py-[11px]"><a href="{{ $row['url'] }}" class="text-sm font-semibold text-[var(--color-primary-600)]">Ver detalle</a></td>
+                                        <tr class="border-b border-[var(--trz-linea)]">
+                                            <td class="py-3.5 pr-4 text-[var(--trz-texto-2)]">{{ $row['date'] }}</td>
+                                            <td class="px-4 py-3.5 font-semibold text-[var(--trz-tinta)]">{{ $row['type'] }}</td>
+                                            <td class="px-4 py-3.5 text-[var(--trz-texto-2)]">{{ $row['period'] }}</td>
+                                            <td class="px-4 py-3.5"><x-status-badge :text="$row['status']" :tone="$row['tone']" /></td>
+                                            <td class="py-3.5 pl-4 text-right"><x-link-arrow :href="$row['url']" class="justify-end">Ver detalle</x-link-arrow></td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                        @endif
-                    </div>
-                </div>
+                        </div>
+                    @endif
+                </x-section>
             </div>
 
             @if($showTutorials)
             {{-- Tutorías --}}
-            <div role="tabpanel" id="panel-tutorias" aria-labelledby="tab-tutorias" tabindex="0" x-show="active === 'tutorias'" class="outline-none">
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Tutorías</h2>
-                        <p class="text-xs text-[var(--text-muted)]">Visibles para Coordinación y el profesor con vínculo vigente</p>
-                    </div>
-                    <div class="flex flex-col gap-[10px] border-t border-[var(--border-subtle)] p-4">
-                        @forelse($tutorials as $tutorial)
-                            <div class="flex flex-col gap-1 rounded-[var(--radius-md)] border border-[var(--border-subtle)] p-[11px]">
-                                <span class="text-xs text-[var(--text-muted)]">{{ $tutorial['date'] }}</span>
-                                <span class="text-sm font-medium text-[var(--text-primary)]">{{ $tutorial['reason'] }}</span>
-                                <span class="text-xs text-[var(--text-secondary)]">{{ $tutorial['note'] }}</span>
-                                @if($tutorial['editUrl'])
-                                    <a href="{{ $tutorial['editUrl'] }}" class="text-xs font-semibold text-[var(--color-primary-600)]">Editar</a>
-                                @endif
+            <div role="tabpanel" id="panel-tutorias" aria-labelledby="tab-tutorias" tabindex="0" x-show="active === 'tutorias'" x-cloak>
+                <x-section title="Tutorías" note="Visibles para Coordinación y el profesor con vínculo vigente.">
+                    @forelse($tutorials as $tutorial)
+                        @if($loop->first)<ul class="flex flex-col border-t border-[var(--trz-linea)]">@endif
+                        <li class="flex items-start gap-4 border-b border-[var(--trz-linea)] py-4">
+                            <x-stream-mark kind="acompanamiento" class="mt-1.5" />
+                            <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                <p class="text-base font-semibold text-[var(--trz-tinta)]">{{ $tutorial['reason'] }}</p>
+                                <p class="text-sm text-[var(--trz-texto-2)]">{{ $tutorial['date'] }}@if($tutorial['note']) · {{ $tutorial['note'] }}@endif</p>
                             </div>
-                        @empty
-                            <p class="text-sm text-[var(--text-muted)]">Sin tutorías registradas.</p>
-                        @endforelse
-                    </div>
-                </div>
+                            @if($tutorial['editUrl'])
+                                <x-link-arrow :href="$tutorial['editUrl']" icon="pencil" class="shrink-0 print:hidden">Editar</x-link-arrow>
+                            @endif
+                        </li>
+                        @if($loop->last)</ul>@endif
+                    @empty
+                        <x-empty-state kind="tutor" title="Sin tutorías registradas." />
+                    @endforelse
+                </x-section>
             </div>
             @endif
         </div>
-    </div>
+    </x-page>
 </x-layouts.app>

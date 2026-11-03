@@ -40,7 +40,7 @@ class ShellUserTest extends TestCase
         $this->get('/solicitudes')->assertSee('Mis solicitudes')->assertDontSee('Indicadores');
 
         $this->actingAsRole(Role::Profesor);
-        $this->get('/estudiantes')->assertSee('TUTORÍA')->assertSee('Mis asesorías')->assertSee('Solicitar tutoría')->assertDontSee('Registrar tutoría');
+        $this->get('/estudiantes')->assertSee('Tutoría')->assertSee('Mis asesorías')->assertSee('Solicitar tutoría')->assertDontSee('Registrar tutoría');
 
         $this->actingAsRole(Role::Estudiante);
         $this->get('/solicitudes')->assertSee('Mi tutor');

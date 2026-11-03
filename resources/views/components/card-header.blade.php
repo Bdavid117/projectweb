@@ -1,5 +1,5 @@
 @props(['class' => ''])
 
-<div class="px-4 py-3 border-b border-[var(--border-subtle)] {{ $class }}">
+<div class="border-b border-[var(--trz-linea)] px-5 py-4 {{ $class }}">
     {{ $slot }}
 </div>

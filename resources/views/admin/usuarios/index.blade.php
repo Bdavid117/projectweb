@@ -1,63 +1,59 @@
+@php
+    $summary = collect($roleOptions)->map(fn ($label, $value) => ($totals[$value] ?? 0).' '.mb_strtolower($label).(($totals[$value] ?? 0) === 1 ? '' : 's'))->implode(', ');
+@endphp
 <x-layouts.app :user="$user" :nav-groups="$navGroups" title="Usuarios y roles · Trayectoria Estudiantil">
-    <div class="flex flex-col gap-5 p-4 sm:p-7">
-        <div class="flex flex-col gap-[3px]">
-            <h1 class="text-2xl font-semibold text-[var(--text-primary)]">Usuarios y roles</h1>
-            <p class="text-sm text-[var(--text-secondary)]">{{ $users->total() }} cuentas con acceso al sistema</p>
+    <x-page>
+        <x-page-header title="Usuarios y roles" :subtitle="$users->total().' cuentas con acceso al sistema: '.$summary.'.'" />
+
+        <div class="flex items-center gap-3 rounded-[var(--radius-lg)] bg-[var(--trz-hilo-fondo)] px-4 py-3.5">
+            <x-ui-icon name="info" class="h-5 w-5 shrink-0 text-[var(--trz-hilo-texto)]" />
+            <p class="text-[15px] leading-snug text-[var(--trz-tinta)]">Por ahora esta pantalla es de solo lectura. Crear usuarios, cambiar roles y desactivar cuentas está planeado.</p>
         </div>
 
-        <div class="flex flex-wrap gap-3">
-            @foreach($roleOptions as $value => $label)
-                <div class="flex min-w-[140px] flex-col gap-[2px] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-3">
-                    <span class="text-xs text-[var(--text-muted)]">{{ $label }}</span>
-                    <span class="text-xl font-semibold text-[var(--text-primary)]">{{ $totals[$value] ?? 0 }}</span>
-                </div>
-            @endforeach
-        </div>
-
-        <form method="GET" action="{{ route('users.index') }}" class="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[14px] lg:flex-row lg:items-center">
-            <div class="flex h-[var(--control-height)] flex-1 items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-default)] px-3">
-                <x-ui-icon name="search" class="h-4 w-4 text-[var(--color-neutral-400)]" />
-                <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="Buscar por nombre o correo" class="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]" />
-            </div>
-            <x-filter-select name="rol" all="Rol: todos" :options="$roleOptions" :selected="$filters['rol']" />
+        <x-filter-bar :action="route('users.index')">
+            <x-search-field name="q" :value="$filters['q']" placeholder="Buscar por nombre o correo" />
+            <div class="w-full sm:w-[190px]"><x-filter-select name="rol" all="Rol: todos" :options="$roleOptions" :selected="$filters['rol']" /></div>
             <x-button variant="secondary" type="submit">Filtrar</x-button>
-        </form>
+        </x-filter-bar>
 
-        <div class="hidden min-w-0 flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] sm:flex">
-            <div class="min-w-0 overflow-x-auto">
-                <div class="flex min-w-[640px] gap-3 px-4 py-[11px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
-                    <span class="flex-1">NOMBRE</span>
-                    <span class="w-[260px]">CORREO</span>
-                    <span class="w-[130px]">ROL</span>
-                    <span class="w-[90px]">ESTADO</span>
-                </div>
-                @forelse($users as $row)
-                    <div class="flex min-w-[640px] items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-[11px] text-sm">
-                        <span class="flex-1 font-semibold text-[var(--text-primary)]">{{ $row->name }}</span>
-                        <span class="w-[260px] truncate text-[var(--text-secondary)]">{{ $row->email }}</span>
-                        <span class="w-[130px] text-[var(--text-secondary)]">{{ $row->role->label() }}</span>
-                        <span class="w-[90px]"><x-status-badge :text="$row->active ? 'Activo' : 'Inactivo'" :tone="$row->active ? 'success' : 'danger'" /></span>
-                    </div>
-                @empty
-                    <div class="border-t border-[var(--border-subtle)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">No hay usuarios que coincidan con los filtros.</div>
-                @endforelse
-            </div>
-        </div>
+        @if($users->isEmpty())
+            <x-empty-state kind="historia" title="No hay usuarios que coincidan con los filtros." />
+        @else
+            <table class="hidden w-full text-[15px] md:table">
+                <caption class="sr-only">Usuarios y roles</caption>
+                <thead>
+                    <tr class="border-b-[1.5px] border-[var(--trz-linea)] text-[13px] font-semibold text-[var(--trz-texto-2)]">
+                        <th scope="col" class="py-2.5 pr-4 text-left font-semibold">Nombre</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Correo</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Rol</th>
+                        <th scope="col" class="py-2.5 pl-4 text-left font-semibold">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($users as $row)
+                        <tr class="border-b border-[var(--trz-linea)]">
+                            <th scope="row" class="py-3.5 pr-4 text-left font-semibold text-[var(--trz-tinta)]">{{ $row->name }}</th>
+                            <td class="px-4 py-3.5 text-[var(--trz-texto-2)]">{{ $row->email }}</td>
+                            <td class="px-4 py-3.5 text-[var(--trz-tinta)]">{{ $row->role->label() }}</td>
+                            <td class="py-3.5 pl-4"><x-status-badge :text="$row->active ? 'Activo' : 'Inactivo'" :tone="$row->active ? 'success' : 'neutral'" :icon="$row->active ? null : 'circle'" /></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
 
-        <div class="flex flex-col gap-3 sm:hidden">
-            @forelse($users as $row)
-                <div class="flex flex-col gap-1 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3">
-                    <div class="flex items-center gap-2">
-                        <span class="flex-1 text-sm font-medium text-[var(--text-primary)]">{{ $row->name }}</span>
-                        <x-status-badge :text="$row->active ? 'Activo' : 'Inactivo'" :tone="$row->active ? 'success' : 'danger'" />
-                    </div>
-                    <p class="text-xs text-[var(--text-secondary)]">{{ $row->email }} · {{ $row->role->label() }}</p>
-                </div>
-            @empty
-                <p class="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-center text-sm text-[var(--text-muted)]">No hay usuarios que coincidan con los filtros.</p>
-            @endforelse
-        </div>
+            <ul class="flex flex-col md:hidden">
+                @foreach($users as $row)
+                    <li class="flex flex-col gap-1.5 border-b border-[var(--trz-linea)] py-3.5 first:border-t">
+                        <span class="flex items-center justify-between gap-3">
+                            <span class="text-base font-semibold text-[var(--trz-tinta)]">{{ $row->name }}</span>
+                            <x-status-badge :text="$row->active ? 'Activo' : 'Inactivo'" :tone="$row->active ? 'success' : 'neutral'" :icon="$row->active ? null : 'circle'" />
+                        </span>
+                        <span class="text-[13px] text-[var(--trz-texto-2)]">{{ $row->email }} · {{ $row->role->label() }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
 
         <x-pagination :paginator="$users" noun="usuarios" />
-    </div>
+    </x-page>
 </x-layouts.app>

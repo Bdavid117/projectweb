@@ -1,5 +1,5 @@
 @props(['class' => ''])
 
-<div class="px-4 py-5 {{ $class }}">
+<div class="px-5 py-5 {{ $class }}">
     {{ $slot }}
 </div>

@@ -1,4 +1,4 @@
-<x-layouts.error code="419" title="La sesión expiró" tone="warning">
+<x-layouts.error code="419" title="La sesión expiró">
     <p>Por seguridad, su sesión caducó tras un rato de inactividad. Recargue la página para continuar o vuelva a iniciar sesión; si estaba llenando un formulario, tendrá que enviarlo de nuevo.</p>
 
     <x-slot:actions>

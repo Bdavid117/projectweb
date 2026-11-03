@@ -1,13 +1,12 @@
-@props(['title', 'class'])
+@props(['title' => null, 'titleClass' => 'text-lg'])
 
-<div class="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-sm">
-
+{{-- Contenedor con borde fino. Úsese solo cuando la agrupación tiene una función real (formularios, avisos). --}}
+<div {{ $attributes->merge(['class' => 'rounded-[var(--radius-xl)] border border-[var(--trz-linea)] bg-[var(--trz-superficie)]']) }}>
     @if(!empty($title))
-    <div class="px-4 py-3 border-b border-[var(--border-subtle)]">
-        <h3 class="font-medium text-[var(--text-primary)] {{ $titleClass ?? 'text-lg' }}">{{ $title }}</h3>
-    </div>
+        <div class="border-b border-[var(--trz-linea)] px-5 py-4">
+            <h3 class="font-semibold text-[var(--trz-tinta)] {{ $titleClass }}">{{ $title }}</h3>
+        </div>
     @endif
 
     {{ $slot }}
-
 </div>

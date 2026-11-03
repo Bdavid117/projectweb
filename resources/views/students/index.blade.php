@@ -1,92 +1,96 @@
 <x-layouts.app :user="$user" :nav-groups="$navGroups" title="Estudiantes · Trayectoria Estudiantil">
-    <div class="flex flex-col gap-5 p-4 sm:p-7">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
-            <div class="flex flex-1 flex-col gap-[3px]">
-                <h1 class="text-2xl font-semibold text-[var(--text-primary)]">Estudiantes</h1>
-                <p class="text-sm text-[var(--text-secondary)]">{{ $activeCount }} {{ $activeCount === 1 ? 'estudiante activo' : 'estudiantes activos' }} {{ $scopedToTutor ? 'entre sus tutorados' : 'en el programa' }} · RF-07</p>
-            </div>
-            <div class="flex gap-3">
-                <x-button variant="subtle" icon="download">Exportar</x-button>
-                <x-button variant="primary" icon="upload">Cargar Excel</x-button>
-            </div>
-        </div>
-
-        <form method="GET" action="{{ route('students.index') }}" class="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[14px] lg:flex-row lg:items-center">
-            <div class="flex h-[var(--control-height)] flex-1 items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-default)] px-3">
-                <x-ui-icon name="search" class="h-4 w-4 text-[var(--color-neutral-400)]" />
-                <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="Buscar por nombre, código o documento" class="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]" />
-            </div>
-            <x-filter-select name="cohorte" all="Cohorte: todas" :options="$cohortOptions" :selected="$filters['cohorte']" />
-            <x-filter-select name="estado" all="Estado: todos" :options="$statusOptions" :selected="$filters['estado']" />
+    <x-page>
+        <x-page-header title="Estudiantes" :subtitle="$activeCount.' '.($activeCount === 1 ? 'estudiante activo' : 'estudiantes activos').' '.($scopedToTutor ? 'entre sus tutorados' : 'en el programa').'.'">
             @if($canFilterByTutor)
-                <x-filter-select name="tutor" all="Tutor: todos" :options="$tutorOptions" :selected="$filters['tutor']" />
+                <x-slot:actions>
+                    <x-button variant="subtle" icon="download" disabled aria-disabled="true" title="Aún no disponible">Exportar</x-button>
+                    <x-button variant="primary" icon="upload" disabled aria-disabled="true" title="Aún no disponible">Cargar Excel</x-button>
+                </x-slot:actions>
+            @endif
+        </x-page-header>
+
+        <x-filter-bar :action="route('students.index')">
+            <x-search-field name="q" :value="$filters['q']" placeholder="Buscar por nombre, código o documento" />
+            <div class="w-full sm:w-[190px]"><x-filter-select name="cohorte" all="Cohorte: todas" :options="$cohortOptions" :selected="$filters['cohorte']" /></div>
+            <div class="w-full sm:w-[190px]"><x-filter-select name="estado" all="Estado: todos" :options="$statusOptions" :selected="$filters['estado']" /></div>
+            @if($canFilterByTutor)
+                <div class="w-full sm:w-[190px]"><x-filter-select name="tutor" all="Tutor: todos" :options="$tutorOptions" :selected="$filters['tutor']" /></div>
             @endif
             <x-button variant="secondary" type="submit">Filtrar</x-button>
-        </form>
+        </x-filter-bar>
 
-        <!-- Desktop table (hidden on mobile) -->
-        <div class="hidden min-w-0 flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] sm:flex">
-            <div class="min-w-0 overflow-x-auto">
-                <div class="flex min-w-[620px] gap-3 px-4 py-[11px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
-                    <span class="w-24">CÓDIGO</span>
-                    <span class="flex-1">ESTUDIANTE</span>
-                    <span class="w-[92px]">COHORTE</span>
-                    <span class="w-16">PAPA</span>
-                    <span class="w-[150px]">AVANCE</span>
-                    <span class="w-[110px]">ESTADO</span>
-                    <span class="w-[76px]"></span>
-                </div>
-                @forelse($students as $student)
-                    <div class="flex min-w-[620px] items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-[11px] text-sm">
-                        <span class="w-24 text-[var(--text-secondary)]">{{ $student['code'] }}</span>
-                        <span class="flex-1 text-[var(--text-primary)]">{{ $student['name'] }}</span>
-                        <span class="w-[92px] text-[var(--text-secondary)]">{{ $student['cohort'] }}</span>
-                        <span class="w-16 {{ $student['papaLow'] ? 'font-semibold text-[var(--color-danger)]' : 'text-[var(--text-secondary)]' }}">{{ $student['papa'] }}</span>
-                        <span class="flex w-[150px] items-center gap-2">
-                            <span class="h-[7px] flex-1 rounded-full bg-[var(--surface-sunken)]">
-                                <span class="block h-[7px] rounded-full bg-[var(--color-primary-500)]" style="width: {{ $student['advance'] }}%"></span>
+        @if($students->isEmpty())
+            @if($scopedToTutor && ! $hasFilters)
+                <x-empty-state kind="solicitar" title="Aún no tiene tutorados">
+                    <x-slot:body>Pida acompañar a un estudiante en <a href="{{ route('tutor-requests.index') }}" class="font-semibold text-[var(--trz-hilo-texto)] hover:underline">Solicitar tutoría</a>; lo verá aquí cuando acepte.</x-slot:body>
+                </x-empty-state>
+            @else
+                <x-empty-state kind="historia" title="No hay estudiantes que coincidan con los filtros." text="Pruebe con otro nombre, código o cohorte, o quite algún filtro." />
+            @endif
+        @else
+            <table class="hidden w-full text-[15px] md:table">
+                <caption class="sr-only">Estudiantes</caption>
+                <thead>
+                    <tr class="border-b-[1.5px] border-[var(--trz-linea)] text-[13px] font-semibold text-[var(--trz-texto-2)]">
+                        <th scope="col" class="py-2.5 pr-4 text-left font-semibold">Estudiante</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Cohorte</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">PAPA</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Avance del plan</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Estado</th>
+                        <th scope="col" class="py-2.5 pl-4 text-right font-semibold"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($students as $student)
+                        <tr class="border-b border-[var(--trz-linea)] hover:bg-[var(--trz-hilo-fondo)]">
+                            <th scope="row" class="py-3.5 pr-4 text-left font-normal">
+                                <a href="{{ route('students.show', $student['id']) }}" class="block text-base font-semibold text-[var(--trz-tinta)] hover:text-[var(--trz-hilo-texto)] hover:underline">{{ $student['name'] }}</a>
+                                <span class="text-[13px] text-[var(--trz-texto-2)]">{{ $student['code'] }}</span>
+                            </th>
+                            <td class="px-4 py-3.5 text-[var(--trz-tinta)]">{{ $student['cohort'] }}</td>
+                            <td class="px-4 py-3.5">
+                                @if($student['papaLow'])
+                                    <span class="inline-flex items-center gap-1.5 font-bold text-[var(--trz-alerta)]"><x-ui-icon name="triangle-alert" class="h-[15px] w-[15px]" /><span class="sr-only">PAPA bajo el mínimo:</span>{{ $student['papa'] }}</span>
+                                @else
+                                    <span class="text-[var(--trz-tinta)]">{{ $student['papa'] }}</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3.5">
+                                <div class="flex items-center gap-3">
+                                    <span class="h-2 w-[110px] overflow-hidden rounded-full bg-[var(--trz-linea)]" role="presentation"><span class="block h-full rounded-full bg-[var(--trz-hilo)]" style="width: {{ $student['advance'] }}%"></span></span>
+                                    <span class="w-10 text-sm font-semibold text-[var(--trz-tinta)]">{{ $student['advance'] }} %</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3.5"><x-status-badge :text="$student['status']" :tone="$student['tone']" /></td>
+                            <td class="py-3.5 pl-4 text-right"><x-link-arrow :href="route('students.show', $student['id'])" class="justify-end">Ver ficha</x-link-arrow></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <ul class="flex flex-col md:hidden">
+                @foreach($students as $student)
+                    <li class="border-b border-[var(--trz-linea)] first:border-t">
+                        <a href="{{ route('students.show', $student['id']) }}" class="flex flex-col gap-2 py-3.5 hover:bg-[var(--trz-hilo-fondo)]">
+                            <span class="flex items-center justify-between gap-3">
+                                <span class="text-base font-semibold text-[var(--trz-tinta)]">{{ $student['name'] }}</span>
+                                @if($student['papaLow'])
+                                    <span class="inline-flex items-center gap-1 text-[15px] font-bold text-[var(--trz-alerta)]"><x-ui-icon name="triangle-alert" class="h-3.5 w-3.5" />{{ $student['papa'] }}</span>
+                                @else
+                                    <span class="text-[15px] font-bold text-[var(--trz-tinta)]">{{ $student['papa'] }}</span>
+                                @endif
                             </span>
-                            <span class="text-xs text-[var(--text-secondary)]">{{ $student['advance'] }}%</span>
-                        </span>
-                        <span class="w-[110px]"><x-status-badge :text="$student['status']" :tone="$student['tone']" /></span>
-                        <a href="{{ route('students.show', $student['id']) }}" class="w-[76px] text-sm font-medium text-[var(--color-primary-600)]">Ver ficha</a>
-                    </div>
-                @empty
-                    <div class="border-t border-[var(--border-subtle)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">
-                        @if($scopedToTutor && ! $hasFilters)
-                            Aún no tiene tutorados. Pida acompañar a un estudiante en <a href="{{ route('tutor-requests.index') }}" class="font-semibold text-[var(--color-primary-600)]">Solicitar tutoría</a>; lo verá aquí cuando acepte.
-                        @else
-                            No hay estudiantes que coincidan con los filtros.
-                        @endif
-                    </div>
-                @endforelse
-            </div>
-        </div>
-
-        <!-- Mobile cards (hidden on desktop), per the 360px mockup -->
-        <div class="flex flex-col gap-3 sm:hidden">
-            @forelse($students as $student)
-                <a href="{{ route('students.show', $student['id']) }}" class="flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3">
-                    <div class="flex items-center gap-2">
-                        <span class="flex-1 text-sm font-medium text-[var(--text-primary)]">{{ $student['name'] }}</span>
-                        <x-status-badge :text="$student['status']" :tone="$student['tone']" />
-                    </div>
-                    <p class="text-xs text-[var(--text-secondary)]">{{ $student['code'] }} · PAPA {{ $student['papa'] }} · avance {{ $student['advance'] }}%</p>
-                    <span class="block h-[6px] rounded-full bg-[var(--surface-sunken)]">
-                        <span class="block h-[6px] rounded-full bg-[var(--color-primary-500)]" style="width: {{ $student['advance'] }}%"></span>
-                    </span>
-                </a>
-            @empty
-                <p class="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-center text-sm text-[var(--text-muted)]">
-                    @if($scopedToTutor && ! $hasFilters)
-                        Aún no tiene tutorados. Pida acompañar a un estudiante en <a href="{{ route('tutor-requests.index') }}" class="font-semibold text-[var(--color-primary-600)]">Solicitar tutoría</a>.
-                    @else
-                        No hay estudiantes que coincidan con los filtros.
-                    @endif
-                </p>
-            @endforelse
-        </div>
+                            <span class="flex items-center justify-between gap-3">
+                                <span class="text-[13px] text-[var(--trz-texto-2)]">{{ $student['code'] }} · {{ $student['cohort'] }} · avance {{ $student['advance'] }} %</span>
+                                <x-status-badge :text="$student['status']" :tone="$student['tone']" />
+                            </span>
+                            <span class="h-1.5 overflow-hidden rounded-full bg-[var(--trz-linea)]" role="presentation"><span class="block h-full rounded-full bg-[var(--trz-hilo)]" style="width: {{ $student['advance'] }}%"></span></span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
 
         <x-pagination :paginator="$students" noun="estudiantes" />
-    </div>
+    </x-page>
 </x-layouts.app>

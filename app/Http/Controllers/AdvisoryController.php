@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicRecord;
 use App\Models\AcademicTerm;
+use App\Models\Alert;
 use App\Models\Student;
 use App\Models\TutorAssignment;
+use App\Models\Tutorship;
 use App\Support\Input;
 use App\Support\Labels;
 use App\Support\Navigation;
@@ -45,7 +48,17 @@ class AdvisoryController extends Controller
             ->paginate(config('program.page_size'))
             ->withQueryString();
 
+        // Resumen de todos los tutorados del periodo (no solo de la página que se muestra).
+        $assigned = TutorAssignment::studentIdsOf($user);
+        $lastSession = $assigned === [] ? null : Tutorship::whereIn('student_id', $assigned)->max('fecha');
+
         return view('advisories.index', [
+            'summary' => [
+                'lowPapa' => AcademicRecord::where('term_id', $termId)->whereIn('student_id', $assigned)->where('papa', '<', config('program.papa_alert'))->count(),
+                'withAlerts' => Alert::whereIn('student_id', $assigned)->where('atendida', false)->distinct()->count('student_id'),
+                'lastSession' => $lastSession ? Carbon::parse($lastSession) : null,
+                'papaAlert' => Labels::decimal(config('program.papa_alert')),
+            ],
             'user' => $user->viewData(),
             'navGroups' => Navigation::forRole($user->role, 'mis-asesorias'),
             'total' => TutorAssignment::where('tutor_id', $user->id)->where('term_id', $termId)->count(),
@@ -74,7 +87,7 @@ class AdvisoryController extends Controller
             'name' => $student->user->name,
             'cohort' => $student->cohorte,
             'last' => Labels::date($last),
-            'papa' => $papa === null ? '—' : number_format($papa, 1),
+            'papa' => $papa === null ? '—' : Labels::decimal($papa),
             'papaLow' => $papa !== null && $papa < config('program.papa_alert'),
             'alert' => $alert,
             'tone' => $tone,

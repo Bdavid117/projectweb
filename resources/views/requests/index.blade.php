@@ -1,71 +1,72 @@
 <x-layouts.app :user="$user" :nav-groups="$navGroups" title="{{ $title }} · Trayectoria Estudiantil">
-    <div class="flex flex-col gap-5 p-4 sm:p-7">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div class="flex flex-1 flex-col gap-[3px]">
-                <h1 class="text-2xl font-semibold text-[var(--text-primary)]">{{ $title }}</h1>
-                <p class="text-sm text-[var(--text-secondary)]">{{ $subtitle }}</p>
-            </div>
+    <x-page>
+        <x-page-header :title="$title" :subtitle="$subtitle">
             @if($canCreate)
-                <x-button variant="primary" icon="file-plus" :href="route('requests.create')">Nueva solicitud</x-button>
+                <x-slot:actions>
+                    <x-button variant="primary" icon="file-plus" :href="route('requests.create')">Nueva solicitud</x-button>
+                </x-slot:actions>
             @endif
-        </div>
+        </x-page-header>
 
-        <form method="GET" action="{{ route('requests.index') }}" class="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[14px] lg:flex-row lg:items-center">
+        <x-filter-bar :action="route('requests.index')">
             @unless($isStudent)
-                <div class="flex h-[var(--control-height)] flex-1 items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-default)] px-3">
-                    <x-ui-icon name="search" class="h-4 w-4 text-[var(--color-neutral-400)]" />
-                    <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="Buscar por estudiante o código" class="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]" />
-                </div>
+                <x-search-field name="q" :value="$filters['q']" placeholder="Buscar por estudiante o código" />
             @endunless
-            <x-filter-select name="tipo" all="Tipo: todos" :options="$typeOptions" :selected="$filters['tipo']" />
-            <x-filter-select name="estado" all="Estado: todos" :options="$statusOptions" :selected="$filters['estado']" />
-            <x-filter-select name="periodo" all="Periodo: todos" :options="$termOptions" :selected="$filters['periodo']" />
+            <div class="w-full sm:w-[200px]"><x-filter-select name="tipo" all="Tipo: todos" :options="$typeOptions" :selected="$filters['tipo']" /></div>
+            <div class="w-full sm:w-[200px]"><x-filter-select name="estado" all="Estado: todos" :options="$statusOptions" :selected="$filters['estado']" /></div>
+            <div class="w-full sm:w-[200px]"><x-filter-select name="periodo" all="Periodo: todos" :options="$termOptions" :selected="$filters['periodo']" /></div>
             <x-button variant="secondary" type="submit">Filtrar</x-button>
-        </form>
+        </x-filter-bar>
 
-        <div class="hidden min-w-0 flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] sm:flex">
-            <div class="min-w-0 overflow-x-auto">
-                <div class="flex min-w-[720px] gap-3 px-4 py-[11px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
-                    <span class="w-[100px]">RADICADA</span>
-                    @unless($isStudent)
-                        <span class="flex-1">ESTUDIANTE</span>
-                    @endunless
-                    <span class="{{ $isStudent ? 'flex-1' : 'w-[230px]' }}">TIPO</span>
-                    <span class="w-20">PERIODO</span>
-                    <span class="w-[130px]">ESTADO</span>
-                    <span class="w-[100px]"></span>
-                </div>
-                @forelse($requests as $row)
-                    <div class="flex min-w-[720px] items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-[11px] text-sm">
-                        <span class="w-[100px] text-[var(--text-muted)]">{{ $row['date'] }}</span>
-                        @unless($isStudent)
-                            <span class="flex-1 font-semibold text-[var(--text-primary)]">{{ $row['student'] }}</span>
-                        @endunless
-                        <span class="{{ $isStudent ? 'flex-1' : 'w-[230px]' }} text-[var(--text-secondary)]">{{ $row['type'] }}</span>
-                        <span class="w-20 text-[var(--text-secondary)]">{{ $row['period'] }}</span>
-                        <span class="w-[130px]"><x-status-badge :text="$row['status']" :tone="$row['tone']" /></span>
-                        <a href="{{ $row['url'] }}" class="w-[100px] text-sm font-semibold text-[var(--color-primary-600)]">Ver detalle</a>
-                    </div>
-                @empty
-                    <div class="border-t border-[var(--border-subtle)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">No hay solicitudes que coincidan con los filtros.</div>
-                @endforelse
-            </div>
-        </div>
+        @if($requests->isEmpty())
+            <x-empty-state kind="solicitudes" title="No hay solicitudes que coincidan con los filtros." text="Quite algún filtro o pruebe con otro periodo.">
+                @if($canCreate)<x-button variant="primary" icon="file-plus" :href="route('requests.create')">Nueva solicitud</x-button>@endif
+            </x-empty-state>
+        @else
+            <table class="hidden w-full text-[15px] md:table">
+                <caption class="sr-only">{{ $title }}</caption>
+                <thead>
+                    <tr class="border-b-[1.5px] border-[var(--trz-linea)] text-[13px] font-semibold text-[var(--trz-texto-2)]">
+                        <th scope="col" class="py-2.5 pr-4 text-left font-semibold">Radicada</th>
+                        @unless($isStudent)<th scope="col" class="px-4 py-2.5 text-left font-semibold">Estudiante</th>@endunless
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Tipo</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Periodo</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Estado</th>
+                        <th scope="col" class="py-2.5 pl-4 text-right font-semibold"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($requests as $row)
+                        <tr class="border-b border-[var(--trz-linea)] hover:bg-[var(--trz-hilo-fondo)]">
+                            <td class="py-3.5 pr-4 text-[var(--trz-texto-2)]">{{ $row['date'] }}</td>
+                            @unless($isStudent)<td class="px-4 py-3.5 font-semibold text-[var(--trz-tinta)]">{{ $row['student'] }}</td>@endunless
+                            <td class="px-4 py-3.5 {{ $isStudent ? 'font-semibold text-[var(--trz-tinta)]' : 'text-[var(--trz-tinta)]' }}">{{ $row['type'] }}</td>
+                            <td class="px-4 py-3.5 text-[var(--trz-texto-2)]">{{ $row['period'] }}</td>
+                            <td class="px-4 py-3.5"><x-status-badge :text="$row['status']" :tone="$row['tone']" /></td>
+                            <td class="py-3.5 pl-4 text-right"><x-link-arrow :href="$row['url']" class="justify-end">Ver detalle</x-link-arrow></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
 
-        <div class="flex flex-col gap-3 sm:hidden">
-            @forelse($requests as $row)
-                <a href="{{ $row['url'] }}" class="flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3">
-                    <div class="flex items-center gap-2">
-                        <span class="flex-1 text-sm font-medium text-[var(--text-primary)]">{{ $row['type'] }}</span>
-                        <x-status-badge :text="$row['status']" :tone="$row['tone']" />
-                    </div>
-                    <p class="text-xs text-[var(--text-secondary)]">{{ $row['date'] }}@unless($isStudent) · {{ $row['student'] }}@endunless · {{ $row['period'] }}</p>
-                </a>
-            @empty
-                <p class="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-center text-sm text-[var(--text-muted)]">No hay solicitudes que coincidan con los filtros.</p>
-            @endforelse
-        </div>
+            <ul class="flex flex-col md:hidden">
+                @foreach($requests as $row)
+                    <li class="border-b border-[var(--trz-linea)] first:border-t">
+                        <a href="{{ $row['url'] }}" class="flex flex-col gap-1.5 py-3.5 hover:bg-[var(--trz-hilo-fondo)]">
+                            <span class="flex items-center justify-between gap-3">
+                                <span class="text-base font-semibold text-[var(--trz-tinta)]">{{ $row['type'] }}</span>
+                                <span class="shrink-0 text-[13px] text-[var(--trz-texto-2)]">{{ $row['date'] }}</span>
+                            </span>
+                            <span class="flex items-center justify-between gap-3">
+                                <span class="text-[13px] text-[var(--trz-texto-2)]">@unless($isStudent){{ $row['student'] }} · @endunless{{ $row['period'] }}</span>
+                                <x-status-badge :text="$row['status']" :tone="$row['tone']" />
+                            </span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
 
         <x-pagination :paginator="$requests" noun="solicitudes" />
-    </div>
+    </x-page>
 </x-layouts.app>

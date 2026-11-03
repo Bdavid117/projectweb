@@ -1,35 +1,40 @@
 <x-layouts.app :user="$user" :nav-groups="$navGroups" title="Mi tutor · Trayectoria Estudiantil">
-    <div class="flex flex-col gap-5 p-4 sm:p-7">
-        <div class="flex flex-col gap-[3px]">
-            <h1 class="text-2xl font-semibold text-[var(--text-primary)]">Mi tutor</h1>
-            <p class="text-sm text-[var(--text-secondary)]">Usted decide quién puede ver su información como tutor · Periodo {{ $termLabel }}</p>
-        </div>
+    <x-page>
+        <x-page-header title="Mi tutor" :subtitle="'Usted decide quién puede ver su información como tutor · Periodo '.$termLabel" />
 
         @if($errors->has('tutor'))
-            <div class="flex gap-[10px] rounded-[var(--radius-md)] bg-[var(--color-danger-bg)] p-3">
-                <x-ui-icon name="circle-alert" class="h-4 w-4 shrink-0 text-[var(--color-danger)]" />
-                <p class="text-sm font-semibold text-[var(--color-danger)]">{{ $errors->first('tutor') }}</p>
-            </div>
+            <x-flash tone="danger" :message="$errors->first('tutor')" />
         @endif
 
         @if(! $hasStudent)
-            <p class="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 text-center text-sm text-[var(--text-muted)]">Su usuario no tiene una ficha de estudiante, así que no puede compartir su información.</p>
+            <x-empty-state kind="tutor" title="Su usuario no tiene una ficha de estudiante" text="Su usuario no tiene una ficha de estudiante, así que no puede compartir su información." />
         @else
-            <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                <div class="flex flex-col gap-[2px] px-4 py-[14px]">
-                    <h2 class="text-sm font-semibold text-[var(--text-primary)]">Solicitudes pendientes</h2>
-                    <p class="text-xs text-[var(--text-muted)]">Si acepta, esa persona podrá ver su ficha, solicitudes, experiencias y tutorías, y registrar tutorías.</p>
-                </div>
+            <x-frase>
+                @if($current)
+                    {{ $current['name'] }} ve su información desde el {{ $current['since'] }}.
+                @else
+                    Hoy no comparte su información con ningún tutor.
+                @endif
+                @if(count($pending) > 0)
+                    Tiene {{ count($pending) === 1 ? '1 solicitud esperando' : count($pending).' solicitudes esperando' }} su respuesta.
+                @endif
+            </x-frase>
+
+            <x-section title="Solicitudes pendientes" note="Si acepta, esa persona podrá ver su ficha, solicitudes, experiencias y tutorías, y registrar tutorías.">
                 @forelse($pending as $row)
-                    <div class="flex flex-col gap-3 border-t border-[var(--border-subtle)] px-4 py-3 lg:flex-row lg:items-center">
-                        <div class="flex min-w-0 flex-1 flex-col gap-[2px]">
-                            <span class="text-sm font-semibold text-[var(--text-primary)]">{{ $row['tutor'] }}</span>
-                            <span class="text-xs text-[var(--text-secondary)]">Enviada el {{ $row['sentAt'] }}</span>
-                            @if($row['message'])
-                                <p class="whitespace-pre-line text-sm text-[var(--text-secondary)]">«{{ $row['message'] }}»</p>
-                            @endif
+                    @if($loop->first)<ul class="flex flex-col border-y border-[var(--trz-linea)]">@endif
+                    <li class="flex flex-col gap-4 py-[18px] sm:flex-row sm:items-center sm:justify-between sm:gap-6 {{ $loop->last ? '' : 'border-b border-[var(--trz-linea)]' }}">
+                        <div class="flex min-w-0 items-start gap-4">
+                            <x-stream-mark kind="acompanamiento" class="mt-1.5" />
+                            <div class="flex min-w-0 flex-col gap-1">
+                                <span class="text-lg font-semibold text-[var(--trz-tinta)]">{{ $row['tutor'] }}</span>
+                                <span class="text-sm text-[var(--trz-texto-2)]">Enviada el {{ $row['sentAt'] }}</span>
+                                @if($row['message'])
+                                    <p class="text-[15px] text-[var(--trz-tinta)]">«{{ $row['message'] }}»</p>
+                                @endif
+                            </div>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex shrink-0 flex-wrap gap-3">
                             <form method="POST" action="{{ $row['acceptUrl'] }}">
                                 @csrf
                                 <x-button variant="primary" type="submit" icon="circle-check">Aceptar</x-button>
@@ -39,48 +44,43 @@
                                 <x-button variant="secondary" type="submit">Rechazar</x-button>
                             </form>
                         </div>
-                    </div>
+                    </li>
+                    @if($loop->last)</ul>@endif
                 @empty
-                    <p class="border-t border-[var(--border-subtle)] px-4 py-6 text-center text-sm text-[var(--text-muted)]">No tiene solicitudes pendientes.</p>
+                    <p class="border-y border-[var(--trz-linea)] py-5 text-[15px] text-[var(--trz-texto-2)]">No tiene solicitudes pendientes.</p>
                 @endforelse
-            </div>
+            </x-section>
 
-            <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                <div class="px-4 py-[14px]">
-                    <h2 class="text-sm font-semibold text-[var(--text-primary)]">Tutor actual</h2>
-                </div>
+            <x-section title="Tutor actual">
                 @if($current)
-                    <div class="flex flex-col gap-3 border-t border-[var(--border-subtle)] px-4 py-3 lg:flex-row lg:items-center">
-                        <div class="flex min-w-0 flex-1 flex-col gap-[2px]">
-                            <span class="text-sm font-semibold text-[var(--text-primary)]">{{ $current['name'] }}</span>
-                            <span class="text-xs text-[var(--text-secondary)]">Comparte su información desde el {{ $current['since'] }}</span>
+                    <div class="flex flex-col gap-4 border-y border-[var(--trz-linea)] py-[18px] sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                        <div class="flex items-start gap-4">
+                            <x-stream-mark kind="acompanamiento" class="mt-1.5" />
+                            <div class="flex flex-col gap-1">
+                                <span class="text-lg font-semibold text-[var(--trz-tinta)]">{{ $current['name'] }}</span>
+                                <span class="text-sm text-[var(--trz-texto-2)]">Comparte su información desde el {{ $current['since'] }}</span>
+                            </div>
                         </div>
-                        {{-- El texto viaja en un atributo data- (HTML lo escapa) y no dentro de un literal de JavaScript: el nombre del tutor es dato del usuario. --}}
-                        <form method="POST" action="{{ route('my-tutor.revoke') }}" x-data data-confirm="¿Dejar de compartir su información con {{ $current['name'] }}? Perderá el acceso de inmediato." @submit="if (! confirm($el.dataset.confirm)) $event.preventDefault()">
-                            @csrf
-                            @method('DELETE')
-                            <x-button variant="secondary" type="submit">Dejar de compartir</x-button>
-                        </form>
+                        <x-confirm title="¿Dejar de compartir su información?" :text="$current['name'].' perderá el acceso a su ficha, solicitudes, experiencias y tutorías de inmediato.'" confirm="Dejar de compartir" trigger="Dejar de compartir" trigger-icon="user-x" trigger-variant="secondary" :action="route('my-tutor.revoke')" />
                     </div>
                 @else
-                    <p class="border-t border-[var(--border-subtle)] px-4 py-6 text-center text-sm text-[var(--text-muted)]">No comparte su información con ningún tutor en este periodo.</p>
+                    <x-empty-state kind="tutor" title="No comparte su información con ningún tutor en este periodo." text="Cuando un profesor le envíe una solicitud, podrá aceptarla o rechazarla aquí." />
                 @endif
-            </div>
+            </x-section>
 
             @if(count($history) > 0)
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="px-4 py-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Historial</h2>
-                    </div>
-                    @foreach($history as $row)
-                        <div class="flex items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-3">
-                            <span class="min-w-0 flex-1 text-sm text-[var(--text-primary)]">{{ $row['tutor'] }}</span>
-                            <span class="text-xs text-[var(--text-secondary)]">{{ $row['date'] }}</span>
-                            <x-status-badge :text="$row['status']" :tone="$row['tone']" />
-                        </div>
-                    @endforeach
-                </div>
+                <x-section title="Historial">
+                    <ul class="flex flex-col border-t border-[var(--trz-linea)]">
+                        @foreach($history as $row)
+                            <li class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--trz-linea)] py-3.5">
+                                <span class="min-w-0 flex-1 text-base font-semibold text-[var(--trz-tinta)]">{{ $row['tutor'] }}</span>
+                                <span class="text-[15px] text-[var(--trz-texto-2)]">{{ $row['date'] }}</span>
+                                <x-status-badge :text="$row['status']" :tone="$row['tone']" />
+                            </li>
+                        @endforeach
+                    </ul>
+                </x-section>
             @endif
         @endif
-    </div>
+    </x-page>
 </x-layouts.app>

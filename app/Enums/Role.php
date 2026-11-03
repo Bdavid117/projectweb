@@ -17,11 +17,9 @@ enum Role: string
         };
     }
 
+    /** Pantalla de inicio tras entrar: todos los roles aterrizan en su panel («Mi panel» para el estudiante). */
     public function homeRoute(): string
     {
-        return match ($this) {
-            self::Estudiante => 'requests.create',
-            default => 'panel.index',
-        };
+        return 'panel.index';
     }
 }

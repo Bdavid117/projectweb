@@ -1,86 +1,94 @@
+@php
+    $h = $headline;
+    $n = fn (int $count, string $one, string $many) => $count.' '.($count === 1 ? $one : $many);
+@endphp
+
 <x-layouts.app :user="$user" :nav-groups="$navGroups" title="Indicadores del programa · Trayectoria Estudiantil">
-    <div class="flex flex-col gap-5 p-4 sm:p-7">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div class="flex flex-1 flex-col gap-[3px]">
-                <h1 class="text-2xl font-semibold text-[var(--text-primary)]">Indicadores del programa</h1>
-                <p class="text-sm text-[var(--text-secondary)]">Vista exclusiva de Coordinación · calculada sobre datos históricos por periodo · RF-38</p>
-            </div>
-            <x-button variant="subtle" icon="download">Exportar</x-button>
-        </div>
+    <x-page>
+        <x-page-header title="Indicadores del programa" :subtitle="'Periodo '.$termLabel.', calculados sobre los datos históricos por periodo, con datos al '.$cutoff.'.'">
+            <x-slot:actions>
+                <x-button variant="subtle" icon="download" disabled aria-disabled="true" title="Aún no disponible">Exportar</x-button>
+            </x-slot:actions>
+        </x-page-header>
 
-        <div class="flex flex-wrap items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3">
-            <span class="rounded-full bg-[var(--surface-sunken)] px-3 py-1 text-sm text-[var(--text-secondary)]">Periodo {{ $termLabel }}</span>
-            <div class="flex-1"></div>
-            <span class="text-sm text-[var(--text-muted)]">Datos al {{ $cutoff }}</span>
-        </div>
+        <x-frase>
+            De {{ $n($h['active'], 'estudiante activo', 'estudiantes activos') }}, {{ $h['internships'] }} {{ $h['internships'] === 1 ? 'está' : 'están' }} en práctica y {{ $h['theses'] }} {{ $h['theses'] === 1 ? 'desarrolla' : 'desarrollan' }} su trabajo de grado.
+            Este periodo se {{ $h['filed'] === 1 ? 'radicó' : 'radicaron' }} {{ $n($h['filed'], 'solicitud', 'solicitudes') }} y {{ $h['pending'] }} {{ $h['pending'] === 1 ? 'sigue' : 'siguen' }} sin decisión.
+        </x-frase>
 
-        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            @foreach($keyIndicators as $indicator)
-                <x-indicator-card :label="$indicator['label']" :value="$indicator['value']" :detail="$indicator['detail']" :value-class="$indicator['valueClass'] ?? null" />
-            @endforeach
-        </div>
-
-        <div class="flex flex-col gap-4 lg:flex-row">
-            <div class="flex flex-1 flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                <div class="flex flex-col gap-[2px] px-4 pb-2 pt-[14px]">
-                    <h2 class="text-sm font-semibold text-[var(--text-primary)]">Distribución del PAPA</h2>
-                    <p class="text-xs text-[var(--text-muted)]">Número de estudiantes por rango</p>
-                </div>
-                <div class="flex items-end gap-3 border-t border-[var(--border-subtle)] px-4 py-4">
+        <div class="grid items-start gap-x-20 gap-y-12 lg:grid-cols-2">
+            <x-section title="Distribución del PAPA" :note="'Número de estudiantes por rango. '.($papaUnit === 1 ? 'Cada punto es un estudiante.' : 'Cada punto equivale a '.$papaUnit.' estudiantes.')">
+                @php($lowCount = $papaHistogram[0]['count'] + ($papaHistogram[1]['count'] ?? 0))
+                <ul class="flex flex-col gap-4">
                     @foreach($papaHistogram as $bar)
-                        <div class="flex flex-1 flex-col items-center justify-end gap-[7px]">
-                            <span class="text-xs font-medium text-[var(--text-secondary)]">{{ $bar['value'] }}</span>
-                            <div class="w-full rounded-t-[var(--radius-sm)] bg-[var(--color-primary-500)]" style="height: {{ $bar['height'] }}px"></div>
-                            <span class="text-xs text-[var(--text-muted)]">{{ $bar['range'] }}</span>
-                        </div>
+                        <li class="flex flex-col gap-1.5">
+                            <div class="flex items-center justify-between gap-3 text-[15px]">
+                                <span class="text-[var(--trz-tinta)]">{{ $bar['range'] }}</span>
+                                <span class="inline-flex items-center gap-2">
+                                    @if($loop->first && $bar['count'] > 0)
+                                        <span class="inline-flex items-center gap-1 text-[13px] font-semibold text-[var(--trz-alerta)]"><x-ui-icon name="triangle-alert" class="h-3.5 w-3.5" />bajo el mínimo</span>
+                                    @endif
+                                    <span class="font-bold text-[var(--trz-tinta)]">{{ $bar['value'] }}</span>
+                                </span>
+                            </div>
+                            <x-dots :count="(int) ceil($bar['count'] / $papaUnit)" :tone="$loop->first ? 'alerta' : 'hilo'" />
+                        </li>
                     @endforeach
-                </div>
-            </div>
+                </ul>
+                <p class="text-base text-[var(--trz-tinta)]">El {{ $h['active'] > 0 ? round($lowCount / max(1, array_sum(array_column($papaHistogram, 'count'))) * 100) : 0 }} % de los estudiantes ({{ $lowCount }}) tiene un PAPA por debajo de 3,3.</p>
+            </x-section>
 
-            <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] lg:w-[470px]">
-                <div class="flex flex-col gap-[2px] px-4 pb-2 pt-[14px]">
-                    <h2 class="text-sm font-semibold text-[var(--text-primary)]">Participación en experiencias formativas</h2>
-                    <p class="text-xs text-[var(--text-muted)]">Estudiantes con al menos un registro</p>
-                </div>
-                <div class="flex flex-col gap-3 border-t border-[var(--border-subtle)] px-4 py-[10px]">
-                    @foreach($participation as $row)
-                        <div class="flex flex-col gap-[5px]">
-                            <div class="flex items-center gap-2">
-                                <span class="flex-1 text-sm text-[var(--text-primary)]">{{ $row['label'] }}</span>
-                                <span class="text-sm text-[var(--text-secondary)]">{{ $row['value'] }}</span>
-                            </div>
-                            <div class="h-2 w-full rounded-full bg-[var(--surface-sunken)]">
-                                <div class="h-2 rounded-full bg-[var(--color-primary-500)]" style="width: {{ $row['percent'] }}%"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+            <x-section title="Participación en experiencias formativas" :note="'Estudiantes con al menos un registro. '.($participationUnit === 1 ? 'Cada rombo es un estudiante.' : 'Cada rombo equivale a '.$participationUnit.' estudiantes.')">
+                @if(empty($participation))
+                    <x-empty-state kind="experiencias" title="Sin experiencias registradas" text="Cuando los estudiantes registren experiencias, aquí verá cuántos participan por categoría." />
+                @else
+                    <ul class="flex flex-col gap-4">
+                        @foreach($participation as $row)
+                            <li class="flex flex-col gap-1.5">
+                                <div class="flex items-center justify-between gap-3 text-[15px]">
+                                    <span class="text-[var(--trz-tinta)]">{{ $row['label'] }}</span>
+                                    <span class="font-bold text-[var(--trz-tinta)]">{{ $row['count'] }} {{ $row['count'] === 1 ? 'estudiante' : 'estudiantes' }} ({{ $row['percent'] }} %)</span>
+                                </div>
+                                <x-dots :count="(int) ceil($row['count'] / $participationUnit)" shape="diamond" />
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </x-section>
         </div>
 
-        <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-            <div class="flex flex-col gap-[2px] px-4 pb-2 pt-[14px]">
-                <h2 class="text-sm font-semibold text-[var(--text-primary)]">Solicitudes por tipo y estado</h2>
-                <p class="text-xs text-[var(--text-muted)]">Periodo {{ $termLabel }} · RF-28</p>
-            </div>
-            <div class="overflow-x-auto">
-                <div class="hidden gap-3 border-t border-[var(--border-subtle)] px-4 py-[10px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)] sm:flex sm:min-w-[680px]">
-                    <span class="flex-1">TIPO DE SOLICITUD</span>
-                    <span class="w-[110px]">RADICADAS</span>
-                    <span class="w-[120px]">EN REVISIÓN</span>
-                    <span class="w-[125px]">CON DECISIÓN</span>
-                    <span class="w-[125px]">TIEMPO MEDIO</span>
-                </div>
+        <x-section title="Solicitudes por tipo y estado" :note="'Periodo '.$termLabel.'.'">
+            <table class="hidden w-full text-[15px] md:table">
+                <caption class="sr-only">Solicitudes del periodo {{ $termLabel }} por tipo y estado</caption>
+                <thead>
+                    <tr class="border-b-[1.5px] border-[var(--trz-linea)] text-[13px] font-semibold text-[var(--trz-texto-2)]">
+                        <th scope="col" class="py-2.5 pr-4 text-left font-semibold">Tipo de solicitud</th>
+                        <th scope="col" class="px-4 py-2.5 text-right font-semibold">Radicadas</th>
+                        <th scope="col" class="px-4 py-2.5 text-right font-semibold">En revisión</th>
+                        <th scope="col" class="px-4 py-2.5 text-right font-semibold">Con decisión</th>
+                        <th scope="col" class="py-2.5 pl-4 text-right font-semibold">Tiempo medio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($requestsByType as $row)
+                        <tr class="border-b border-[var(--trz-linea)]">
+                            <th scope="row" class="py-3.5 pr-4 text-left font-semibold text-[var(--trz-tinta)]">{{ $row['type'] }}</th>
+                            <td class="px-4 py-3.5 text-right text-[var(--trz-texto-2)]">{{ $row['filed'] }}</td>
+                            <td class="px-4 py-3.5 text-right text-[var(--trz-texto-2)]">{{ $row['review'] }}</td>
+                            <td class="px-4 py-3.5 text-right text-[var(--trz-texto-2)]">{{ $row['decided'] }}</td>
+                            <td class="py-3.5 pl-4 text-right text-[var(--trz-texto-2)]">{{ $row['avgTime'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <ul class="flex flex-col border-t border-[var(--trz-linea)] md:hidden">
                 @foreach($requestsByType as $row)
-                    <div class="flex flex-col gap-1 border-t border-[var(--border-subtle)] px-4 py-[11px] text-sm sm:flex-row sm:min-w-[680px] sm:items-center sm:gap-3">
-                        <span class="flex-1 font-medium text-[var(--text-primary)] sm:font-normal">{{ $row['type'] }}</span>
-                        <span class="text-[var(--text-secondary)] sm:w-[110px]">Radicadas: {{ $row['filed'] }}</span>
-                        <span class="text-[var(--text-secondary)] sm:w-[120px]">En revisión: {{ $row['review'] }}</span>
-                        <span class="text-[var(--text-secondary)] sm:w-[125px]">Con decisión: {{ $row['decided'] }}</span>
-                        <span class="text-[var(--text-secondary)] sm:w-[125px]">Tiempo medio: {{ $row['avgTime'] }}</span>
-                    </div>
+                    <li class="flex flex-col gap-1 border-b border-[var(--trz-linea)] py-3.5">
+                        <span class="text-base font-semibold text-[var(--trz-tinta)]">{{ $row['type'] }}</span>
+                        <span class="text-sm text-[var(--trz-texto-2)]">{{ $row['filed'] }} radicadas · {{ $row['review'] }} en revisión · {{ $row['decided'] }} con decisión · {{ $row['avgTime'] }}</span>
+                    </li>
                 @endforeach
-            </div>
-        </div>
-    </div>
+            </ul>
+        </x-section>
+    </x-page>
 </x-layouts.app>

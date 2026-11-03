@@ -19,9 +19,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ProgramMetrics
 {
-    private const COHORT_BAR_HEIGHT = 152;
-
-    private const HISTOGRAM_BAR_HEIGHT = 141;
+    /** Máximo de puntos por fila en los gráficos de puntos: la unidad (estudiantes por punto) se ajusta a este tope. */
+    private const MAX_DOTS = 24;
 
     private ?AcademicTerm $term = null;
 
@@ -45,32 +44,29 @@ class ProgramMetrics
     public function panel(?User $viewer = null): array
     {
         $ids = $this->visibleStudentIds($viewer);
+        $scoped = $ids !== null;
         $term = $this->term();
-        $records = $this->records($term);
+        $records = $this->records($term)->when($scoped, fn ($q) => $q->whereIn('academic_records.student_id', $ids));
         $avgPapa = (clone $records)->avg('papa');
         $avgAdvance = (clone $records)->avg('porcentaje_avance');
         $previous = $this->previousTerm($term);
-        $prevPapa = $previous ? $this->records($previous)->avg('papa') : null;
+        $prevPapa = $previous ? $this->records($previous)->when($scoped, fn ($q) => $q->whereIn('academic_records.student_id', $ids))->avg('papa') : null;
         $open = $this->alerts($ids)->where('atendida', false)->count();
-
-        $delta = $avgPapa !== null && $prevPapa !== null
-            ? ((float) $avgPapa - (float) $prevPapa >= 0 ? '+' : '').number_format((float) $avgPapa - (float) $prevPapa, 1).' frente al periodo anterior'
-            : 'Sin periodo anterior para comparar';
-
-        $alerts = ['label' => 'ALERTAS ABIERTAS', 'value' => (string) $open, 'detail' => 'Requieren atención temprana'];
-        if ($open > 0) {
-            $alerts['valueClass'] = 'text-[var(--color-danger)]';
-        }
+        $active = Student::where('estado', 'activo')->when($scoped, fn ($q) => $q->whereIn('id', $ids))->count();
 
         return [
-            'indicators' => [
-                ['label' => 'ESTUDIANTES ACTIVOS', 'value' => (string) Student::where('estado', 'activo')->count(), 'detail' => 'Matriculados en '.Labels::termLabel($term)],
-                ['label' => 'PAPA PROMEDIO', 'value' => $avgPapa !== null ? number_format((float) $avgPapa, 1) : '—', 'detail' => $delta],
-                ['label' => 'AVANCE MEDIO', 'value' => $avgAdvance !== null ? round((float) $avgAdvance).'%' : '—', 'detail' => 'Créditos cursados del plan'],
-                $alerts,
+            // Cifras de la frase que abre el panel; la vista las redacta.
+            'headline' => [
+                'scoped' => $scoped,
+                'active' => $active,
+                'open' => $open,
+                'papa' => $avgPapa !== null ? Labels::decimal($avgPapa) : null,
+                'papaDelta' => $avgPapa !== null && $prevPapa !== null ? round((float) $avgPapa - (float) $prevPapa, 1) : null,
+                'advance' => $avgAdvance !== null ? (int) round((float) $avgAdvance) : null,
+                'term' => Labels::termLabel($term),
             ],
+            'cohortMap' => $this->cohortMap($records, $ids),
             'attentionRows' => $this->attentionRows($ids),
-            'cohortChart' => $this->cohortChart($records),
             'recentActivity' => $this->recentActivity($ids),
         ];
     }
@@ -79,7 +75,6 @@ class ProgramMetrics
     {
         $term = $this->term();
         $active = Student::where('estado', 'activo')->count();
-        $share = fn (int $n) => $active > 0 ? round($n / $active * 100).'% de los activos' : 'Sin estudiantes activos';
 
         $internships = Internship::whereDate('fecha_inicio', '<=', today())
             ->where(fn ($q) => $q->whereNull('fecha_fin')->orWhereDate('fecha_fin', '>=', today()))
@@ -91,16 +86,20 @@ class ProgramMetrics
         $pending = (clone $periodRequests)->where('estado', '!=', 'con_decision')->count();
 
         return [
-            'keyIndicators' => [
-                ['label' => 'ESTUDIANTES ACTIVOS', 'value' => (string) $active, 'detail' => 'Matriculados en '.Labels::termLabel($term)],
-                ['label' => 'PRÁCTICAS EN CURSO', 'value' => (string) $internships, 'detail' => $share($internships)],
-                ['label' => 'TRABAJOS DE GRADO', 'value' => (string) $theses, 'detail' => $share($theses)],
-                ['label' => 'SOLICITUDES DEL PERIODO', 'value' => (string) $filed, 'detail' => $pending.' aún sin decisión', 'valueClass' => 'text-[var(--color-warning)]'],
-            ],
-            'papaHistogram' => $this->papaHistogram($term),
-            'participation' => $this->participation($active),
+            // Cifras de la frase que abre Indicadores.
+            'headline' => ['active' => $active, 'internships' => $internships, 'theses' => $theses, 'filed' => $filed, 'pending' => $pending],
+            'papaHistogram' => $histogram = $this->papaHistogram($term),
+            'papaUnit' => $this->dotUnit(array_column($histogram, 'count')),
+            'participation' => $participation = $this->participation($active),
+            'participationUnit' => $this->dotUnit(array_column($participation, 'count')),
             'requestsByType' => $this->requestsByType($term),
         ];
+    }
+
+    /** Estudiantes que representa cada punto para que la fila más larga no pase de MAX_DOTS. */
+    private function dotUnit(array $counts): int
+    {
+        return max(1, (int) ceil(max([1, ...$counts]) / self::MAX_DOTS));
     }
 
     private function records(?AcademicTerm $term): Builder
@@ -142,19 +141,53 @@ class ProgramMetrics
         ])->all();
     }
 
-    private function cohortChart(Builder $records): array
+    /**
+     * Un punto por estudiante, en la fila de su cohorte y a la altura de su avance del plan (0 a 100 %).
+     * Los que tienen una alerta abierta llevan un anillo. Respeta el alcance del usuario (el profesor solo ve a sus tutorados).
+     *
+     * @return array{rows: list<array{label: string, dots: list<array{pct: int, alert: bool, label: string}>}>, reading: ?string}
+     */
+    private function cohortMap(Builder $records, ?array $ids): array
     {
-        return (clone $records)
+        $withAlert = $this->alerts($ids)->where('atendida', false)->pluck('student_id')->flip();
+
+        $students = (clone $records)
             ->join('students', 'students.id', '=', 'academic_records.student_id')
-            ->selectRaw('left(students.cohorte, 4) as anio, avg(academic_records.porcentaje_avance) as avance')
-            ->groupBy('anio')
-            ->orderBy('anio')
-            ->get()
-            ->map(fn ($row) => [
-                'label' => $row->anio,
-                'value' => round((float) $row->avance).'%',
-                'height' => max(3, (int) round((float) $row->avance / 100 * self::COHORT_BAR_HEIGHT)),
-            ])->all();
+            ->leftJoin('users', 'users.id', '=', 'students.user_id')
+            ->select('students.id as student_id', 'students.cohorte', 'students.codigo', 'users.name', 'academic_records.porcentaje_avance')
+            ->orderBy('students.cohorte')
+            ->orderBy('users.name')
+            ->get();
+
+        // Una fila por año de ingreso: la cohorte «2021-2» y la «2021-1» comparten fila.
+        $students = $students->each(fn ($row) => $row->year = substr((string) $row->cohorte, 0, 4));
+
+        $rows = $students->groupBy('year')->map(fn ($group, $year) => [
+            'label' => (string) $year,
+            'dots' => $group->map(function ($row) use ($withAlert) {
+                $pct = (int) max(0, min(100, round((float) $row->porcentaje_avance)));
+                $alert = $withAlert->has($row->student_id);
+
+                return [
+                    'pct' => $pct,
+                    'alert' => $alert,
+                    'label' => ($row->name ?? $row->codigo).' · '.$pct.' % del plan'.($alert ? ', con una alerta abierta' : ''),
+                ];
+            })->values()->all(),
+        ])->values()->all();
+
+        $byCohort = $students->filter(fn ($row) => $withAlert->has($row->student_id))->countBy('year')->sortDesc();
+        $total = $byCohort->sum();
+        $top = $byCohort->take(2);
+
+        $reading = match (true) {
+            $students->isEmpty() => null,
+            $total === 0 => 'Ninguna alerta abierta en este periodo.',
+            $byCohort->count() === 1 => 'Las '.$total.' alertas abiertas están en la cohorte '.$top->keys()->first().'.',
+            default => 'Las cohortes '.$top->keys()->join(' y ').' concentran '.$top->sum().' de las '.$total.' alertas abiertas.',
+        };
+
+        return ['rows' => $rows, 'reading' => $reading];
     }
 
     private function recentActivity(?array $ids): array
@@ -179,7 +212,7 @@ class ProgramMetrics
 
     private function papaHistogram(?AcademicTerm $term): array
     {
-        $buckets = [['< 3.0', 3.0], ['3.0–3.3', 3.3], ['3.3–3.6', 3.6], ['3.6–4.0', 4.0], ['4.0–4.3', 4.3], ['> 4.3', INF]];
+        $buckets = [['Menos de 3,0', 3.0], ['3,0 a 3,3', 3.3], ['3,3 a 3,6', 3.6], ['3,6 a 4,0', 4.0], ['4,0 a 4,3', 4.3], ['Más de 4,3', INF]];
         $counts = array_fill(0, count($buckets), 0);
 
         foreach ($this->records($term)->pluck('papa') as $papa) {
@@ -191,12 +224,10 @@ class ProgramMetrics
             }
         }
 
-        $max = max($counts) ?: 1;
-
         return array_map(fn (array $bucket, int $count) => [
             'range' => $bucket[0],
             'value' => (string) $count,
-            'height' => (int) round($count / $max * self::HISTOGRAM_BAR_HEIGHT),
+            'count' => $count,
         ], $buckets, $counts);
     }
 
@@ -212,7 +243,7 @@ class ProgramMetrics
             ->map(function ($row) use ($active) {
                 $percent = $active > 0 ? (int) min(100, round($row->total / $active * 100)) : 0;
 
-                return ['label' => $row->categoria, 'value' => $row->total.' · '.$percent.'%', 'percent' => $percent];
+                return ['label' => $row->categoria, 'value' => $row->total.' · '.$percent.'%', 'percent' => $percent, 'count' => (int) $row->total];
             })->all();
     }
 

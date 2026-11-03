@@ -7,11 +7,11 @@
     $retry = is_numeric($retry) ? (int) $retry : null;
 @endphp
 
-<x-layouts.error code="429" title="Demasiados intentos" tone="warning">
+<x-layouts.error code="429" title="Demasiados intentos">
     <p>Hizo demasiados intentos seguidos. Para proteger las cuentas, el sistema los bloquea por un momento.</p>
 
     @if($retry)
-        <p>Espere <span class="font-semibold text-[var(--text-primary)]">{{ $retry }} {{ $retry === 1 ? 'segundo' : 'segundos' }}</span> antes de volver a intentarlo.</p>
+        <p>Espere <span class="font-semibold text-[var(--trz-tinta)]">{{ $retry }} {{ $retry === 1 ? 'segundo' : 'segundos' }}</span> antes de volver a intentarlo.</p>
     @else
         <p>Espere un minuto antes de volver a intentarlo.</p>
     @endif

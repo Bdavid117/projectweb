@@ -12,8 +12,6 @@ use Illuminate\Support\Collection;
 
 class StudentProfile
 {
-    private const PAPA_BAR_HEIGHT = 150;
-
     /** @var array<string, array{0: string, 1: string}> */
     private const CATEGORY_STYLE = [
         'Investigación' => ['sparkles', 'primary'],
@@ -41,7 +39,7 @@ class StudentProfile
             'cohort' => 'Cohorte '.$student->cohorte,
             'enrollment' => $latest?->numero_matricula ? $latest->numero_matricula.'.ª matrícula' : 'Sin matrícula registrada',
             'tutor' => $tutor ? 'Tutor asignado: '.$tutor->name : 'Sin tutor asignado',
-            'papa' => $latest ? number_format((float) $latest->papa, 1) : '—',
+            'papa' => $latest ? Labels::decimal($latest->papa) : '—',
         ];
     }
 
@@ -68,15 +66,11 @@ class StudentProfile
         return [
             'student' => self::header($student),
             'tabs' => $tabs,
-            'papaChart' => $records->map(fn (AcademicRecord $r) => [
-                'period' => $r->term->codigo,
-                'value' => number_format((float) $r->papa, 1),
-                'height' => (int) round((float) $r->papa / 5 * self::PAPA_BAR_HEIGHT),
-            ])->all(),
+            'notebook' => self::notebook($student, $records, $seesTutorships),
             'academicRows' => $records->reverse()->values()->map(fn (AcademicRecord $r) => [
                 'period' => $r->term->codigo,
-                'papa' => number_format((float) $r->papa, 1),
-                'average' => $r->promedio_periodo !== null ? number_format((float) $r->promedio_periodo, 1) : '—',
+                'papa' => Labels::decimal($r->papa),
+                'average' => $r->promedio_periodo !== null ? Labels::decimal($r->promedio_periodo) : '—',
                 'credits' => $r->creditos_cursados !== null ? $r->creditos_cursados.' de '.config('program.total_credits') : '—',
                 'advance' => (int) round((float) $r->porcentaje_avance),
             ])->all(),
@@ -89,8 +83,8 @@ class StudentProfile
                 'details' => [
                     ['label' => 'Créditos cursados', 'value' => $latest ? $latest->creditos_cursados.' de '.config('program.total_credits') : '—'],
                     ['label' => 'Cupo del periodo', 'value' => $latest?->cupo_creditos ? $latest->cupo_creditos.' créditos' : '—'],
-                    ['label' => 'PAPA actual', 'value' => $latest ? number_format((float) $latest->papa, 1) : '—'],
-                    ['label' => 'Promedio anterior', 'value' => $previous ? number_format((float) $previous->papa, 1) : '—'],
+                    ['label' => 'PAPA actual', 'value' => $latest ? Labels::decimal($latest->papa) : '—'],
+                    ['label' => 'Promedio anterior', 'value' => $previous ? Labels::decimal($previous->papa) : '—'],
                 ],
             ],
             'showTutorials' => $seesTutorships,
@@ -101,6 +95,60 @@ class StudentProfile
                 'editUrl' => $viewer && $viewer->can('update', $t) ? route('tutorships.edit', $t) : null,
             ])->all(),
         ];
+    }
+
+    /**
+     * Cuaderno de ruta: el PAPA de cada periodo, las experiencias y las tutorías en un solo eje, del periodo más reciente
+     * al más antiguo. Cada entrada lleva la corriente a la que pertenece (académico, experiencia o acompañamiento).
+     *
+     * @return list<array{period: string, items: list<array{kind: string, text: string}>}>
+     */
+    private static function notebook(Student $student, Collection $records, bool $seesTutorships): array
+    {
+        $terms = AcademicTerm::orderBy('fecha_inicio')->get();
+        $periodOf = fn ($date) => $terms->first(fn (AcademicTerm $t) => $date->between($t->fecha_inicio, $t->fecha_fin))?->codigo ?? (string) $date->year;
+
+        $entries = $records->map(fn (AcademicRecord $r) => [
+            'period' => $r->term->codigo,
+            'at' => $r->term->fecha_fin ?? $r->term->fecha_inicio,
+            'kind' => 'academico',
+            'text' => 'PAPA '.Labels::decimal($r->papa).($r->promedio_periodo !== null ? ' · promedio del periodo '.Labels::decimal($r->promedio_periodo) : ''),
+        ]);
+
+        foreach ($student->experiences()->get() as $experience) {
+            $entries->push([
+                'period' => $periodOf($experience->fecha_inicio),
+                'at' => $experience->fecha_inicio,
+                'kind' => 'experiencia',
+                'text' => $experience->nombre.match ($experience->estado()) {
+                    'validada' => '',
+                    'rechazada' => ' (rechazada)',
+                    default => ' (por verificar)',
+                },
+            ]);
+        }
+
+        if ($seesTutorships) {
+            foreach ($student->tutorships()->get() as $tutorship) {
+                $entries->push([
+                    'period' => $periodOf($tutorship->fecha),
+                    'at' => $tutorship->fecha,
+                    'kind' => 'acompanamiento',
+                    'text' => 'Tutoría del '.$tutorship->fecha->isoFormat('D [de] MMMM').($tutorship->motivo ? ': '.$tutorship->motivo : ''),
+                ]);
+            }
+        }
+
+        return $entries->groupBy('period')
+            ->map(fn (Collection $items, string $period) => [
+                'period' => $period,
+                'latest' => $items->max('at'),
+                'items' => $items->sortByDesc('at')->map(fn (array $item) => ['kind' => $item['kind'], 'text' => $item['text']])->values()->all(),
+            ])
+            ->sortByDesc('latest')
+            ->map(fn (array $group) => ['period' => $group['period'], 'items' => $group['items']])
+            ->values()
+            ->all();
     }
 
     private static function records(Student $student): Collection

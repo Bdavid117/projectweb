@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\AcademicTerm;
 use App\Models\CommitteeRequest;
 use App\Support\Labels;
 use Carbon\Carbon;
@@ -19,11 +20,20 @@ class LabelsTest extends TestCase
 
     public function test_request_status_uses_the_decision_once_decided(): void
     {
-        $this->assertSame(['Radicada', 'info'], Labels::requestStatus(new CommitteeRequest(['estado' => 'radicada'])));
-        $this->assertSame(['En revisión', 'warning'], Labels::requestStatus(new CommitteeRequest(['estado' => 'en_revision'])));
+        $this->assertSame(['Radicada', 'neutral'], Labels::requestStatus(new CommitteeRequest(['estado' => 'radicada'])));
+        $this->assertSame(['En revisión', 'review'], Labels::requestStatus(new CommitteeRequest(['estado' => 'en_revision'])));
         $this->assertSame(['Aprobada', 'success'], Labels::requestStatus(new CommitteeRequest(['estado' => 'con_decision', 'decision' => 'aprobada'])));
         $this->assertSame(['Rechazada', 'danger'], Labels::requestStatus(new CommitteeRequest(['estado' => 'con_decision', 'decision' => 'rechazada'])));
-        $this->assertSame(['Aplazada', 'primary'], Labels::requestStatus(new CommitteeRequest(['estado' => 'con_decision', 'decision' => 'aplazada'])));
+        $this->assertSame(['Aplazada', 'warning'], Labels::requestStatus(new CommitteeRequest(['estado' => 'con_decision', 'decision' => 'aplazada'])));
+    }
+
+    public function test_decimals_use_a_comma_and_missing_values_a_dash(): void
+    {
+        $this->assertSame('4,1', Labels::decimal(4.07));
+        $this->assertSame('3,0', Labels::decimal('3'));
+        $this->assertSame('1.204,5', Labels::decimal(1204.5));
+        $this->assertSame('—', Labels::decimal(null));
+        $this->assertSame('2026-2', Labels::termLabel(new AcademicTerm(['codigo' => '2026-2'])));
     }
 
     public function test_period_date_and_bytes_formatting(): void

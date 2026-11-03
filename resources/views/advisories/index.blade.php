@@ -1,59 +1,81 @@
+@php
+    $s = $summary;
+@endphp
+
 <x-layouts.app :user="$user" :nav-groups="$navGroups" title="Mis asesorías · Trayectoria Estudiantil">
-    <div class="flex flex-col gap-5 p-4 sm:p-7">
-        <div class="flex flex-col gap-[3px]">
-            <h1 class="text-2xl font-semibold text-[var(--text-primary)]">Mis asesorías</h1>
-            <p class="text-sm text-[var(--text-secondary)]">{{ $total }} estudiantes asignados en {{ $termLabel }} · RF-35</p>
-        </div>
+    <x-page>
+        <x-page-header title="Mis asesorías" :subtitle="$total.' estudiantes asignados en '.$termLabel.'. Solo aparecen quienes aceptaron su solicitud de tutoría.'">
+            <x-slot:actions>
+                <x-button variant="primary" icon="user-plus" :href="route('tutor-requests.index')">Solicitar tutoría</x-button>
+            </x-slot:actions>
+        </x-page-header>
 
-        <form method="GET" action="{{ route('advisories.index') }}" class="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[14px] lg:flex-row lg:items-center">
-            <div class="flex h-[var(--control-height)] flex-1 items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-default)] px-3">
-                <x-ui-icon name="search" class="h-4 w-4 text-[var(--color-neutral-400)]" />
-                <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="Buscar por nombre o código" class="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]" />
-            </div>
-            <x-filter-select name="alertas" all="Alertas: todas" :options="$alertOptions" :selected="$filters['alertas']" />
+        @if($total > 0)
+            <x-frase>
+                De sus {{ $total }} tutorados, {{ $s['lowPapa'] === 0 ? 'ninguno tiene' : ($s['lowPapa'] === 1 ? '1 tiene' : $s['lowPapa'].' tienen') }} el PAPA por debajo de {{ $s['papaAlert'] }}
+                y {{ $s['withAlerts'] === 0 ? 'ninguno acumula' : ($s['withAlerts'] === 1 ? '1 acumula' : $s['withAlerts'].' acumulan') }} una alerta abierta.
+                @if($s['lastSession'])La última tutoría registrada fue el {{ $s['lastSession']->isoFormat('D [de] MMMM') }}.@endif
+            </x-frase>
+        @endif
+
+        <x-filter-bar :action="route('advisories.index')">
+            <x-search-field name="q" :value="$filters['q']" placeholder="Buscar por nombre o código" />
+            <div class="w-full sm:w-[220px]"><x-filter-select name="alertas" all="Alertas: todas" :options="$alertOptions" :selected="$filters['alertas']" /></div>
             <x-button variant="secondary" type="submit">Filtrar</x-button>
-        </form>
+        </x-filter-bar>
 
-        <div class="hidden min-w-0 flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] sm:flex">
-            <div class="min-w-0 overflow-x-auto">
-                <div class="flex min-w-[760px] gap-3 px-4 py-[11px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
-                    <span class="flex-1">ESTUDIANTE</span>
-                    <span class="w-[90px]">COHORTE</span>
-                    <span class="w-[140px]">ÚLTIMA TUTORÍA</span>
-                    <span class="w-16">PAPA</span>
-                    <span class="w-[170px]">ALERTAS</span>
-                    <span class="w-[150px]"></span>
-                </div>
-                @forelse($students as $row)
-                    <div class="flex min-w-[760px] items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-[11px] text-sm">
-                        <a href="{{ $row['profileUrl'] }}" class="flex-1 font-semibold text-[var(--text-primary)]">{{ $row['name'] }}</a>
-                        <span class="w-[90px] text-[var(--text-secondary)]">{{ $row['cohort'] }}</span>
-                        <span class="w-[140px] text-[var(--text-secondary)]">{{ $row['last'] }}</span>
-                        <span class="w-16 {{ $row['papaLow'] ? 'font-semibold text-[var(--color-danger)]' : 'text-[var(--text-secondary)]' }}">{{ $row['papa'] }}</span>
-                        <span class="w-[170px]"><x-status-badge :text="$row['alert']" :tone="$row['tone']" /></span>
-                        <a href="{{ $row['registerUrl'] }}" class="w-[150px] text-sm font-semibold text-[var(--color-primary-600)]">Registrar tutoría</a>
-                    </div>
-                @empty
-                    <div class="border-t border-[var(--border-subtle)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">No hay estudiantes que coincidan con los filtros.</div>
-                @endforelse
-            </div>
-        </div>
+        @if($students->isEmpty())
+            <x-empty-state kind="historia" title="No hay estudiantes que coincidan con los filtros." text="Pruebe con otro nombre o quite el filtro de alertas." />
+        @else
+            <table class="hidden w-full text-[15px] md:table">
+                <caption class="sr-only">Estudiantes asignados</caption>
+                <thead>
+                    <tr class="border-b-[1.5px] border-[var(--trz-linea)] text-[13px] font-semibold text-[var(--trz-texto-2)]">
+                        <th scope="col" class="py-2.5 pr-4 text-left font-semibold">Estudiante</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Cohorte</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Última tutoría</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">PAPA</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Alertas</th>
+                        <th scope="col" class="py-2.5 pl-4 text-right font-semibold"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($students as $row)
+                        <tr class="border-b border-[var(--trz-linea)] hover:bg-[var(--trz-hilo-fondo)]">
+                            <th scope="row" class="py-3.5 pr-4 text-left font-normal"><a href="{{ $row['profileUrl'] }}" class="text-base font-semibold text-[var(--trz-tinta)] hover:text-[var(--trz-hilo-texto)] hover:underline">{{ $row['name'] }}</a></th>
+                            <td class="px-4 py-3.5 text-[var(--trz-tinta)]">{{ $row['cohort'] }}</td>
+                            <td class="px-4 py-3.5 text-[var(--trz-tinta)]">{{ $row['last'] }}</td>
+                            <td class="px-4 py-3.5">
+                                @if($row['papaLow'])
+                                    <span class="inline-flex items-center gap-1.5 font-bold text-[var(--trz-alerta)]"><x-ui-icon name="triangle-alert" class="h-[15px] w-[15px]" /><span class="sr-only">PAPA bajo el mínimo:</span>{{ $row['papa'] }}</span>
+                                @else
+                                    <span class="text-[var(--trz-tinta)]">{{ $row['papa'] }}</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3.5"><x-status-badge :text="$row['alert']" :tone="$row['tone']" /></td>
+                            <td class="py-3.5 pl-4 text-right"><x-link-arrow :href="$row['registerUrl']" class="justify-end">Registrar tutoría</x-link-arrow></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
 
-        <div class="flex flex-col gap-3 sm:hidden">
-            @forelse($students as $row)
-                <div class="flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3">
-                    <div class="flex items-center gap-2">
-                        <a href="{{ $row['profileUrl'] }}" class="flex-1 text-sm font-medium text-[var(--text-primary)]">{{ $row['name'] }}</a>
-                        <x-status-badge :text="$row['alert']" :tone="$row['tone']" />
-                    </div>
-                    <p class="text-xs text-[var(--text-secondary)]">{{ $row['cohort'] }} · PAPA {{ $row['papa'] }} · última tutoría {{ $row['last'] }}</p>
-                    <a href="{{ $row['registerUrl'] }}" class="text-sm font-semibold text-[var(--color-primary-600)]">Registrar tutoría</a>
-                </div>
-            @empty
-                <p class="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-center text-sm text-[var(--text-muted)]">No hay estudiantes que coincidan con los filtros.</p>
-            @endforelse
-        </div>
+            <ul class="flex flex-col md:hidden">
+                @foreach($students as $row)
+                    <li class="flex flex-col gap-1.5 border-b border-[var(--trz-linea)] py-3.5 first:border-t">
+                        <span class="flex items-center justify-between gap-3">
+                            <a href="{{ $row['profileUrl'] }}" class="text-base font-semibold text-[var(--trz-tinta)] hover:underline">{{ $row['name'] }}</a>
+                            <span class="text-[15px] font-bold {{ $row['papaLow'] ? 'text-[var(--trz-alerta)]' : 'text-[var(--trz-tinta)]' }}">{{ $row['papa'] }}</span>
+                        </span>
+                        <span class="flex items-center justify-between gap-3">
+                            <span class="text-[13px] text-[var(--trz-texto-2)]">{{ $row['cohort'] }} · última tutoría {{ $row['last'] }}</span>
+                            <x-status-badge :text="$row['alert']" :tone="$row['tone']" />
+                        </span>
+                        <x-link-arrow :href="$row['registerUrl']">Registrar tutoría</x-link-arrow>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
 
         <x-pagination :paginator="$students" noun="estudiantes asignados" />
-    </div>
+    </x-page>
 </x-layouts.app>

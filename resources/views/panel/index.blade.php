@@ -1,113 +1,96 @@
-<x-layouts.app :user="$user" :nav-groups="$navGroups" title="Panel del programa · Trayectoria Estudiantil">
-    <div class="flex flex-col gap-5 p-4 sm:p-7">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-            <div class="flex flex-1 flex-col gap-[3px]">
-                <h1 class="text-2xl font-semibold text-[var(--text-primary)]">Panel del programa</h1>
-                <p class="text-sm text-[var(--text-secondary)]">Datos al {{ $cutoff }} · periodo {{ $termLabel }}</p>
-            </div>
-            <div class="flex gap-3">
-                <x-button variant="subtle" icon="download">Exportar</x-button>
-                <x-button variant="primary" icon="upload">Cargar Excel</x-button>
+@php
+    $h = $headline;
+    $isProfessor = $h['scoped'];
+    $subject = $isProfessor ? ($h['active'] === 1 ? 'estudiante bajo su tutoría' : 'estudiantes bajo su tutoría') : ($h['active'] === 1 ? 'estudiante activo' : 'estudiantes activos');
+    $attention = $h['open'] === 0 ? 'ninguno con situaciones por atender' : $h['open'].' con situaciones por atender';
+    $tenths = $h['papaDelta'] === null ? null : (int) round(abs($h['papaDelta']) * 10);
+    $delta = match (true) {
+        $tenths === null => null,
+        $tenths === 0 => 'igual que el periodo anterior',
+        default => ($tenths === 1 ? 'una décima' : ($tenths < 10 ? $tenths.' décimas' : \App\Support\Labels::decimal(abs($h['papaDelta'])).' puntos')).($h['papaDelta'] > 0 ? ' más' : ' menos').' que el periodo anterior',
+    };
+@endphp
+
+<x-layouts.app :user="$user" :nav-groups="$navGroups" title="Panel · Trayectoria Estudiantil">
+    <x-page>
+        <div class="flex flex-col gap-8">
+            <p class="text-sm text-[var(--trz-texto-2)]">{{ $termLabel === 'sin periodo' ? 'Sin periodo vigente' : 'Periodo '.$termLabel }}, con datos al {{ $cutoff }}.</p>
+
+            <div class="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
+                <div class="flex min-w-0 flex-col gap-4">
+                    @if($isProfessor && $h['active'] === 0)
+                        <h1 class="max-w-[22ch] text-[40px] font-semibold leading-[1.06] text-[var(--trz-tinta)] sm:text-[52px]">Aún no tiene estudiantes bajo su tutoría.</h1>
+                        <p class="max-w-[60ch] text-lg leading-[1.45] text-[var(--trz-texto-2)]">Pida acompañar a un estudiante; lo verá aquí cuando acepte.</p>
+                    @else
+                        <h1 class="max-w-[24ch] text-[40px] font-semibold leading-[1.06] text-[var(--trz-tinta)] sm:text-[52px]">{{ $h['active'] }} {{ $subject }}, {{ $attention }}.</h1>
+                        @if($h['papa'] !== null)
+                            <p class="max-w-[62ch] text-lg leading-[1.45] text-[var(--trz-texto-2)]">
+                                {{ $isProfessor ? 'Su PAPA medio es' : 'El PAPA medio es' }} {{ $h['papa'] }}@if($delta), {{ $delta }},@endif
+                                y el avance medio del plan es {{ $h['advance'] }} %.@if($isProfessor) Solo ve a quienes aceptaron su solicitud de tutoría.@endif
+                            </p>
+                        @endif
+                    @endif
+                </div>
+                <div class="flex shrink-0 flex-wrap items-center gap-3">
+                    @if($isProfessor)
+                        <x-button variant="subtle" :href="route('advisories.index')">Mis asesorías</x-button>
+                        <x-button variant="primary" icon="user-plus" :href="route('tutor-requests.index')">Solicitar tutoría</x-button>
+                    @else
+                        <x-button variant="subtle" icon="download" disabled aria-disabled="true" title="Aún no disponible">Exportar</x-button>
+                        <x-button variant="primary" icon="upload" disabled aria-disabled="true" title="Aún no disponible">Cargar Excel</x-button>
+                    @endif
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            @foreach($indicators as $indicator)
-                <x-indicator-card :label="$indicator['label']" :value="$indicator['value']" :detail="$indicator['detail']" :value-class="$indicator['valueClass'] ?? null" />
-            @endforeach
-        </div>
+        <div class="grid items-start gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,1fr)_420px]">
+            <x-section :title="$isProfessor ? 'Dónde está cada tutorado' : 'Dónde está cada cohorte'" note="Cada punto es un estudiante, ubicado según el porcentaje que lleva del plan de estudios. Quienes tienen una alerta abierta llevan un anillo.">
+                @if(empty($cohortMap['rows']))
+                    <x-empty-state kind="historia" title="Sin datos de avance por cohorte" text="Cuando haya registros académicos del periodo, cada estudiante aparecerá aquí como un punto." />
+                @else
+                    <x-cohort-map :rows="$cohortMap['rows']" :reading="$cohortMap['reading']" />
+                @endif
+            </x-section>
 
-        <div class="flex flex-col gap-4 lg:flex-row">
-            <div class="flex min-w-0 flex-1 flex-col gap-4">
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="flex items-center gap-3 px-4 py-[14px]">
-                        <div class="flex flex-1 flex-col gap-[2px]">
-                            <h2 class="text-sm font-semibold text-[var(--text-primary)]">Situaciones que requieren atención</h2>
-                            <p class="text-xs text-[var(--text-muted)]">Detectadas por reglas del programa · RF-37</p>
-                        </div>
-                        <a href="/estudiantes" class="text-sm font-medium text-[var(--color-primary-600)]">Ver todas</a>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <div class="flex min-w-[740px] gap-3 border-t border-[var(--border-subtle)] px-4 py-[9px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
-                            <span class="shrink-0 w-[210px]">ESTUDIANTE</span>
-                            <span class="min-w-[200px] flex-1">SITUACIÓN</span>
-                            <span class="shrink-0 w-24">DETECTADA</span>
-                            <span class="shrink-0 w-[118px]">ESTADO</span>
-                            <span class="shrink-0 w-[70px]"></span>
-                        </div>
-                        @if(empty($attentionRows))
-                            <p class="border-t border-[var(--border-subtle)] px-4 py-6 text-sm text-[var(--text-muted)]">Sin situaciones registradas.</p>
-                        @endif
-                        @foreach($attentionRows as $row)
-                            <div class="flex min-w-[740px] items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-3 text-sm">
-                                <span class="shrink-0 w-[210px] text-[var(--text-primary)]">{{ $row['name'] }}</span>
-                                <span class="min-w-[200px] flex-1 text-[var(--text-secondary)]">{{ $row['issue'] }}</span>
-                                <span class="shrink-0 w-24 text-[var(--text-secondary)]">{{ $row['date'] }}</span>
-                                <span class="shrink-0 w-[118px]"><x-status-badge :text="$row['status']" :tone="$row['tone']" /></span>
-                                <a href="{{ $row['url'] }}" class="shrink-0 w-[70px] text-sm font-medium text-[var(--color-primary-600)]">Ver ficha</a>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
+            <div class="flex flex-col gap-12">
+                <x-section title="Piden atención" note="Detectadas por las reglas del programa.">
+                    @if(empty($attentionRows))
+                        <p class="border-y border-[var(--trz-linea)] py-5 text-[15px] text-[var(--trz-texto-2)]">Sin situaciones por atender.</p>
+                    @else
+                        <ul class="flex flex-col border-t border-[var(--trz-linea)]">
+                            @foreach($attentionRows as $row)
+                                <li class="flex flex-col gap-2 border-b border-[var(--trz-linea)] py-4">
+                                    <div class="flex items-baseline justify-between gap-3">
+                                        <a href="{{ $row['url'] }}" class="text-[17px] font-semibold text-[var(--trz-tinta)] hover:text-[var(--trz-hilo-texto)] hover:underline max-md:-my-2.5 max-md:py-2.5">{{ $row['name'] }}</a>
+                                        <span class="shrink-0 text-[13px] text-[var(--trz-texto-2)]">{{ $row['date'] }}</span>
+                                    </div>
+                                    <p class="text-[15px] text-[var(--trz-texto-2)]">{{ $row['issue'] }}</p>
+                                    <div><x-status-badge :text="$row['status']" :tone="$row['tone']" /></div>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <x-link-arrow href="/estudiantes">Ver {{ $isProfessor ? 'a todos mis tutorados' : 'todas las situaciones' }}</x-link-arrow>
+                    @endif
+                </x-section>
 
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="flex flex-col gap-[2px] px-4 py-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Avance en créditos por cohorte</h2>
-                        <p class="text-xs text-[var(--text-muted)]">Porcentaje medio del plan de estudios cursado</p>
-                    </div>
-                    <div class="flex items-end gap-[18px] overflow-x-auto border-t border-[var(--border-subtle)] px-4 py-5">
-                        @if(empty($cohortChart))
-                            <p class="text-sm text-[var(--text-muted)]">Sin datos de avance por cohorte.</p>
-                        @endif
-                        @foreach($cohortChart as $bar)
-                            <div class="flex min-w-[28px] flex-1 flex-col items-center justify-end gap-2">
-                                <span class="text-xs font-medium text-[var(--text-secondary)]">{{ $bar['value'] }}</span>
-                                <div class="w-full rounded-t-[var(--radius-sm)] bg-[var(--color-primary-500)]" style="height: {{ $bar['height'] }}px"></div>
-                                <span class="text-xs text-[var(--text-muted)]">{{ $bar['label'] }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-4 lg:w-[360px]">
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="flex flex-col gap-[2px] px-4 py-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Actividad reciente</h2>
-                        <p class="text-xs text-[var(--text-muted)]">Últimos registros del programa</p>
-                    </div>
-                    <div class="flex flex-col gap-1 border-t border-[var(--border-subtle)] py-1">
-                        @if(empty($recentActivity))
-                            <p class="px-4 py-3 text-sm text-[var(--text-muted)]">Sin actividad reciente.</p>
-                        @endif
-                        @foreach($recentActivity as $activity)
-                            <div class="flex items-center gap-[11px] px-4 py-[10px]">
-                                <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--surface-sunken)]">
-                                    <x-ui-icon :name="$activity['icon']" class="h-[15px] w-[15px] text-[var(--color-primary-600)]" />
-                                </div>
-                                <div class="flex flex-1 flex-col gap-[2px]">
-                                    <p class="text-sm text-[var(--text-primary)]">{{ $activity['description'] }}</p>
-                                    <p class="text-xs text-[var(--text-muted)]">{{ $activity['meta'] }}</p>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                    <div class="px-4 py-[14px]">
-                        <h2 class="text-sm font-semibold text-[var(--text-primary)]">Accesos rápidos</h2>
-                    </div>
-                    <div class="flex flex-col gap-2 border-t border-[var(--border-subtle)] p-4">
-                        @foreach($quickLinks as $link)
-                            <a href="{{ $link['href'] ?? '#' }}" class="flex w-full items-center gap-[9px] rounded-[var(--radius-md)] border border-[var(--border-default)] px-3 py-[10px] text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]">
-                                <x-ui-icon :name="$link['icon']" class="h-4 w-4 text-[var(--color-primary-600)]" />
-                                {{ $link['label'] }}
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
+                <x-section title="Movimiento reciente">
+                    @if(empty($recentActivity))
+                        <p class="text-[15px] text-[var(--trz-texto-2)]">Sin actividad reciente.</p>
+                    @else
+                        <ul class="flex flex-col gap-4">
+                            @foreach($recentActivity as $activity)
+                                <li class="flex items-start gap-3.5">
+                                    <x-stream-mark :kind="match ($activity['icon']) { 'sparkles' => 'experiencia', 'message-square' => 'acompanamiento', default => 'academico' }" class="mt-1.5" />
+                                    <div class="flex min-w-0 flex-col gap-0.5">
+                                        <p class="text-base font-semibold leading-snug text-[var(--trz-tinta)]">{{ $activity['description'] }}</p>
+                                        <p class="text-[13px] text-[var(--trz-texto-2)]">{{ $activity['meta'] }}</p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </x-section>
             </div>
         </div>
-    </div>
+    </x-page>
 </x-layouts.app>

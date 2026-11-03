@@ -47,13 +47,39 @@ class NotificationTest extends TestCase
             ->assertJsonPath('html', fn ($html) => str_contains($html, 'No tiene notificaciones pendientes.'));
     }
 
+    public function test_the_bell_arrives_already_filled_so_no_page_has_to_ask_for_it(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->signInSeeded(Role::Estudiante);
+
+        $list = trim($this->getJson('/notificaciones')->json('html'));
+        $page = $this->get('/perfil')->getContent();
+
+        // El número y la lista viajan en la propia página; el navegador ya no pide /notificaciones al cargar.
+        $this->assertMatchesRegularExpression("/x-data=\"notifications\\('[^']*\\/notificaciones', 1\\)\"/", $page);
+        $this->assertStringContainsString($list, $page);
+        $this->assertStringNotContainsString('Cargando…', $page);
+    }
+
+    public function test_the_bell_hides_its_badge_when_there_is_nothing_pending(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->signInSeeded(Role::Profesor);
+
+        $page = $this->get('/panel')->getContent();
+
+        $this->assertMatchesRegularExpression("/x-data=\"notifications\\('[^']*\\/notificaciones', 0\\)\"/", $page);
+        $this->assertStringContainsString('No tiene notificaciones pendientes.', $page);
+        $this->assertMatchesRegularExpression('/x-text="count"\s+style="display: none"/', $page);
+    }
+
     public function test_topbar_exposes_working_menus_and_the_brand_logo(): void
     {
         $this->seed(DatabaseSeeder::class);
         $this->signInSeeded(Role::Estudiante);
 
         $this->get('/perfil')
-            ->assertSee('aria-label="Abrir menú de navegación"', false)
+            ->assertSee('aria-label="Abrir el menú de navegación"', false)
             ->assertSee('aria-label="Notificaciones"', false)
             ->assertSee('aria-label="Menú de usuario"', false)
             ->assertSee('Mi perfil')

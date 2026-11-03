@@ -20,12 +20,12 @@ class IndicatorTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Indicadores del programa');
-        $response->assertSee('SOLICITUDES DEL PERIODO');
-        $response->assertSee('aún sin decisión');
+        $response->assertSee('De 6 estudiantes activos, 1 está en práctica y 1 desarrolla su trabajo de grado.');
+        $response->assertSee('Este periodo se radicaron 2 solicitudes y 2 siguen sin decisión.');
         $response->assertSee('Cancelación de asignatura');
         $response->assertSee('Distribución del PAPA');
-        $response->assertSee('Periodo 2026-2S');
-        $response->assertDontSee('312');
+        $response->assertSee('Periodo 2026-2');
+        $response->assertDontSeeText('312');
     }
 
     public function test_only_coordination_can_open_the_indicators(): void

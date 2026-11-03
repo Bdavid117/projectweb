@@ -114,7 +114,7 @@ class RequestController extends Controller
             'user' => $user->viewData(),
             'navGroups' => Navigation::forRole($user->role, 'solicitudes'),
             'title' => $isStudent ? 'Mis solicitudes' : 'Solicitudes',
-            'subtitle' => $total.' solicitudes en el periodo '.Labels::termLabel($term).' · '.$pending.' sin decisión · '.($isStudent ? 'RF-27' : 'RF-28'),
+            'subtitle' => $total.' solicitudes en el periodo '.Labels::termLabel($term).' · '.$pending.' sin decisión',
             'isStudent' => $isStudent,
             'canCreate' => $user->can('create', CommitteeRequest::class),
             'requests' => $requests->through(fn (CommitteeRequest $r) => $this->row($r)),
@@ -135,18 +135,17 @@ class RequestController extends Controller
         [$status, $tone] = Labels::requestStatus($solicitud);
         $repeated = $user->role === Role::Coordinacion ? $workflow->repeatedCount($solicitud) : 0;
 
-        $dots = [
-            'radicada' => 'bg-[var(--color-primary-600)]',
-            'en_revision' => 'bg-[var(--color-warning)]',
-            'con_decision' => 'bg-[var(--color-success)]',
-        ];
+        // Recorrido: cada cambio de estado ya ocurrido y, a continuación, lo que falta hasta la decisión.
         $trail = $solicitud->statusHistory->sortBy('fecha')->map(fn ($h) => [
-            'label' => Labels::stateLabel($h->estado_nuevo),
-            'meta' => $h->fecha->format('d/m/Y H:i').' · '.$h->user->name,
-            'dot' => $dots[$h->estado_nuevo] ?? 'bg-[var(--color-neutral-300)]',
+            'title' => Labels::stateLabel($h->estado_nuevo),
+            'detail' => $h->fecha->format('d/m/Y H:i').' · '.$h->user->name,
+            'done' => true,
         ])->values()->all();
+        if ($solicitud->estado === 'radicada') {
+            $trail[] = ['title' => 'En revisión', 'detail' => 'Pendiente · Coordinación la pasa a revisión', 'done' => false];
+        }
         if ($solicitud->estado !== 'con_decision') {
-            $trail[] = ['label' => 'Con decisión', 'meta' => 'Pendiente · la registra Coordinación', 'dot' => 'bg-[var(--color-neutral-300)]'];
+            $trail[] = ['title' => 'Con decisión', 'detail' => 'Pendiente · la registra Coordinación', 'done' => false];
         }
 
         return view('requests.show', [
@@ -172,7 +171,7 @@ class RequestController extends Controller
             'trail' => $trail,
             'studentCard' => $isStaff ? StudentProfile::header($solicitud->student) : null,
             'repeatedWarning' => $repeated > 0
-                ? 'Es la '.($repeated + 1).'.ª solicitud de este tipo del estudiante en el periodo '.$solicitud->term->codigo.' · RF-29'
+                ? 'Es la '.($repeated + 1).'.ª solicitud de este tipo del estudiante en el periodo '.$solicitud->term->codigo.''
                 : null,
             'decision' => $solicitud->estado === 'con_decision' ? [
                 'text' => $status,

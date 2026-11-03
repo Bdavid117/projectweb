@@ -34,7 +34,7 @@ class AdvisoryTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Mis asesorías');
-        $response->assertSee('5 estudiantes asignados en 2026-2S');
+        $response->assertSee('5 estudiantes asignados en 2026-2');
         foreach (['Pérez Rojas, Juan Sebastián', 'Gómez Ruiz, Laura', 'Cardona Vélez, Mateo', 'Martínez Cruz, Diana', 'Ospina Lara, Sofía'] as $name) {
             $response->assertSee($name);
         }
@@ -53,7 +53,7 @@ class AdvisoryTest extends TestCase
         $response->assertSee('1 alerta abierta');
         $response->assertSee('Sin tutoría reciente');
         $response->assertSee('Sin alertas');
-        $response->assertSee('font-semibold text-[var(--color-danger)]', false);
+        $response->assertSee('font-semibold text-[var(--trz-alerta)]', false);
     }
 
     public function test_a_deleted_tutorship_no_longer_counts_as_the_last_one(): void
@@ -65,11 +65,11 @@ class AdvisoryTest extends TestCase
 
     public function test_filters_by_alerts_and_search(): void
     {
-        $this->get('/mis-asesorias?alertas=con')->assertSee('Mostrando 1–2 de 2')->assertSee('Pérez Rojas, Juan Sebastián')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Cardona Vélez, Mateo');
-        $this->get('/mis-asesorias?alertas=sin')->assertSee('Mostrando 1–3 de 3')->assertSee('Cardona Vélez, Mateo')->assertDontSee('Gómez Ruiz, Laura');
-        $this->get('/mis-asesorias?q=cardona')->assertSee('Cardona Vélez, Mateo')->assertDontSee('Gómez Ruiz, Laura');
-        $this->get('/mis-asesorias?q=%25')->assertSee('No hay estudiantes');
-        $this->get('/mis-asesorias?q[]=x&alertas[]=y')->assertOk();
+        $this->main('/mis-asesorias?alertas=con')->assertSee('Mostrando 1–2 de 2')->assertSee('Pérez Rojas, Juan Sebastián')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Cardona Vélez, Mateo');
+        $this->main('/mis-asesorias?alertas=sin')->assertSee('Mostrando 1–3 de 3')->assertSee('Cardona Vélez, Mateo')->assertDontSee('Gómez Ruiz, Laura');
+        $this->main('/mis-asesorias?q=cardona')->assertSee('Cardona Vélez, Mateo')->assertDontSee('Gómez Ruiz, Laura');
+        $this->main('/mis-asesorias?q=%25')->assertSee('No hay estudiantes');
+        $this->main('/mis-asesorias?q[]=x&alertas[]=y')->assertOk();
     }
 
     public function test_rows_link_to_the_profile_and_to_the_register_form(): void

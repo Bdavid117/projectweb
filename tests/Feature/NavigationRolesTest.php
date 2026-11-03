@@ -25,7 +25,7 @@ class NavigationRolesTest extends TestCase
     public function test_the_profesor_gets_the_tutor_group_as_an_extra_menu_section_and_nobody_else_does(): void
     {
         $groups = collect(Navigation::forRole(Role::Profesor, 'panel'));
-        $tutoring = $groups->firstWhere('label', 'TUTORÍA');
+        $tutoring = $groups->firstWhere('label', 'Tutoría');
 
         $this->assertNotNull($tutoring);
         $this->assertSame(['mis-asesorias', 'solicitar-tutoria'], collect($tutoring['items'])->pluck('key')->all());

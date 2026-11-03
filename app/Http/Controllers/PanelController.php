@@ -31,11 +31,6 @@ class PanelController extends Controller
             'cutoff' => $metrics->cutoff(),
             'termLabel' => Labels::termLabel($metrics->term()),
             ...$metrics->panel($user),
-            'quickLinks' => [
-                ['icon' => 'upload', 'label' => 'Cargar archivo de Excel'],
-                ['icon' => 'file-plus', 'label' => 'Registrar decisión del comité', 'href' => '/solicitudes'],
-                ['icon' => 'user-plus', 'label' => 'Crear usuario y asignar rol'],
-            ],
         ]);
     }
 }

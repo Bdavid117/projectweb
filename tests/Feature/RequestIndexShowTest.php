@@ -49,7 +49,7 @@ class RequestIndexShowTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Solicitudes');
-        $response->assertSee('2 solicitudes en el periodo 2026-2S · 2 sin decisión');
+        $response->assertSee('2 solicitudes en el periodo 2026-2 · 2 sin decisión');
         $response->assertSee('Pérez Rojas, Juan Sebastián');
         $response->assertSee('Gómez Ruiz, Laura');
         $response->assertSee('Cancelación de asignatura');
@@ -103,12 +103,12 @@ class RequestIndexShowTest extends TestCase
         $this->signInSeeded(Role::Coordinacion);
         $reingreso = RequestType::where('nombre', 'Reingreso al programa')->firstOrFail();
 
-        $this->get('/solicitudes?estado=en_revision')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
-        $this->get('/solicitudes?estado=radicada')->assertSee('Pérez Rojas, Juan Sebastián')->assertDontSee('Gómez Ruiz, Laura');
-        $this->get('/solicitudes?tipo='.$reingreso->id)->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
-        $this->get('/solicitudes?q=gómez')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
-        $this->get('/solicitudes?q=2020123')->assertSee('Pérez Rojas, Juan Sebastián')->assertDontSee('Gómez Ruiz, Laura');
-        $this->get('/solicitudes?estado=aprobada')->assertSee('No hay solicitudes');
+        $this->main('/solicitudes?estado=en_revision')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
+        $this->main('/solicitudes?estado=radicada')->assertSee('Pérez Rojas, Juan Sebastián')->assertDontSee('Gómez Ruiz, Laura');
+        $this->main('/solicitudes?tipo='.$reingreso->id)->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
+        $this->main('/solicitudes?q=gómez')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
+        $this->main('/solicitudes?q=2020123')->assertSee('Pérez Rojas, Juan Sebastián')->assertDontSee('Gómez Ruiz, Laura');
+        $this->main('/solicitudes?estado=aprobada')->assertSee('No hay solicitudes');
     }
 
     public function test_hostile_and_array_query_values_do_not_break_the_list(): void
@@ -138,9 +138,11 @@ class RequestIndexShowTest extends TestCase
         $response->assertOk();
         $response->assertSee('Cancelación de asignatura');
         $response->assertSee('Pérez Rojas, Juan Sebastián');
-        $response->assertSee('Trazabilidad');
+        $response->assertSee('Recorrido de la solicitud');
         $response->assertSee('Pendiente · la registra Coordinación');
-        $response->assertSee('Código 2020123');
+        $response->assertSee('2020123');
+        $response->assertDontSee('Código 2020123');
+        $response->assertDontSee('Tutor asignado:');
     }
 
     public function test_the_owner_coordination_and_the_linked_professor_can_open_but_nobody_else(): void

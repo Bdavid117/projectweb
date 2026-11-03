@@ -77,7 +77,7 @@ class StudentController extends Controller
             'code' => $student->codigo,
             'name' => $student->user->name,
             'cohort' => $student->cohorte,
-            'papa' => $papa === null ? '—' : number_format($papa, 1),
+            'papa' => $papa === null ? '—' : Labels::decimal($papa),
             'papaLow' => $papa !== null && $papa < config('program.papa_alert'),
             'advance' => $record ? (int) round((float) $record->porcentaje_avance) : 0,
             'status' => $status,
