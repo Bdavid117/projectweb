@@ -182,6 +182,17 @@ class SharedComponentsTest extends TestCase
         $this->assertStringContainsString('Solicitudes', $back);
     }
 
+    public function test_the_sheets_that_cover_the_page_stop_it_from_scrolling_behind_them(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->signInSeeded(Role::Estudiante);
+
+        $html = $this->get('/panel')->getContent();
+
+        // Una vez la hoja «Más» (móvil) y otra el cajón de navegación (tablet).
+        $this->assertSame(2, substr_count($html, "classList.toggle('overflow-hidden'"));
+    }
+
     public function test_empty_state_says_what_is_missing_and_offers_a_way_to_start(): void
     {
         $html = Blade::render('<x-empty-state kind="tesis" title="No hay trabajo de grado" text="Aún no se ha registrado."><x-slot:body><a href="/x">Empezar</a></x-slot:body></x-empty-state>');

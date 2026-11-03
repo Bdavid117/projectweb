@@ -70,8 +70,8 @@
                     @endforeach
                 </div>
 
-                <div class="flex flex-wrap gap-3 pt-1" x-data="{ sending: false }" @submit.window="sending = true">
-                    <x-button variant="primary" type="submit" class="min-h-12" x-bind:disabled="sending"><span x-show="!sending">Radicar solicitud</span><span x-show="sending" x-cloak class="inline-flex items-center gap-2"><x-ui-icon name="loader-circle" class="h-[17px] w-[17px] animate-spin" />Radicando…</span></x-button>
+                <div class="flex flex-wrap gap-3 pt-1">
+                    <x-button variant="primary" type="submit" class="min-h-12" data-busy-label="Radicando…">Radicar solicitud</x-button>
                     <x-button variant="secondary" :href="route('requests.index')" class="min-h-12">Cancelar</x-button>
                 </div>
             </form>

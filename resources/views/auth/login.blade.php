@@ -32,7 +32,7 @@
 
             {{-- Móvil y tablet: el mismo motivo y la misma animación, a otra escala. Escalar el SVG de escritorio (760 px) dejaría
                  las etiquetas en 6 px, así que este tiene su propia geometría con letra de 15 unidades. --}}
-            <svg @if($errors->any()) data-static @endif class="h-auto w-full max-w-[340px] sm:max-w-[440px] lg:hidden" viewBox="0 0 340 150" fill="none" role="img" aria-label="Tres corrientes, historia académica, experiencias y acompañamiento, que se unen en una sola trayectoria">
+            <svg @if($errors->any()) data-static @endif class="h-auto w-full max-w-[340px] max-sm:[@media(max-height:760px)]:max-w-[260px] sm:max-w-[440px] lg:hidden" viewBox="0 0 340 150" fill="none" role="img" aria-label="Tres corrientes, historia académica, experiencias y acompañamiento, que se unen en una sola trayectoria">
                 <g stroke-width="5" stroke-linecap="round" fill="none">
                     <path class="trace-path trace-1 [stroke:var(--trz-hilo)]" pathLength="1" d="M12 32 H110 C150 32 160 84 200 84" />
                     <path class="trace-path trace-2 [stroke:var(--trz-hito)]" pathLength="1" d="M12 84 C60 84 90 74 130 74 C165 74 175 84 200 84" />
@@ -57,7 +57,7 @@
         </section>
 
         <section class="flex w-full max-w-[480px] flex-col gap-5 lg:max-w-none">
-            <form method="POST" action="{{ route('login.store') }}" x-data="{ sending: false }" @submit="sending = true" class="flex flex-col gap-5" novalidate>
+            <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-5" novalidate>
                 @csrf
                 <div class="flex flex-col gap-2">
                     <h2 class="text-[32px] font-semibold leading-tight text-[var(--trz-tinta)]">Iniciar sesión</h2>
@@ -67,10 +67,7 @@
                 <x-form-field label="Correo institucional" name="email" type="email" placeholder="usuario@unal.edu.co" icon="mail" autocomplete="username" :value="old('email')" />
                 <x-form-field label="Contraseña" name="password" type="password" placeholder="••••••••••" autocomplete="current-password" />
 
-                <x-button variant="primary" type="submit" class="mt-1 w-full min-h-12" x-bind:disabled="sending" x-bind:aria-busy="sending">
-                    <span x-show="!sending">Ingresar</span>
-                    <span x-show="sending" x-cloak class="inline-flex items-center gap-2"><x-ui-icon name="loader-circle" class="h-[17px] w-[17px] animate-spin" />Ingresando…</span>
-                </x-button>
+                <x-button variant="primary" type="submit" class="mt-1 w-full min-h-12" data-busy-label="Ingresando…">Ingresar</x-button>
 
                 <a href="#" class="inline-flex w-fit items-center text-[15px] font-semibold text-[var(--trz-hilo-texto)] hover:underline max-md:-my-2.5 max-md:min-h-11">¿Olvidó su contraseña?</a>
             </form>

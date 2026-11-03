@@ -76,6 +76,18 @@ class FormComponentsTest extends TestCase
         $this->assertStringNotContainsString('calendar-picker-indicator', $text);
     }
 
+    public function test_an_invalid_field_is_marked_and_linked_to_its_message_so_the_focus_lands_on_something_readable(): void
+    {
+        $this->withErrors(['email' => ['Credenciales inválidas.']]);
+
+        $html = Blade::render('<x-form-field label="Correo" name="email" help="Use su correo." />');
+
+        // El script lleva el foco al primer [aria-invalid="true"]; el lector de pantalla lee el mensaje por aria-describedby.
+        $this->assertStringContainsString('aria-invalid="true"', $html);
+        $this->assertStringContainsString('aria-describedby="email-error email-help"', $html);
+        $this->assertStringContainsString('id="email-error"', $html);
+    }
+
     public function test_form_field_without_errors_keeps_the_default_border(): void
     {
         $this->withErrors([]);

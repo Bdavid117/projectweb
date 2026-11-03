@@ -47,4 +47,11 @@ class LoginTest extends TestCase
 
         $this->assertSame(2, substr_count($html, 'data-static'));
     }
+
+    public function test_the_phone_motif_gives_way_on_short_screens_so_the_form_stays_close_to_the_top(): void
+    {
+        $html = $this->get('/login')->getContent();
+
+        $this->assertStringContainsString('[@media(max-height:760px)]:max-w-[260px]', $html);
+    }
 }

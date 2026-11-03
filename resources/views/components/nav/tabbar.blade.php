@@ -18,10 +18,10 @@
 @endphp
 
 {{-- Móvil (< md): cuatro destinos fijos abajo y «Más», que abre una hoja con el resto y la cuenta. --}}
-<div x-data="{ more: false }" @keydown.escape.window="more = false" class="md:hidden print:hidden">
+<div x-data="{ more: false }" @keydown.escape.window="more = false" x-effect="document.documentElement.classList.toggle('overflow-hidden', more)" class="md:hidden print:hidden">
     <div x-show="more" x-cloak x-transition.opacity.duration.150ms @click="more = false" class="fixed inset-0 z-30 bg-[var(--trz-velo)]"></div>
     <div x-show="more" x-cloak x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0" x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
-        class="fixed inset-x-0 bottom-[var(--tabbar-height)] z-40 max-h-[75vh] overflow-y-auto rounded-t-[20px] border border-b-0 border-[var(--trz-linea)] bg-[var(--trz-superficie)] pb-2 shadow-[var(--shadow-hoja)]" role="dialog" aria-label="Más opciones">
+        class="fixed inset-x-0 bottom-[var(--tabbar-height)] z-40 max-h-[75vh] overflow-y-auto overscroll-contain rounded-t-[20px] border border-b-0 border-[var(--trz-linea)] bg-[var(--trz-superficie)] pb-2 shadow-[var(--shadow-hoja)]" role="dialog" aria-label="Más opciones">
         <div class="flex h-[18px] items-end justify-center pt-2" aria-hidden="true"><span class="h-1 w-10 rounded-full bg-[var(--trz-borde-control)]"></span></div>
         <nav aria-label="Más secciones">
             <x-nav.list :groups="$groups" skip-tabs />

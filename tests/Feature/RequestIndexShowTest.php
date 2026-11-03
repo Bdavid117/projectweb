@@ -103,12 +103,12 @@ class RequestIndexShowTest extends TestCase
         $this->signInSeeded(Role::Coordinacion);
         $reingreso = RequestType::where('nombre', 'Reingreso al programa')->firstOrFail();
 
-        $this->get('/solicitudes?estado=en_revision')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
-        $this->get('/solicitudes?estado=radicada')->assertSee('Pérez Rojas, Juan Sebastián')->assertDontSee('Gómez Ruiz, Laura');
-        $this->get('/solicitudes?tipo='.$reingreso->id)->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
-        $this->get('/solicitudes?q=gómez')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
-        $this->get('/solicitudes?q=2020123')->assertSee('Pérez Rojas, Juan Sebastián')->assertDontSee('Gómez Ruiz, Laura');
-        $this->get('/solicitudes?estado=aprobada')->assertSee('No hay solicitudes');
+        $this->main('/solicitudes?estado=en_revision')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
+        $this->main('/solicitudes?estado=radicada')->assertSee('Pérez Rojas, Juan Sebastián')->assertDontSee('Gómez Ruiz, Laura');
+        $this->main('/solicitudes?tipo='.$reingreso->id)->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
+        $this->main('/solicitudes?q=gómez')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Pérez Rojas, Juan Sebastián');
+        $this->main('/solicitudes?q=2020123')->assertSee('Pérez Rojas, Juan Sebastián')->assertDontSee('Gómez Ruiz, Laura');
+        $this->main('/solicitudes?estado=aprobada')->assertSee('No hay solicitudes');
     }
 
     public function test_hostile_and_array_query_values_do_not_break_the_list(): void

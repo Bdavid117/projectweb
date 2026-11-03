@@ -126,6 +126,13 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: calc(var(--topbar-height) + 16px);
+    /* Reserva el canal de la barra de desplazamiento: al abrir un diálogo la página no se corre de lado. */
+    scrollbar-gutter: stable;
+  }
+
+  /* Con un diálogo modal abierto, la página de atrás no se desplaza. */
+  html:has(dialog[open]) {
+    overflow: hidden;
   }
 
   body {
@@ -183,6 +190,27 @@
     scroll-behavior: auto !important;
   }
   .skeleton::after { animation: none; }
+}
+
+/* ---------- Envío en curso ----------
+   El script marca con data-busy los botones de un formulario POST ya enviado: quedan deshabilitados (no hay doble envío)
+   y muestran un giro, con lo que quien envía sabe que algo está pasando. */
+@keyframes trz-spin {
+  to { transform: rotate(360deg); }
+}
+[data-busy]::after {
+  content: "";
+  flex: none;
+  width: 1em;
+  height: 1em;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: trz-spin 0.7s linear infinite;
+}
+[data-busy]:disabled {
+  opacity: 0.75;
+  cursor: progress;
 }
 
 /* ---------- El hilo que se dibuja una sola vez (acceso) ---------- */

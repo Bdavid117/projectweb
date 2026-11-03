@@ -5,6 +5,8 @@ namespace Tests;
 use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Http\Response;
+use Illuminate\Testing\TestResponse;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -14,6 +16,18 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         $this->withoutVite();
+    }
+
+    /**
+     * GET de una pantalla, pero solo con el contenido de <main>. La barra superior también nombra estudiantes (la campana
+     * trae sus avisos en la página), así que un `assertDontSee` sobre un nombre debe mirar solo el cuerpo de la pantalla.
+     */
+    protected function main(string $uri): TestResponse
+    {
+        $response = $this->get($uri)->assertOk();
+        preg_match('#<main\b[^>]*>(.*)</main>#s', $response->getContent(), $found);
+
+        return TestResponse::fromBaseResponse(new Response($found[1] ?? $response->getContent()));
     }
 
     /**

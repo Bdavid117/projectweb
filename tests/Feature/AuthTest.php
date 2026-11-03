@@ -26,7 +26,7 @@ class AuthTest extends TestCase
 
         $this->post('/logout');
         $this->user(Role::Estudiante);
-        $this->post('/login', ['email' => 'estudiante@unal.edu.co', 'password' => 'password'])->assertRedirect('/solicitudes/nueva');
+        $this->post('/login', ['email' => 'estudiante@unal.edu.co', 'password' => 'password'])->assertRedirect('/panel');
     }
 
     public function test_unknown_email_and_wrong_password_give_the_same_generic_error(): void

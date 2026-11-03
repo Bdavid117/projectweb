@@ -46,9 +46,9 @@ class StudentIndexTest extends TestCase
 
     public function test_search_matches_name_code_and_document_case_insensitively(): void
     {
-        $this->get('/estudiantes?q=gómez')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Ruiz Salazar, Andrés');
-        $this->get('/estudiantes?q=2021098')->assertSee('Cardona Vélez, Mateo')->assertDontSee('Gómez Ruiz, Laura');
-        $this->get('/estudiantes?q=102019087')->assertSee('Ruiz Salazar, Andrés')->assertDontSee('Cardona Vélez, Mateo');
+        $this->main('/estudiantes?q=gómez')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Ruiz Salazar, Andrés');
+        $this->main('/estudiantes?q=2021098')->assertSee('Cardona Vélez, Mateo')->assertDontSee('Gómez Ruiz, Laura');
+        $this->main('/estudiantes?q=102019087')->assertSee('Ruiz Salazar, Andrés')->assertDontSee('Cardona Vélez, Mateo');
     }
 
     public function test_like_wildcards_in_the_search_are_treated_literally(): void
@@ -61,10 +61,10 @@ class StudentIndexTest extends TestCase
     {
         $tutor = User::where('email', 'profesor2@unal.edu.co')->firstOrFail();
 
-        $this->get('/estudiantes?estado=en_riesgo')->assertSee('Cardona Vélez, Mateo')->assertDontSee('Pérez Rojas, Juan');
-        $this->get('/estudiantes?cohorte=2021-1')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Cardona Vélez, Mateo');
-        $this->get('/estudiantes?tutor='.$tutor->id)->assertSee('Mostrando 1–5 de 5 estudiantes')->assertDontSee('Ruiz Salazar, Andrés');
-        $this->get('/estudiantes?estado=activo&tutor='.$tutor->id)->assertSee('Mostrando 1–4 de 4 estudiantes')->assertDontSee('Cardona Vélez, Mateo');
+        $this->main('/estudiantes?estado=en_riesgo')->assertSee('Cardona Vélez, Mateo')->assertDontSee('Pérez Rojas, Juan');
+        $this->main('/estudiantes?cohorte=2021-1')->assertSee('Gómez Ruiz, Laura')->assertDontSee('Cardona Vélez, Mateo');
+        $this->main('/estudiantes?tutor='.$tutor->id)->assertSee('Mostrando 1–5 de 5 estudiantes')->assertDontSee('Ruiz Salazar, Andrés');
+        $this->main('/estudiantes?estado=activo&tutor='.$tutor->id)->assertSee('Mostrando 1–4 de 4 estudiantes')->assertDontSee('Cardona Vélez, Mateo');
     }
 
     public function test_pagination_keeps_the_active_filters(): void

@@ -6,6 +6,9 @@
     $canOpenProfile = $account?->role === \App\Enums\Role::Estudiante;
     $period ??= rescue(fn () => \App\Models\AcademicTerm::current()?->codigo, null, false) ?? '—';
     $pageTitle = $title ? trim(explode(' · ', $title)[0]) : null;
+    // La campana llega ya llena: el número y la lista viajan en la página y solo se piden de nuevo al abrirla.
+    $notifications = $account ? \App\Support\Notifications::for($account) : [];
+    $notificationCount = count($notifications);
     $linkBase = 'relative inline-flex h-[var(--topbar-height)] items-center gap-1.5 whitespace-nowrap px-3.5 text-[15px] transition-colors';
 @endphp
 
@@ -64,16 +67,16 @@
             <span class="text-sm font-semibold text-[var(--trz-tinta)]">{{ $period }}</span>
         </div>
 
-        <div class="relative" x-data="notifications('{{ route('notifications.index') }}')" @keydown.escape.window="open = false" @click.outside="open = false">
-            <button type="button" class="relative flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] text-[var(--trz-texto-2)] hover:bg-[var(--trz-hilo-fondo)]" aria-label="Notificaciones" aria-haspopup="true" :aria-expanded="open" @click="open = !open">
+        <div class="relative" x-data="notifications('{{ route('notifications.index') }}', {{ $notificationCount }})" @keydown.escape.window="open = false" @click.outside="open = false">
+            <button type="button" class="relative flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] text-[var(--trz-texto-2)] hover:bg-[var(--trz-hilo-fondo)]" aria-label="Notificaciones" aria-haspopup="true" :aria-expanded="open" @click="toggle()">
                 <x-ui-icon name="bell" class="h-5 w-5" />
-                <span x-show="count > 0" x-cloak x-text="count" class="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--trz-alerta)] px-1 text-[11px] font-bold text-[var(--trz-papel)]"></span>
+                <span x-show="count > 0" x-text="count" @if($notificationCount === 0) style="display: none" @endif class="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--trz-alerta)] px-1 text-[11px] font-bold text-[var(--trz-papel)]">{{ $notificationCount }}</span>
             </button>
             <div x-show="open" x-cloak x-transition.origin.top.right.duration.150ms class="absolute right-[-64px] top-full z-50 mt-1 w-[min(420px,calc(100vw-24px))] overflow-hidden rounded-[var(--radius-lg)] border border-[var(--trz-linea)] bg-[var(--trz-superficie)] shadow-[var(--shadow-menu)] sm:right-0">
                 <div class="flex items-center justify-between border-b border-[var(--trz-linea)] px-[18px] py-3.5">
                     <h2 class="text-lg font-semibold text-[var(--trz-tinta)]">Notificaciones</h2>
                 </div>
-                <div x-html="html"></div>
+                <div x-ref="list"><x-notification-list :items="$notifications" /></div>
             </div>
         </div>
 
