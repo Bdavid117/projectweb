@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // RF-37: las reglas de alertas tempranas se evalúan cada día antes de que empiece la jornada.
+        $schedule->command('alertas:evaluar')->dailyAt('06:00')->withoutOverlapping();
     }
 
     /**

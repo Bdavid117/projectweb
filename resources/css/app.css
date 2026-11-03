@@ -138,6 +138,27 @@
   body {
     background: var(--trz-papel);
     color: var(--trz-tinta);
+    /* URL, correos, nombres de archivo con guiones bajos y códigos no llevan espacios: se parten donde haga falta en lugar de
+       ensanchar la pantalla (en el móvil se arrastraba la página de lado y quedaba un hueco gris). `anywhere`, y no `break-word`,
+       también reduce el ancho mínimo de las cajas flexibles y de las rejillas. */
+    overflow-wrap: anywhere;
+  }
+
+  /* En las tablas se conserva el ancho mínimo por palabras: allí un desborde se desplaza dentro de su contenedor, no en la página. */
+  table, td, th {
+    overflow-wrap: break-word;
+  }
+
+  /* Un contenedor con desplazamiento recorta a sus hijos absolutos solo si es su bloque contenedor: sin esto, un `sr-only` dentro
+     de una tabla desplazable se colocaba fuera de ella y ensanchaba la página. */
+  .overflow-x-auto {
+    position: relative;
+  }
+
+  /* Red de seguridad: lo que aun así se salga se recorta en lugar de dejar un hueco gris al arrastrar. `clip` no crea contenedor de
+     desplazamiento, así que la barra superior sigue pegada. */
+  html, body {
+    overflow-x: clip;
   }
 
   h1, h2, h3 {
@@ -191,6 +212,140 @@
   }
   .skeleton::after { animation: none; }
 }
+
+/* ---------- Mapa de cohortes del panel ----------
+   Zoom (--k) y desplazamiento (--tx, --ty) viven en el <figure>: cada punto, fila y marca del eje se coloca con ellas, de modo que mover o
+   acercar el mapa no toca los elementos uno por uno. Los puntos mantienen su tamaño al acercar (solo se separan). */
+.cohort-map { --k: 1; --tx: 0; --ty: 0; }
+.cohort-viewport { touch-action: pan-y; }
+.cohort-viewport[data-zoomed] { touch-action: none; cursor: grab; }
+.cohort-viewport[data-zoomed]:active { cursor: grabbing; }
+.cohort-plot {
+  background-image: linear-gradient(to right, var(--trz-linea) 1px, transparent 1px), linear-gradient(to bottom, var(--trz-linea) 1px, transparent 1px);
+  background-size: calc(25% * var(--k)) 100%, 100% calc(var(--rowh) * var(--k) * 1px);
+  background-position: calc(var(--tx) * 1px) 0, 0 calc(var(--ty) * 1px);
+}
+/* El año de cada fila es un botón (resume la cohorte): ocupa toda la fila, así mide al menos --rowh (46 px) de alto y no hay zonas muertas. */
+.cohort-rowlabel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--ty) * 1px + var(--r) * var(--rowh) * var(--k) * 1px);
+  display: flex;
+  height: calc(var(--rowh) * var(--k) * 1px);
+  align-items: center;
+  padding-left: 8px;
+  text-align: left;
+}
+.cohort-tick {
+  position: absolute;
+  top: 0;
+  left: calc(var(--tx) * 1px + var(--t) * 1% * var(--k));
+  transform: translateX(calc(var(--a) * -100%));
+  white-space: nowrap;
+}
+.cohort-dot, .cohort-cluster {
+  position: absolute;
+  left: calc(var(--tx) * 1px + var(--px) * 1% * var(--k) + var(--nx, 0) * 1px);
+  top: calc(var(--ty) * 1px + (var(--r) + 0.5) * var(--rowh) * var(--k) * 1px + var(--j) * 1px);
+}
+.cohort-dot {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  place-items: center;
+  border-radius: 9999px;
+}
+.cohort-dot::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: var(--trz-hilo);
+  transition: transform 120ms ease-out;
+}
+.cohort-dot[data-alert]::before { outline: 2.5px solid var(--trz-alerta); outline-offset: 3px; }
+.cohort-dot:is(:hover, :focus-visible) { z-index: 5; }
+.cohort-dot:is(:hover, :focus-visible)::before { transform: scale(1.5); }
+.cohort-dot[data-dim] { opacity: 0.12; pointer-events: none; }
+
+/* Sin tutoría reciente: el punto se dibuja HUECO (borde azul, centro del color de la superficie). Ocupa lo mismo que uno lleno: con cientos de
+   estudiantes no suma ruido ni puede quedar corrido de su punto (no hay un segundo elemento que centrar) y la forma, no solo el color, lo distingue. */
+.cohort-dot[data-quiet]::before {
+  width: 12px;
+  height: 12px;
+  border: 2.5px solid var(--trz-hilo);
+  background: var(--trz-superficie);
+}
+
+/* Quien se ubicó con la búsqueda y quienes entraron en el recuadro. */
+.cohort-dot[data-found] { z-index: 6; }
+.cohort-dot[data-found]::before { transform: scale(1.7); box-shadow: 0 0 0 3px var(--trz-superficie), 0 0 0 6px var(--trz-tinta); }
+.cohort-dot[data-selected]::before { box-shadow: 0 0 0 2px var(--trz-superficie), 0 0 0 4.5px var(--trz-hilo-texto); transform: scale(1.25); }
+
+/* Un punto que una burbuja agrupa deja de verse y de poder enfocarse (visibility lo saca también del orden de tabulación). */
+.cohort-dot[data-clustered] { visibility: hidden; }
+.cohort-cluster {
+  display: grid;
+  min-width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  padding: 0 6px;
+  place-items: center;
+  border: 2px solid var(--trz-hilo);
+  border-radius: 9999px;
+  background: var(--trz-hilo-fondo);
+  color: var(--trz-hilo-texto);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  z-index: 4;
+}
+/* La burbuja se dibuja de 32 px pero se toca en 44: la zona táctil crece sin tocar el diseño. */
+.cohort-cluster::after { content: ""; position: absolute; inset: -6px; }
+.cohort-cluster[data-alert] { border-color: var(--trz-alerta); }
+.cohort-cluster[data-selected] { box-shadow: 0 0 0 2px var(--trz-superficie), 0 0 0 4.5px var(--trz-hilo-texto); }
+
+/* Avance esperado de la cohorte: raya discontinua vertical sobre toda su fila (en el borde derecho queda dentro, no recortada). */
+.cohort-expected {
+  position: absolute;
+  left: calc(var(--tx) * 1px + var(--e) * 1% * var(--k));
+  top: calc(var(--ty) * 1px + var(--r) * var(--rowh) * var(--k) * 1px);
+  height: calc(var(--rowh) * var(--k) * 1px);
+  margin-left: -2px;
+  border-right: 2px dashed var(--trz-hito-texto);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Cambio frente al periodo anterior: trazo del avance de antes al de hoy, con una punta hacia donde está hoy (sube = derecha, baja = izquierda). */
+.cohort-trail {
+  display: none;
+  position: absolute;
+  left: calc(var(--tx) * 1px + var(--lo) * 1% * var(--k));
+  top: calc(var(--ty) * 1px + (var(--r) + 0.5) * var(--rowh) * var(--k) * 1px + var(--j) * 1px);
+  width: calc(var(--span) * 1% * var(--k));
+  height: 2px;
+  margin-top: -1px;
+  background: var(--trz-texto-2);
+  pointer-events: none;
+}
+.cohort-trail::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  background: var(--trz-texto-2);
+  clip-path: polygon(100% 0, 100% 100%, 0 50%);
+}
+.cohort-trail[data-up]::after { left: auto; right: 0; clip-path: polygon(0 0, 0 100%, 100% 50%); }
+.cohort-map[data-trails] .cohort-trail { display: block; }
+.cohort-map[data-trails] .cohort-trail[data-dim] { opacity: 0.12; }
+
+.cohort-viewport[data-selecting] { touch-action: none; cursor: crosshair; }
 
 /* ---------- Envío en curso ----------
    El script marca con data-busy los botones de un formulario POST ya enviado: quedan deshabilitados (no hay doble envío)
