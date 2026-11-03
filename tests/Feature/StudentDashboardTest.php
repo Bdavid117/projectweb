@@ -19,9 +19,9 @@ class StudentDashboardTest extends TestCase
         $this->get('/panel')->assertOk()
             ->assertSee('Mi panel')
             ->assertSee($user->student->codigo)
-            ->assertSee('PAPA ACTUAL')
-            ->assertSee('AVANCE DEL PLAN')
-            ->assertDontSee('ESTUDIANTES ACTIVOS');
+            ->assertSee('Mi recorrido')
+            ->assertSee('Lleva el')
+            ->assertDontSee('estudiantes activos');
     }
 
     public function test_staff_still_see_the_program_panel(): void
@@ -29,6 +29,6 @@ class StudentDashboardTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $this->signInSeeded(Role::Coordinacion);
 
-        $this->get('/panel')->assertOk()->assertSee('ESTUDIANTES ACTIVOS')->assertDontSee('Mi panel');
+        $this->get('/panel')->assertOk()->assertSee('estudiantes activos')->assertDontSee('Mi panel');
     }
 }

@@ -3,30 +3,22 @@
 <!DOCTYPE html>
 <html lang="es" class="h-full">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $title ?? 'Trayectoria Estudiantil' }}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <x-head :title="$title ?? 'Trayectoria Estudiantil'" />
 </head>
-<body class="min-h-full bg-[var(--surface-page)] font-sans text-[var(--text-primary)]">
-    <div class="flex min-h-screen flex-col">
-        <x-topbar :user="$user" />
-        <div class="flex flex-1">
-            <x-sidebar :groups="$navGroups" />
-            <main class="min-w-0 flex-1">
-                @if(session('status'))
-                    <div role="status" class="mx-4 mt-4 flex items-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-success-bg)] p-3 text-sm font-medium text-[var(--color-success)] sm:mx-7 sm:mt-7">
-                        <x-ui-icon name="circle-check" class="h-4 w-4 shrink-0" />
-                        {{ session('status') }}
-                    </div>
-                @endif
-                {{ $slot }}
-            </main>
-        </div>
-    </div>
+<body class="min-h-full bg-[var(--trz-papel)] font-sans text-[var(--trz-tinta)] antialiased">
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:rounded-[var(--radius-md)] focus:bg-[var(--trz-superficie)] focus:px-4 focus:py-2 focus:font-semibold focus:text-[var(--trz-tinta)]">Saltar al contenido</a>
+    <x-topbar :user="$user" :groups="$navGroups" :title="$title" />
+    <x-nav.drawer :groups="$navGroups" />
+
+    <main id="contenido" class="min-w-0 pb-[var(--tabbar-height)] md:pb-0 print:pb-0">
+        @if(session('status'))
+            <div class="mx-auto w-full max-w-[var(--content-max-width)] px-[18px] pt-6 sm:px-8 xl:px-16">
+                <x-flash :message="session('status')" />
+            </div>
+        @endif
+        {{ $slot }}
+    </main>
+
+    <x-nav.tabbar :groups="$navGroups" :user="$user" />
 </body>
 </html>

@@ -1,16 +1,23 @@
-@props(['text', 'tone' => 'success'])
+@props(['text', 'tone' => 'success', 'icon' => null])
 
+{{-- Chip de estado: forma + ícono + texto, nunca solo color. --}}
 @php
     $tones = [
-        'success' => 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
-        'warning' => 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
-        'danger' => 'bg-[var(--color-danger-bg)] text-[var(--color-danger)]',
-        'info' => 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
-        'primary' => 'bg-[var(--color-primary-50)] text-[var(--color-primary-600)]',
-        'accent' => 'bg-[var(--color-accent-100)] text-[var(--color-accent-600)]',
-        'restricted' => 'bg-[var(--color-restricted-bg)] text-[var(--color-restricted)]',
+        'success' => ['bg-[var(--trz-logro-fondo)] text-[var(--trz-logro)]', 'circle-check'],
+        'warning' => ['bg-[var(--trz-hito-fondo)] text-[var(--trz-hito-texto)]', 'hourglass'],
+        'danger' => ['bg-[var(--trz-alerta-fondo)] text-[var(--trz-alerta)]', 'circle-x'],
+        'info' => ['bg-[var(--trz-hilo-fondo)] text-[var(--trz-hilo-texto)]', 'info'],
+        'review' => ['bg-[var(--trz-hilo-fondo)] text-[var(--trz-hilo-texto)]', 'eye'],
+        'primary' => ['bg-[var(--trz-hilo-fondo)] text-[var(--trz-hilo-texto)]', 'graduation-cap'],
+        'restricted' => ['bg-[var(--trz-brote-fondo)] text-[var(--trz-brote)]', 'lock'],
+        'neutral' => ['border border-[var(--trz-linea)] bg-[var(--trz-superficie)] text-[var(--trz-texto-2)]', 'file-text'],
     ];
+    [$classes, $defaultIcon] = $tones[$tone] ?? $tones['info'];
+    $glyph = $icon === false ? null : ($icon ?? $defaultIcon);
 @endphp
-<span class="inline-flex items-center rounded-full px-[11px] py-[5px] text-xs font-semibold {{ $tones[$tone] }}">
+<span {{ $attributes->merge(['class' => 'inline-flex items-center gap-[7px] whitespace-nowrap rounded-[var(--radius-sm)] px-3 py-[5px] text-[13px] font-bold '.$classes]) }}>
+    @if($glyph)
+        <x-ui-icon :name="$glyph" class="h-[15px] w-[15px]" />
+    @endif
     {{ $text }}
 </span>

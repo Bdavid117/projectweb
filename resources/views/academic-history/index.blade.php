@@ -1,77 +1,93 @@
+@php
+    $latest = $records->first();
+    $first = $records->last();
+    $count = $records->count();
+    $sentence = $count === 0 ? '' : 'Su PAPA '
+        .($count > 1
+            ? 'pasó de '.\App\Support\Labels::decimal($first->papa).' a '.\App\Support\Labels::decimal($latest->papa).' en '.$count.' periodos registrados'
+            : 'es '.\App\Support\Labels::decimal($latest->papa).' en el único periodo registrado')
+        .($latest->creditos_cursados ? ', y ya cursó '.$latest->creditos_cursados.' créditos: el '.(int) round((float) $latest->porcentaje_avance).' % del plan' : '').'.';
+@endphp
+
 <x-layouts.app :user="$user" :nav-groups="$navGroups" title="Mi historia académica · Trayectoria Estudiantil">
-    <div class="flex flex-col gap-5 p-4 sm:p-7">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-            <div class="flex flex-1 flex-col gap-[3px]">
-                <h1 class="text-2xl font-semibold text-[var(--text-primary)]">Mi historia académica</h1>
-                <p class="text-sm text-[var(--text-secondary)]">Registros académicos por periodo</p>
-            </div>
-        </div>
+    <x-page>
+        <x-page-header title="Mi historia académica" subtitle="Registros académicos por periodo." />
 
-        @if($records->count() > 0)
-        <div class="grid gap-4 lg:grid-cols-2">
-            <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
-                    <h2 class="text-sm font-semibold text-[var(--text-primary)]">Evolución del PAPA por periodo</h2>
-                    <p class="text-xs text-[var(--text-muted)]">Escala de 0 a 5 · RF-16</p>
-                </div>
-                <div class="flex items-end gap-[14px] overflow-x-auto border-t border-[var(--border-subtle)] px-4 py-4" style="min-height: 180px">
-                    @foreach($papaSeries as $bar)
-                        <div class="flex min-w-[36px] flex-1 flex-col items-center justify-end gap-[7px]">
-                            <span class="text-xs font-medium text-[var(--text-secondary)]">{{ $bar['label'] }}</span>
-                            <div class="w-full rounded-t-[var(--radius-sm)] bg-[var(--color-primary-500)]" style="height: {{ $bar['height'] }}px"></div>
-                            <span class="text-xs text-[var(--text-muted)]">{{ $bar['period'] }}</span>
+        @if($count > 0)
+            <x-frase>{{ $sentence }}</x-frase>
+
+            <div class="grid items-start gap-x-20 gap-y-12 lg:grid-cols-2">
+                <x-section title="Evolución del PAPA por periodo" note="Escala de 0 a 5.">
+                    <div class="overflow-x-auto">
+                        <div class="flex min-h-[200px] items-end gap-5 border-b border-[var(--trz-linea)] px-1 pt-3" role="img" aria-label="PAPA por periodo: {{ collect($papaSeries)->map(fn ($b) => $b['period'].' '.$b['label'])->implode(', ') }}">
+                            @foreach($papaSeries as $bar)
+                                <div class="flex min-w-[44px] flex-1 flex-col items-center justify-end gap-1.5">
+                                    <span class="text-sm font-bold text-[var(--trz-tinta)]">{{ $bar['label'] }}</span>
+                                    <div class="w-full max-w-[44px] rounded-t-[6px] bg-[var(--trz-hilo)]" style="height: {{ $bar['height'] }}px"></div>
+                                </div>
+                            @endforeach
                         </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                <div class="flex flex-col gap-[2px] px-4 pb-[10px] pt-[14px]">
-                    <h2 class="text-sm font-semibold text-[var(--text-primary)]">Avance en créditos por periodo</h2>
-                    <p class="text-xs text-[var(--text-muted)]">Porcentaje del plan cursado acumulado · RF-16</p>
-                </div>
-                <div class="flex items-end gap-[14px] overflow-x-auto border-t border-[var(--border-subtle)] px-4 py-4" style="min-height: 180px">
-                    @foreach($creditSeries as $bar)
-                        <div class="flex min-w-[36px] flex-1 flex-col items-center justify-end gap-[7px]">
-                            <span class="text-xs font-medium text-[var(--text-secondary)]">{{ $bar['label'] }}</span>
-                            <div class="w-full rounded-t-[var(--radius-sm)] bg-[var(--color-accent-500)]" style="height: {{ $bar['height'] }}px"></div>
-                            <span class="text-xs text-[var(--text-muted)]">{{ $bar['period'] }}</span>
+                        <div class="flex gap-5 px-1 pt-2">
+                            @foreach($papaSeries as $bar)
+                                <span class="min-w-[44px] flex-1 text-center text-[13px] text-[var(--trz-texto-2)]">{{ $bar['period'] }}</span>
+                            @endforeach
                         </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
+                    </div>
+                </x-section>
 
-        <div class="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)] overflow-hidden">
-            <table class="w-full text-left text-sm">
-                <thead>
-                    <tr class="border-b border-[var(--border-subtle)] bg-[var(--surface-sunken)]">
-                        <th class="px-4 py-3 font-medium text-[var(--text-muted)]">Periodo</th>
-                        <th class="px-4 py-3 font-medium text-[var(--text-muted)]">PAPA</th>
-                        <th class="px-4 py-3 font-medium text-[var(--text-muted)]">Promedio periodo</th>
-                        <th class="px-4 py-3 font-medium text-[var(--text-muted)]">Créditos cursados</th>
-                        <th class="px-4 py-3 font-medium text-[var(--text-muted)]">Avance %</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-[var(--border-subtle)]">
-                    @foreach($records as $record)
-                    <tr class="hover:bg-[var(--surface-sunken)]">
-                        <td class="px-4 py-3 text-[var(--text-secondary)]">{{ $record->term->codigo }}</td>
-                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ number_format((float) $record->papa, 1) }}</td>
-                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->promedio_periodo !== null ? number_format((float) $record->promedio_periodo, 1) : '-' }}</td>
-                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ $record->creditos_cursados ?? '-' }}</td>
-                        <td class="px-4 py-3 text-[var(--text-primary)]">{{ (int) round((float) $record->porcentaje_avance) }}%</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                <x-section title="Avance en créditos por periodo" note="Porcentaje del plan cursado, acumulado.">
+                    <div class="overflow-x-auto">
+                        <div class="flex min-h-[200px] items-end gap-5 border-b border-[var(--trz-linea)] px-1 pt-3" role="img" aria-label="Avance por periodo: {{ collect($creditSeries)->map(fn ($b) => $b['period'].' '.$b['label'])->implode(', ') }}">
+                            @foreach($creditSeries as $bar)
+                                <div class="flex min-w-[44px] flex-1 flex-col items-center justify-end gap-1.5">
+                                    <span class="text-sm font-bold text-[var(--trz-tinta)]">{{ $bar['label'] }}</span>
+                                    <div class="w-full max-w-[44px] rounded-t-[6px] bg-[var(--trz-hilo)]" style="height: {{ $bar['height'] }}px"></div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="flex gap-5 px-1 pt-2">
+                            @foreach($creditSeries as $bar)
+                                <span class="min-w-[44px] flex-1 text-center text-[13px] text-[var(--trz-texto-2)]">{{ $bar['period'] }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                </x-section>
+            </div>
+
+            <x-section title="Registro por periodo">
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[560px] text-[15px]">
+                        <thead>
+                            <tr class="border-b-[1.5px] border-[var(--trz-linea)] text-[13px] font-semibold text-[var(--trz-texto-2)]">
+                                <th scope="col" class="py-2.5 pr-4 text-left font-semibold">Periodo</th>
+                                <th scope="col" class="px-4 py-2.5 text-left font-semibold">PAPA</th>
+                                <th scope="col" class="px-4 py-2.5 text-left font-semibold">Promedio periodo</th>
+                                <th scope="col" class="px-4 py-2.5 text-left font-semibold">Créditos cursados</th>
+                                <th scope="col" class="py-2.5 pl-4 text-left font-semibold">Avance del plan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($records as $record)
+                                @php($advance = (int) round((float) $record->porcentaje_avance))
+                                <tr class="border-b border-[var(--trz-linea)]">
+                                    <th scope="row" class="py-3.5 pr-4 text-left font-semibold text-[var(--trz-tinta)]">{{ $record->term->codigo }}</th>
+                                    <td class="px-4 py-3.5 font-semibold text-[var(--trz-tinta)]">{{ \App\Support\Labels::decimal($record->papa) }}</td>
+                                    <td class="px-4 py-3.5 text-[var(--trz-texto-2)]">{{ $record->promedio_periodo !== null ? \App\Support\Labels::decimal($record->promedio_periodo) : '-' }}</td>
+                                    <td class="px-4 py-3.5 text-[var(--trz-texto-2)]">{{ $record->creditos_cursados ?? '-' }}</td>
+                                    <td class="py-3.5 pl-4">
+                                        <div class="flex items-center gap-3">
+                                            <span class="h-2 w-[140px] overflow-hidden rounded-full bg-[var(--trz-linea)]" role="presentation"><span class="block h-full rounded-full bg-[var(--trz-hilo)]" style="width: {{ $advance }}%"></span></span>
+                                            <span class="w-12 text-sm font-semibold text-[var(--trz-tinta)]">{{ $advance }} %</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </x-section>
         @else
-        <div class="flex flex-col items-center justify-center py-20 text-center">
-            <x-ui-icon name="trending-up" class="h-16 w-16 text-[var(--text-muted)]" />
-            <h2 class="text-lg font-semibold text-[var(--text-primary)] mt-4">No hay registros académicos</h2>
-            <p class="text-sm text-[var(--text-muted)] mt-2">Aún no se han registrado tus registros académicos.</p>
-        </div>
+            <x-empty-state kind="historia" title="No hay registros académicos" text="Aún no hay registros académicos cargados a su nombre." />
         @endif
-    </div>
+    </x-page>
 </x-layouts.app>

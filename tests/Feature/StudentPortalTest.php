@@ -30,7 +30,9 @@ class StudentPortalTest extends TestCase
 
         foreach (['/perfil' => 'Mi perfil', '/historia-academica' => 'Mi historia académica', '/trabajo-de-grado' => 'Mi trabajo de grado', '/practica' => 'Mi práctica'] as $url => $label) {
             $html = $this->get($url)->getContent();
-            $this->assertMatchesRegularExpression('/<a\s[^>]*class="[^"]*bg-\[var\(--color-primary-50\)\][^"]*"[^>]*>(?:(?!<\/a>).)*<span>'.preg_quote($label, '/').'<\/span>/su', $html, $url);
+            // El ítem activo lleva aria-current="page" (lo anuncian los lectores de pantalla) y es el único del menú.
+            $this->assertMatchesRegularExpression('/<a\s[^>]*href="'.preg_quote($url, '/').'"[^>]*aria-current="page"/su', $html, $url);
+            $this->assertStringContainsString($label, $html);
         }
     }
 

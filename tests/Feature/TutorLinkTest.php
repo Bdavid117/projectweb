@@ -294,9 +294,10 @@ class TutorLinkTest extends TestCase
 
         $response = $this->actingAs($juan->user)->get(route('my-tutor.show'))->assertOk();
 
-        // El nombre solo aparece escapado, dentro de un atributo data-, y no hay ningún onclick con JavaScript interpolado.
-        $response->assertSee('data-confirm="¿Dejar de compartir su información con '.e($evil).'?', false);
+        // El nombre solo aparece escapado, como texto del diálogo de confirmación; no hay JavaScript interpolado.
+        $response->assertSee(e($evil).' perderá el acceso', false);
         $response->assertDontSee('onclick=', false);
+        $response->assertDontSee('confirm(', false);
         $response->assertDontSee('<img src=x onerror=alert(1)>', false);
     }
 

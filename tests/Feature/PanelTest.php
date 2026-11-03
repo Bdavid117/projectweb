@@ -20,14 +20,18 @@ class PanelTest extends TestCase
         $response = $this->get('/panel');
 
         $response->assertOk();
-        $response->assertSee('Panel del programa');
-        $response->assertSee('ESTUDIANTES ACTIVOS');
+        $response->assertSee('Periodo 2026-2, con datos al');
+        $response->assertSee('6 estudiantes activos, 3 con situaciones por atender.');
+        $response->assertSee('El PAPA medio es 3,7');
+        $response->assertSee('3 décimas menos que el periodo anterior');
+        $response->assertSee('el avance medio del plan es 44 %');
+        $response->assertSee('Dónde está cada cohorte');
+        $response->assertSee('Piden atención');
         $response->assertSee('Pérez Rojas, Juan Sebastián');
         $response->assertSee('Sin atender');
         $response->assertSee('Atendida');
-        $response->assertSee('Matriculados en 2026-2S');
-        $response->assertDontSee('312');
-        $response->assertDontSee('20/09/2026');
+        $response->assertDontSeeText('312');
+        $response->assertDontSeeText('20/09/2026');
     }
 
     public function test_staff_roles_can_open_the_panel(): void
@@ -48,7 +52,7 @@ class PanelTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $this->signInSeeded(Role::Estudiante);
 
-        $this->get('/panel')->assertOk()->assertSee('Mi panel')->assertDontSee('ESTUDIANTES ACTIVOS');
+        $this->get('/panel')->assertOk()->assertSee('Mi panel')->assertDontSee('estudiantes activos');
     }
 
     public function test_coordination_sees_every_alert_but_a_professor_only_those_of_their_tutored_students(): void
@@ -73,8 +77,8 @@ class PanelTest extends TestCase
         $response = $this->get('/panel');
 
         $response->assertOk();
-        $response->assertSee('ESTUDIANTES ACTIVOS');
-        $response->assertSee('Situaciones que requieren atención')->assertSee('Sin situaciones registradas.');
+        $response->assertSee('Aún no tiene estudiantes bajo su tutoría.');
+        $response->assertSee('Piden atención')->assertSee('Sin situaciones por atender.');
         foreach (['Ruiz Salazar, Andrés', 'Gómez Ruiz, Laura', 'Pérez Rojas, Juan Sebastián'] as $name) {
             $response->assertDontSee($name);
         }
@@ -88,9 +92,9 @@ class PanelTest extends TestCase
         $this->seed(DatabaseSeeder::class);
 
         $this->signInSeededTutor();
-        $this->assertSame('2', collect((new ProgramMetrics)->panel(auth()->user())['indicators'])->firstWhere('label', 'ALERTAS ABIERTAS')['value']);
+        $this->assertSame(2, (new ProgramMetrics)->panel(auth()->user())['headline']['open']);
 
         $this->signInSeeded(Role::Coordinacion);
-        $this->assertSame('3', collect((new ProgramMetrics)->panel(auth()->user())['indicators'])->firstWhere('label', 'ALERTAS ABIERTAS')['value']);
+        $this->assertSame(3, (new ProgramMetrics)->panel(auth()->user())['headline']['open']);
     }
 }

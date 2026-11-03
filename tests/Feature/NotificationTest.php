@@ -53,7 +53,7 @@ class NotificationTest extends TestCase
         $this->signInSeeded(Role::Estudiante);
 
         $this->get('/perfil')
-            ->assertSee('aria-label="Abrir menú de navegación"', false)
+            ->assertSee('aria-label="Abrir el menú de navegación"', false)
             ->assertSee('aria-label="Notificaciones"', false)
             ->assertSee('aria-label="Menú de usuario"', false)
             ->assertSee('Mi perfil')

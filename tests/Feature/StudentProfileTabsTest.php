@@ -50,7 +50,7 @@ class StudentProfileTabsTest extends TestCase
         }
 
         // Contenido de cada sección.
-        $response->assertSee('Evolución del PAPA por periodo');
+        $response->assertSee('Cuaderno de ruta');
         $response->assertSee('Historia académica por periodo');
         $response->assertSee('Semillero de investigación SIGMA');
         $response->assertSee('Trabajo de grado · modalidad pasantía');
@@ -90,11 +90,11 @@ class StudentProfileTabsTest extends TestCase
         $response->assertSee('Seguimiento a carga académica');
     }
 
-    public function test_the_mobile_more_menu_is_present(): void
+    public function test_the_tab_index_scrolls_sideways_on_small_screens(): void
     {
         $this->signInSeeded(Role::Coordinacion);
 
-        $this->get('/estudiantes/'.$this->juan()->id)->assertOk()->assertSee('Sección:');
+        $this->get('/estudiantes/'.$this->juan()->id)->assertOk()->assertSee('overflow-x-auto', false)->assertSee('Imprimir ficha');
     }
 
     public function test_the_profile_is_forbidden_without_a_link_and_for_students(): void

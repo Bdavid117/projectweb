@@ -25,12 +25,12 @@ class Labels
     public static function requestStatus(CommitteeRequest $request): array
     {
         return match ($request->estado) {
-            'radicada' => ['Radicada', 'info'],
-            'en_revision' => ['En revisión', 'warning'],
+            'radicada' => ['Radicada', 'neutral'],
+            'en_revision' => ['En revisión', 'review'],
             default => match ($request->decision) {
                 'aprobada' => ['Aprobada', 'success'],
                 'rechazada' => ['Rechazada', 'danger'],
-                'aplazada' => ['Aplazada', 'primary'],
+                'aplazada' => ['Aplazada', 'warning'],
                 default => ['Con decisión', 'success'],
             },
         };
@@ -79,7 +79,13 @@ class Labels
 
     public static function termLabel(?AcademicTerm $term): string
     {
-        return $term ? $term->codigo.'S' : 'sin periodo';
+        return $term ? $term->codigo : 'sin periodo';
+    }
+
+    /** Número con coma decimal (4,1), como se lee en español; `—` cuando no hay dato. */
+    public static function decimal(float|int|string|null $value, int $digits = 1): string
+    {
+        return $value === null || $value === '' ? '—' : number_format((float) $value, $digits, ',', '.');
     }
 
     public static function bytes(int $bytes): string

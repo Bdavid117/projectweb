@@ -1,143 +1,178 @@
 @import "tailwindcss";
+@import "@fontsource-variable/bricolage-grotesque/wght.css";
+@import "@fontsource-variable/ibm-plex-sans/wght.css";
+
+/*
+ * Sistema de diseño «El hilo». Fuente de verdad: el lienzo de Pencil (mokup/trayectoria-estudiantil.pen).
+ * Todas las vistas leen estos tokens con valores arbitrarios (bg-[var(--trz-hilo)]), nunca con hex.
+ * Tres corrientes marcan cada dato: Académico (círculo, hilo azul), Experiencias (rombo, hito ámbar) y
+ * Acompañamiento (cuadrado, brote violeta). Los estados nunca dependen solo del color.
+ */
+@theme {
+  --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Bricolage Grotesque", "IBM Plex Sans Variable", ui-sans-serif, system-ui, sans-serif;
+}
 
 :root {
-  /* ---------- Marca · Azul institucional ---------- */
-  --color-primary-50:  #EEF4FB;
-  --color-primary-100: #D6E4F5;
-  --color-primary-200: #ADC9EB;
-  --color-primary-300: #7FA9DD;
-  --color-primary-400: #4E85C9;
-  --color-primary-500: #2B66AE;
-  --color-primary-600: #1E5290;
-  --color-primary-700: #17406F;
-  --color-primary-800: #112F52;
-  --color-primary-900: #0B1F36;
+  /* ---------- Neutros ---------- */
+  --trz-tinta:          #101A33; /* texto principal y elementos oscuros */
+  --trz-papel:          #F3F5F9; /* fondo de página */
+  --trz-superficie:     #FFFFFF; /* barras, tarjetas y campos */
+  --trz-texto-2:        #4A5578;
+  --trz-texto-3:        #5F6B8A;
+  --trz-linea:          #DCE1EC; /* separadores y decoración */
+  --trz-borde-control:  #7A86A6; /* bordes de campos y botones (3:1) */
 
-  /* ---------- Acento · Verde académico ---------- */
-  --color-accent-50:  #ECF7F1;
-  --color-accent-100: #D2EDE0;
-  --color-accent-300: #7FCFA9;
-  --color-accent-500: #2E9E6B;
-  --color-accent-600: #16704A;
-  --color-accent-800: #0D4A31;
+  /* ---------- Corriente académica · hilo ---------- */
+  --trz-hilo:           #2456D6; /* relleno de marca */
+  --trz-hilo-hover:     #1C46B5;
+  --trz-hilo-fondo:     #E8EEFC;
+  --trz-hilo-texto:     #2456D6; /* texto y enlaces azules */
+  --trz-sobre-hilo:     #FFFFFF; /* texto sobre el azul de marca: no cambia de tema */
 
-  /* ---------- Neutrales ---------- */
-  --color-white: #FFFFFF;
-  --color-neutral-50:  #F7F8FA;
-  --color-neutral-100: #EEF0F4;
-  --color-neutral-200: #DFE3E9;
-  --color-neutral-300: #C6CCD6;
-  --color-neutral-400: #99A1AE;
-  --color-neutral-500: #6B7280;
-  --color-neutral-600: #4B5563;
-  --color-neutral-700: #374151;
-  --color-neutral-800: #1F2937;
-  --color-neutral-900: #111827;
+  /* ---------- Corriente de experiencias · hito ---------- */
+  --trz-hito:           #F2A81D; /* solo relleno: no se usa como texto */
+  --trz-hito-texto:     #8A5600;
+  --trz-hito-fondo:     #FDF1D6;
 
-  /* ---------- Semánticos ---------- */
-  --color-success:    #16704A;
-  --color-success-bg: #ECF7F1;
-  --color-warning:    #92610C;
-  --color-warning-bg: #FDF6E7;
-  --color-danger:     #B42318;
-  --color-danger-bg:  #FDF0EF;
-  --color-info:       #1E5290;
-  --color-info-bg:    #EEF4FB;
+  /* ---------- Corriente de acompañamiento · brote ---------- */
+  --trz-brote:          #6D4AE0;
+  --trz-brote-fondo:    #EFEBFD;
 
-  --color-restricted:    #6D28D9;
-  --color-restricted-bg: #F4F0FE;
+  /* ---------- Estados ---------- */
+  --trz-logro:          #0A6E54;
+  --trz-logro-fondo:    #E3F3EE;
+  --trz-alerta:         #B3202D;
+  --trz-alerta-fondo:   #FCE9EB;
 
-  /* ---------- Roles de superficie ---------- */
-  --surface-page:    var(--color-neutral-50);
-  --surface-card:    var(--color-white);
-  --surface-sunken:  var(--color-neutral-100);
-  --surface-inverse: var(--color-primary-800);
-  --border-subtle:   var(--color-neutral-200);
-  --border-default:  var(--color-neutral-300);
-  --border-strong:   var(--color-neutral-400);
-  --text-primary:    var(--color-neutral-900);
-  --text-secondary:  var(--color-neutral-600);
-  --text-muted:      var(--color-neutral-500);
-  --text-on-brand:   var(--color-white);
-  --focus-ring:      var(--color-primary-500);
+  --trz-foco:           #101A33;
+  --trz-velo:           rgb(16 26 51 / 0.4);
 
-  /* ---------- Tipografía ---------- */
-  --text-xs:   0.75rem;
-  --text-sm:   0.875rem;
-  --text-base: 1rem;
-  --text-lg:   1.125rem;
-  --text-xl:   1.25rem;
-  --text-2xl:  1.5rem;
-  --text-3xl:  1.875rem;
-
-  --weight-regular:  400;
-  --weight-medium:   500;
-  --weight-semibold: 600;
-  --weight-bold:     700;
-
-  --leading-tight:  1.25;
-  --leading-normal: 1.5;
-  --leading-loose:  1.7;
-
-  /* ---------- Espaciado · base 4px ---------- */
-  --space-1:  0.25rem;
-  --space-2:  0.5rem;
-  --space-3:  0.75rem;
-  --space-4:  1rem;
-  --space-5:  1.25rem;
-  --space-6:  1.5rem;
-  --space-8:  2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-
-  /* ---------- Radios ---------- */
-  --radius-sm:   4px;
-  --radius-md:   6px;
-  --radius-lg:   10px;
-  --radius-xl:   14px;
+  /* ---------- Radios · sombras · layout ---------- */
+  --radius-sm:   8px;
+  --radius-md:   10px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
   --radius-full: 9999px;
 
-  /* ---------- Sombras ---------- */
-  --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.06);
-  --shadow-md: 0 2px 6px rgba(17, 24, 39, 0.08);
-  --shadow-lg: 0 8px 24px rgba(17, 24, 39, 0.12);
+  --shadow-menu: 0 8px 24px rgb(16 26 51 / 0.15);
+  --shadow-hoja: 0 -8px 24px rgb(16 26 51 / 0.2);
 
-  /* ---------- Layout ---------- */
-  --sidebar-width:           260px;
-  --sidebar-width-collapsed: 72px;
-  --topbar-height:           60px;
-  --content-max-width:       1280px;
-
-  /* ---------- Puntos de quiebre ---------- */
-  --bp-mobile:  360px;
-  --bp-tablet:  768px;
-  --bp-desktop: 1280px;
-
-  /* ---------- Componentes ---------- */
-  --control-height:    40px;
-  --control-height-sm: 32px;
+  --topbar-height:     64px;
+  --tabbar-height:     64px;
+  --content-max-width: 1440px;
+  --control-height:    44px;
   --touch-target-min:  44px;
 }
 
-@layer base {
-  html, body {
-    height: 100%;
-  }
+/* Modo oscuro: automático según el sistema, o forzado con data-theme (menú de usuario). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --trz-tinta:          #EAF0FF;
+  --trz-papel:          #0D1424;
+  --trz-superficie:     #151E33;
+  --trz-texto-2:        #B4BEDA;
+  --trz-texto-3:        #9AA7C7;
+  --trz-linea:          #2A3556;
+  --trz-borde-control:  #7383AD;
+  --trz-hilo:           #3B6BE8;
+  --trz-hilo-hover:     #2E5BD8;
+  --trz-hilo-fondo:     #1B2B57;
+  --trz-hilo-texto:     #9DB8FF;
+  --trz-hito-texto:     #F6C65A;
+  --trz-hito-fondo:     #3A2C0B;
+  --trz-brote:          #A48DF5;
+  --trz-brote-fondo:    #2A2250;
+  --trz-logro:          #4FD1A5;
+  --trz-logro-fondo:    #0F3A2F;
+  --trz-alerta:         #FF8A93;
+  --trz-alerta-fondo:   #3A1218;
+  --trz-foco:           #EAF0FF;
+  --trz-velo:           rgb(0 0 0 / 0.6);
+  --shadow-menu: 0 8px 24px rgb(0 0 0 / 0.45);
+  --shadow-hoja: 0 -8px 24px rgb(0 0 0 / 0.5);
+}
 
-  .font-sans {
-    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --trz-tinta:          #EAF0FF;
+    --trz-papel:          #0D1424;
+    --trz-superficie:     #151E33;
+    --trz-texto-2:        #B4BEDA;
+    --trz-texto-3:        #9AA7C7;
+    --trz-linea:          #2A3556;
+    --trz-borde-control:  #7383AD;
+    --trz-hilo:           #3B6BE8;
+    --trz-hilo-hover:     #2E5BD8;
+    --trz-hilo-fondo:     #1B2B57;
+    --trz-hilo-texto:     #9DB8FF;
+    --trz-hito-texto:     #F6C65A;
+    --trz-hito-fondo:     #3A2C0B;
+    --trz-brote:          #A48DF5;
+    --trz-brote-fondo:    #2A2250;
+    --trz-logro:          #4FD1A5;
+    --trz-logro-fondo:    #0F3A2F;
+    --trz-alerta:         #FF8A93;
+    --trz-alerta-fondo:   #3A1218;
+    --trz-foco:           #EAF0FF;
+    --trz-velo:           rgb(0 0 0 / 0.6);
+    --shadow-menu: 0 8px 24px rgb(0 0 0 / 0.45);
+    --shadow-hoja: 0 -8px 24px rgb(0 0 0 / 0.5);
   }
 }
 
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--topbar-height) + 16px);
+  }
+
+  body {
+    background: var(--trz-papel);
+    color: var(--trz-tinta);
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.012em;
+  }
+
+  /*
+   * Foco visible: anillo de 2 px con 2 px de aire, en tinta (cumple 3:1 sobre cualquier fondo).
+   * Va DENTRO de @layer base a propósito: CSS fuera de toda capa le gana a las utilidades de Tailwind
+   * (que viven en @layer utilities), y así `outline-none` de los campos quedaba anulado y aparecía un
+   * segundo aro dentro del borde del campo. No fija border-radius: el aro sigue la forma de cada elemento.
+   */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--trz-foco);
+    outline-offset: 2px;
+  }
 }
 
 [x-cloak] {
   display: none !important;
+}
+
+/* ---------- Movimiento ---------- */
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+/* Esqueleto de carga: bloque en color de línea con un destello lento de izquierda a derecha. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--trz-linea);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--trz-superficie) 65%, transparent), transparent);
+  animation: shimmer 1.4s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -145,10 +180,12 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
+  .skeleton::after { animation: none; }
 }
 
-/* ---------- Login: trayectoria que se dibuja una sola vez ---------- */
+/* ---------- El hilo que se dibuja una sola vez (acceso) ---------- */
 @keyframes trace-draw {
   from { stroke-dashoffset: 1; }
   to { stroke-dashoffset: 0; }
@@ -160,10 +197,6 @@
 @keyframes trace-label {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
-}
-@keyframes trace-pulse {
-  0% { opacity: 0.55; transform: scale(1); }
-  100% { opacity: 0; transform: scale(2.6); }
 }
 
 .trace-path {
@@ -179,12 +212,6 @@
 }
 .trace-node { animation: trace-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 .trace-label { animation: trace-label 0.5s ease-out forwards; }
-.trace-pulse {
-  opacity: 0;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: trace-pulse 2.4s ease-out 3.2s infinite;
-}
 .trace-1 { animation-delay: 0.3s; }
 .trace-2 { animation-delay: 1.2s; }
 .trace-3 { animation-delay: 2s; }
@@ -197,5 +224,18 @@
 @media (prefers-reduced-motion: reduce) {
   .trace-path { stroke-dashoffset: 0; animation: none; }
   .trace-node, .trace-label { opacity: 1; animation: none; }
-  .trace-pulse { display: none; }
+}
+
+/* ---------- Impresión: una sola tinta, sin barras ni controles ---------- */
+@media print {
+  :root, :root[data-theme="dark"] {
+    --trz-papel: #FFFFFF;
+    --trz-superficie: #FFFFFF;
+    --trz-tinta: #101A33;
+  }
+  body { background: #FFFFFF; }
+  /* La ficha imprime todas sus secciones, no solo la pestaña abierta. */
+  [role="tabpanel"] { display: block !important; break-inside: avoid-page; }
+  [role="tabpanel"] + [role="tabpanel"] { margin-top: 1.5rem; }
+  a[href]::after { content: none !important; }
 }

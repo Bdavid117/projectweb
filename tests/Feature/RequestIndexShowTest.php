@@ -49,7 +49,7 @@ class RequestIndexShowTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Solicitudes');
-        $response->assertSee('2 solicitudes en el periodo 2026-2S · 2 sin decisión');
+        $response->assertSee('2 solicitudes en el periodo 2026-2 · 2 sin decisión');
         $response->assertSee('Pérez Rojas, Juan Sebastián');
         $response->assertSee('Gómez Ruiz, Laura');
         $response->assertSee('Cancelación de asignatura');
@@ -138,9 +138,11 @@ class RequestIndexShowTest extends TestCase
         $response->assertOk();
         $response->assertSee('Cancelación de asignatura');
         $response->assertSee('Pérez Rojas, Juan Sebastián');
-        $response->assertSee('Trazabilidad');
+        $response->assertSee('Recorrido de la solicitud');
         $response->assertSee('Pendiente · la registra Coordinación');
-        $response->assertSee('Código 2020123');
+        $response->assertSee('2020123');
+        $response->assertDontSee('Código 2020123');
+        $response->assertDontSee('Tutor asignado:');
     }
 
     public function test_the_owner_coordination_and_the_linked_professor_can_open_but_nobody_else(): void

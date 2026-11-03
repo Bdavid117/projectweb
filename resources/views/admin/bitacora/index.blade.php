@@ -1,31 +1,45 @@
 <x-layouts.app :user="$user" :nav-groups="$navGroups" title="Bitácora · Trayectoria Estudiantil">
-    <div class="flex flex-col gap-5 p-4 sm:p-7">
-        <div class="flex flex-col gap-[3px]">
-            <h1 class="text-2xl font-semibold text-[var(--text-primary)]">Bitácora</h1>
-            <p class="text-sm text-[var(--text-secondary)]">Registro de cambios de estado en solicitudes, con responsable y fecha · RNF-05</p>
-        </div>
+    <x-page>
+        <x-page-header title="Bitácora" subtitle="Registro de cambios de estado en solicitudes, con responsable y fecha." />
 
-        <div class="flex min-w-0 flex-col rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-            <div class="min-w-0 overflow-x-auto">
-                <div class="flex min-w-[720px] gap-3 px-4 py-[11px] text-[11px] font-semibold tracking-[0.4px] text-[var(--text-muted)]">
-                    <span class="w-[130px]">FECHA</span>
-                    <span class="w-[170px]">USUARIO</span>
-                    <span class="flex-1">REGISTRO</span>
-                    <span class="w-[220px]">CAMBIO</span>
-                </div>
-                @forelse($entries as $entry)
-                    <div class="flex min-w-[720px] items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-[11px] text-sm">
-                        <span class="w-[130px] text-[var(--text-secondary)]">{{ $entry['when'] }}</span>
-                        <span class="w-[170px] truncate text-[var(--text-secondary)]">{{ $entry['who'] }}</span>
-                        <a href="{{ $entry['url'] }}" class="flex-1 truncate font-semibold text-[var(--text-primary)]">{{ $entry['what'] }}</a>
-                        <span class="w-[220px] text-[var(--text-secondary)]">{{ $entry['from'] }} → {{ $entry['to'] }}</span>
-                    </div>
-                @empty
-                    <div class="border-t border-[var(--border-subtle)] px-4 py-8 text-center text-sm text-[var(--text-muted)]">Aún no hay actividad registrada.</div>
-                @endforelse
-            </div>
-        </div>
+        @if($entries->isEmpty())
+            <x-empty-state kind="bitacora" title="Aún no hay actividad registrada." text="Los cambios de estado de las solicitudes aparecerán aquí con responsable y fecha." />
+        @else
+            <table class="hidden w-full text-[15px] md:table">
+                <caption class="sr-only">Bitácora de cambios de estado</caption>
+                <thead>
+                    <tr class="border-b-[1.5px] border-[var(--trz-linea)] text-[13px] font-semibold text-[var(--trz-texto-2)]">
+                        <th scope="col" class="py-2.5 pr-4 text-left font-semibold">Fecha</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Usuario</th>
+                        <th scope="col" class="px-4 py-2.5 text-left font-semibold">Registro</th>
+                        <th scope="col" class="py-2.5 pl-4 text-left font-semibold">Cambio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($entries as $entry)
+                        <tr class="border-b border-[var(--trz-linea)]">
+                            <td class="py-3.5 pr-4 text-[var(--trz-texto-2)]">{{ $entry['when'] }}</td>
+                            <td class="px-4 py-3.5 text-[var(--trz-texto-2)]">{{ $entry['who'] }}</td>
+                            <td class="px-4 py-3.5"><a href="{{ $entry['url'] }}" class="font-semibold text-[var(--trz-tinta)] hover:text-[var(--trz-hilo-texto)] hover:underline">{{ $entry['what'] }}</a></td>
+                            <td class="py-3.5 pl-4">
+                                <span class="inline-flex items-center gap-2 text-sm"><span class="text-[var(--trz-texto-2)]">{{ $entry['from'] }}</span><x-ui-icon name="arrow-right" class="h-3.5 w-3.5 text-[var(--trz-texto-3)]" /><span class="font-semibold text-[var(--trz-tinta)]">{{ $entry['to'] }}</span></span>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <ul class="flex flex-col md:hidden">
+                @foreach($entries as $entry)
+                    <li class="flex flex-col gap-1 border-b border-[var(--trz-linea)] py-3.5 first:border-t">
+                        <a href="{{ $entry['url'] }}" class="text-[15px] font-semibold text-[var(--trz-tinta)] hover:underline max-md:-my-3 max-md:py-3">{{ $entry['what'] }}</a>
+                        <span class="text-[13px] text-[var(--trz-texto-2)]">{{ $entry['when'] }} · {{ $entry['who'] }}</span>
+                        <span class="inline-flex items-center gap-2 text-[13px]"><span class="text-[var(--trz-texto-2)]">{{ $entry['from'] }}</span><x-ui-icon name="arrow-right" class="h-3.5 w-3.5 text-[var(--trz-texto-3)]" /><span class="font-bold text-[var(--trz-tinta)]">{{ $entry['to'] }}</span></span>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
 
         <x-pagination :paginator="$entries" noun="registros" />
-    </div>
+    </x-page>
 </x-layouts.app>

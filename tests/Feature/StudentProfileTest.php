@@ -29,8 +29,8 @@ class StudentProfileTest extends TestCase
         $response->assertSee('Tutor asignado: Carlos Pineda');
         $response->assertSee('2020-1');
         $response->assertSee('2026-2');
-        $response->assertSee('3.4');
-        $response->assertSee('4.1');
+        $response->assertSee('3,4');
+        $response->assertSee('4,1');
         $response->assertSee('Semillero de investigación SIGMA');
         $response->assertSee('Trabajo de grado · modalidad pasantía');
         $response->assertSee('Práctica empresarial · Softlogic S.A.S.');

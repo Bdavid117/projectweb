@@ -24,7 +24,7 @@ class EmptyDatabaseScreensTest extends TestCase
     {
         $this->actingAsRole(Role::Coordinacion);
 
-        $this->get('/panel')->assertOk()->assertSee('ESTUDIANTES ACTIVOS')->assertSee('sin periodo');
+        $this->get('/panel')->assertOk()->assertSee('0 estudiantes activos, ninguno con situaciones por atender.')->assertSee('Sin periodo vigente')->assertSee('Sin datos de avance por cohorte');
         $this->get('/indicadores')->assertOk()->assertSee('Indicadores del programa');
     }
 

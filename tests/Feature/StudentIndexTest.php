@@ -40,7 +40,7 @@ class StudentIndexTest extends TestCase
 
         $response = $this->get('/estudiantes');
 
-        $response->assertSee('font-semibold text-[var(--color-danger)]', false);
+        $response->assertSee('font-semibold text-[var(--trz-alerta)]', false);
         $response->assertSee('href="'.route('students.show', $juan).'"', false);
     }
 

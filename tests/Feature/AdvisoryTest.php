@@ -34,7 +34,7 @@ class AdvisoryTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Mis asesorías');
-        $response->assertSee('5 estudiantes asignados en 2026-2S');
+        $response->assertSee('5 estudiantes asignados en 2026-2');
         foreach (['Pérez Rojas, Juan Sebastián', 'Gómez Ruiz, Laura', 'Cardona Vélez, Mateo', 'Martínez Cruz, Diana', 'Ospina Lara, Sofía'] as $name) {
             $response->assertSee($name);
         }
@@ -53,7 +53,7 @@ class AdvisoryTest extends TestCase
         $response->assertSee('1 alerta abierta');
         $response->assertSee('Sin tutoría reciente');
         $response->assertSee('Sin alertas');
-        $response->assertSee('font-semibold text-[var(--color-danger)]', false);
+        $response->assertSee('font-semibold text-[var(--trz-alerta)]', false);
     }
 
     public function test_a_deleted_tutorship_no_longer_counts_as_the_last_one(): void

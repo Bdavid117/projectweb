@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicRecord;
+use App\Support\Labels;
 use App\Support\Navigation;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -30,7 +31,7 @@ class AcademicHistoryController extends Controller
             'records' => $records,
             'papaSeries' => $chronological->map(fn (AcademicRecord $r) => [
                 'period' => $r->term->codigo,
-                'label' => number_format((float) $r->papa, 1),
+                'label' => Labels::decimal($r->papa),
                 'height' => (int) round((float) $r->papa / 5 * $maxHeight),
             ])->all(),
             'creditSeries' => $chronological->map(fn (AcademicRecord $r) => [
