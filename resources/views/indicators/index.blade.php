@@ -16,7 +16,7 @@
             Este periodo se {{ $h['filed'] === 1 ? 'radicó' : 'radicaron' }} {{ $n($h['filed'], 'solicitud', 'solicitudes') }} y {{ $h['pending'] }} {{ $h['pending'] === 1 ? 'sigue' : 'siguen' }} sin decisión.
         </x-frase>
 
-        <div class="grid items-start gap-x-20 gap-y-12 lg:grid-cols-2">
+        <div class="grid grid-cols-1 items-start gap-x-20 gap-y-12 lg:grid-cols-2">
             <x-section title="Distribución del PAPA" :note="'Número de estudiantes por rango. '.($papaUnit === 1 ? 'Cada punto es un estudiante.' : 'Cada punto equivale a '.$papaUnit.' estudiantes.')">
                 @php($lowCount = $papaHistogram[0]['count'] + ($papaHistogram[1]['count'] ?? 0))
                 <ul class="flex flex-col gap-4">

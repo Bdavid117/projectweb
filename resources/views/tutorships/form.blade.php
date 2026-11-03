@@ -3,7 +3,7 @@
     <x-page>
         <x-page-header :title="$editing ? 'Editar tutoría' : 'Registrar tutoría'" :subtitle="'Queda asociada al estudiante y a su tutor, y no podrá editarse pasadas '.$hours.' horas.'" :back="route('students.show', $student['id'])" back-label="{{ $student['name'] }}" />
 
-        <div class="grid items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_420px]">
+        <div class="grid grid-cols-1 items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_420px]">
             <div class="flex flex-col gap-6">
                 <form method="POST" action="{{ $editing ? route('tutorships.update', $tutorship) : route('tutorships.store', $student['id']) }}" class="flex flex-col gap-6">
                     @csrf
@@ -19,7 +19,7 @@
                         </div>
                     </div>
 
-                    <div class="grid gap-5 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <x-form-field label="Fecha de la sesión *" name="fecha" type="date" icon="calendar" :value="$tutorship?->fecha?->format('Y-m-d') ?? now()->format('Y-m-d')" help="No puede ser posterior a hoy" />
                         <x-form-field label="Periodo académico" name="periodo" :value="$termLabel" :readonly="true" icon="lock" help="Se toma del calendario vigente" />
                     </div>

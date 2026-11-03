@@ -10,7 +10,7 @@
             @endphp
             <x-frase>{{ $sentence }}</x-frase>
 
-            <div class="grid items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_460px]">
+            <div class="grid grid-cols-1 items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_460px]">
                 <div class="flex flex-col gap-10">
                     <x-section title="Detalles del trabajo de grado">
                         <dl class="flex flex-col border-t border-[var(--trz-linea)]">
@@ -55,7 +55,7 @@
                     @csrf
                     @method('PUT')
                     <div class="flex flex-col gap-1.5">
-                        <h2 class="text-2xl font-semibold text-[var(--trz-tinta)]">Actualizar mi trabajo de grado</h2>
+                        <h2 class="text-[22px] sm:text-2xl font-semibold text-[var(--trz-tinta)]">Actualizar mi trabajo de grado</h2>
                         <p class="text-sm leading-snug text-[var(--trz-texto-2)]">Puede cambiar el título, el repositorio y el codirector.</p>
                     </div>
                     <x-form-field label="Título *" name="titulo" :value="$thesis->titulo" />

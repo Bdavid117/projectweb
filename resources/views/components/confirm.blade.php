@@ -12,7 +12,7 @@
             @method($method)
             <div class="flex items-center gap-3">
                 <x-ui-icon name="triangle-alert" class="h-6 w-6 shrink-0 text-[var(--trz-alerta)]" />
-                <h2 id="{{ $dialogId }}" class="text-2xl font-semibold leading-tight">{{ $title }}</h2>
+                <h2 id="{{ $dialogId }}" class="text-[22px] sm:text-2xl font-semibold leading-tight">{{ $title }}</h2>
             </div>
             <p class="text-base leading-relaxed text-[var(--trz-texto-2)]">{{ $text }}</p>
             <div class="flex flex-wrap justify-end gap-3 pt-2">

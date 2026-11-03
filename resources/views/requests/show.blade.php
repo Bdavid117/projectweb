@@ -8,7 +8,7 @@
             <x-back-link :href="route('requests.index')">{{ $isStudent ? 'Mis solicitudes' : 'Solicitudes' }}</x-back-link>
             <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-12">
                 <div class="flex min-w-0 flex-col gap-2.5">
-                    <h1 class="text-[32px] font-semibold leading-[1.08] text-[var(--trz-tinta)] sm:text-[42px]">Solicitud {{ $solicitud['number'] }}</h1>
+                    <h1 class="text-[28px] font-semibold leading-[1.1] text-[var(--trz-tinta)] sm:text-[42px] sm:leading-[1.08]">Solicitud {{ $solicitud['number'] }}</h1>
                     <p class="max-w-[72ch] text-base leading-[1.45] text-[var(--trz-texto-2)] sm:text-lg">
                         {{ $solicitud['type'] }}. Radicada el {{ $solicitud['filedAt'] }}
                         @unless($isStudent) por {{ $solicitud['student'] }} (código {{ $solicitud['code'] }})@endunless, periodo {{ $solicitud['term'] }}.
@@ -22,7 +22,7 @@
             <x-flash tone="danger" :message="$errors->first('estado')" />
         @endif
 
-        <div class="grid items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_420px]">
+        <div class="grid grid-cols-1 items-start gap-x-20 gap-y-12 lg:grid-cols-[minmax(0,1fr)_420px]">
             <div class="flex flex-col gap-11">
                 <x-section title="Descripción de la solicitud">
                     <p class="whitespace-pre-line text-[17px] leading-[1.6] text-[var(--trz-tinta)]">{{ $solicitud['description'] }}</p>
@@ -103,7 +103,7 @@
                     <form method="POST" action="{{ route('requests.decision', $solicitud['id']) }}" class="flex flex-col gap-5">
                         @csrf
                         <div class="flex flex-wrap items-center justify-between gap-3">
-                            <h2 class="text-2xl font-semibold text-[var(--trz-tinta)] sm:text-[26px]">Registrar decisión</h2>
+                            <h2 class="text-[22px] font-semibold text-[var(--trz-tinta)] sm:text-[26px]">Registrar decisión</h2>
                             <x-status-badge text="Solo Coordinación" tone="restricted" />
                         </div>
                         <x-form-field label="Decisión *" name="decision" type="select" help="Aprobada, rechazada o aplazada">

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AcademicHistoryController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdvisoryController;
+use App\Http\Controllers\AlertController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\InternshipController;
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notificaciones', NotificationController::class)->name('notifications.index');
 
     Route::get('/panel', [PanelController::class, 'index'])->name('panel.index');
+    Route::post('/alertas/{alerta}/atender', [AlertController::class, 'attend'])->name('alerts.attend');
 
     Route::middleware('role:profesor,coordinacion')->group(function () {
         Route::get('/estudiantes', [StudentController::class, 'index'])->name('students.index');

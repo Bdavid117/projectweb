@@ -4,10 +4,10 @@
             <x-back-link href="/estudiantes" class="print:hidden">Estudiantes</x-back-link>
 
             <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
-                <div class="flex min-w-0 items-center gap-5">
-                    <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--trz-hilo-fondo)] text-lg font-bold text-[var(--trz-hilo-texto)] sm:h-16 sm:w-16" aria-hidden="true">{{ $student['initials'] }}</span>
+                <div class="flex min-w-0 items-center gap-4 sm:gap-5">
+                    <span class="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-[var(--trz-hilo-fondo)] text-2xl font-bold text-[var(--trz-hilo-texto)] sm:h-20 sm:w-20 sm:text-3xl lg:h-[88px] lg:w-[88px] lg:text-4xl" aria-hidden="true">{{ $student['initials'] }}</span>
                     <div class="flex min-w-0 flex-col gap-2">
-                        <h1 class="text-[30px] font-semibold leading-[1.08] text-[var(--trz-tinta)] sm:text-[42px]">{{ $student['name'] }}</h1>
+                        <h1 class="text-2xl font-semibold leading-[1.15] text-[var(--trz-tinta)] sm:text-[42px] sm:leading-[1.08]">{{ $student['name'] }}</h1>
                         <p class="text-[15px] leading-relaxed text-[var(--trz-texto-2)]">{{ $student['code'] }} · {{ $student['cohort'] }} · {{ $student['enrollment'] }} · {{ $student['tutor'] }}</p>
                     </div>
                 </div>
@@ -21,7 +21,7 @@
 
             <div class="flex flex-col gap-2.5 border-y border-[var(--trz-linea)] py-4 sm:flex-row sm:items-center sm:gap-8" role="group" aria-label="Avance en el plan de estudios">
                 <div class="flex items-baseline gap-3">
-                    <span class="font-display text-[44px] font-semibold leading-none text-[var(--trz-tinta)]">{{ $progress['percent'] }} %</span>
+                    <span class="font-display text-[34px] font-semibold leading-none text-[var(--trz-tinta)] sm:text-[44px]">{{ $progress['percent'] }} %</span>
                     <span class="text-sm text-[var(--trz-texto-2)]">{{ $progress['details'][0]['value'] }} créditos</span>
                 </div>
                 <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-[var(--trz-linea)]" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress['percent'] }}" aria-label="Avance del plan: {{ $progress['percent'] }} por ciento">
@@ -46,7 +46,7 @@
             </div>
 
             {{-- General: cuaderno de ruta + datos del avance --}}
-            <div role="tabpanel" id="panel-general" aria-labelledby="tab-general" tabindex="0" x-show="active === 'general'" class="grid items-start gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,1fr)_380px]">
+            <div role="tabpanel" id="panel-general" aria-labelledby="tab-general" tabindex="0" x-show="active === 'general'" class="grid grid-cols-1 items-start gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,1fr)_380px]">
                 <x-section title="Cuaderno de ruta" note="El PAPA de cada periodo, las experiencias y las tutorías en un solo eje. La historia se conserva por periodo, no se sobrescribe.">
                     @if(empty($notebook))
                         <x-empty-state kind="historia" title="Sin historia registrada" text="Cuando haya registros académicos, experiencias o tutorías, el cuaderno de ruta las mostrará aquí." />

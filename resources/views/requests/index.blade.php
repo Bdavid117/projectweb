@@ -41,9 +41,9 @@
                             <td class="py-3.5 pr-4 text-[var(--trz-texto-2)]">{{ $row['date'] }}</td>
                             @unless($isStudent)<td class="px-4 py-3.5 font-semibold text-[var(--trz-tinta)]">{{ $row['student'] }}</td>@endunless
                             <td class="px-4 py-3.5 {{ $isStudent ? 'font-semibold text-[var(--trz-tinta)]' : 'text-[var(--trz-tinta)]' }}">{{ $row['type'] }}</td>
-                            <td class="px-4 py-3.5 text-[var(--trz-texto-2)]">{{ $row['period'] }}</td>
+                            <td class="whitespace-nowrap px-4 py-3.5 text-[var(--trz-texto-2)]">{{ $row['period'] }}</td>
                             <td class="px-4 py-3.5"><x-status-badge :text="$row['status']" :tone="$row['tone']" /></td>
-                            <td class="py-3.5 pl-4 text-right"><x-link-arrow :href="$row['url']" class="justify-end">Ver detalle</x-link-arrow></td>
+                            <td class="whitespace-nowrap py-3.5 pl-4 text-right"><x-link-arrow :href="$row['url']" class="justify-end">Ver detalle</x-link-arrow></td>
                         </tr>
                     @endforeach
                 </tbody>

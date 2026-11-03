@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Role;
+use App\Support\Input;
 use App\Support\Labels;
 use App\Support\Navigation;
 use App\Support\ProgramMetrics;
@@ -25,7 +26,12 @@ class PanelController extends Controller
             ]);
         }
 
+        // `?tipo=en-riesgo,con-alerta`: los tipos se combinan (todos a la vez). Lo desconocido se descarta y «todos» no suma nada.
+        $kinds = collect(explode(',', Input::text($request, 'tipo')))->map(fn ($k) => trim($k))
+            ->filter(fn ($k) => $k !== 'todos' && in_array($k, ProgramMetrics::mapKinds(), true))->unique()->values();
+
         return view('panel.index', [
+            'cohortFilter' => $kinds->isEmpty() ? 'todos' : $kinds->implode(','),
             'user' => $user->viewData(),
             'navGroups' => Navigation::forRole($user->role, 'panel'),
             'cutoff' => $metrics->cutoff(),

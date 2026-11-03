@@ -6,7 +6,7 @@
                 <span class="font-display text-xl font-bold text-[var(--trz-tinta)]">Trayectoria Estudiantil</span>
             </a>
 
-            <h1 class="max-w-[16ch] text-[34px] font-semibold leading-[1.08] text-[var(--trz-tinta)] sm:text-5xl lg:text-[56px]">Cada estudiante deja un camino. Aquí se conserva.</h1>
+            <h1 class="max-w-[16ch] text-[28px] font-semibold leading-[1.1] text-[var(--trz-tinta)] sm:text-5xl lg:text-[56px]">Cada estudiante deja un camino. Aquí se conserva.</h1>
 
             {{-- Tres corrientes que se juntan en un solo tronco. El trazo se dibuja una vez; con movimiento reducido aparece ya dibujado. --}}
             <svg @if($errors->any()) data-static @endif class="hidden w-full max-w-[760px] lg:block" viewBox="0 0 760 300" fill="none" role="img" aria-label="Tres corrientes, historia académica, experiencias y acompañamiento, que se unen en una sola trayectoria">
@@ -60,7 +60,7 @@
             <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-5" novalidate>
                 @csrf
                 <div class="flex flex-col gap-2">
-                    <h2 class="text-[32px] font-semibold leading-tight text-[var(--trz-tinta)]">Iniciar sesión</h2>
+                    <h2 class="text-[28px] font-semibold leading-tight text-[var(--trz-tinta)] sm:text-[32px]">Iniciar sesión</h2>
                     <p class="text-base text-[var(--trz-texto-2)]">Use sus credenciales institucionales.</p>
                 </div>
 
