@@ -8,6 +8,7 @@ use App\Http\Requests\StoreInterventionRequest;
 use App\Models\Alert;
 use App\Models\Intervention;
 use App\Models\Student;
+use App\Support\Audit;
 use App\Support\Labels;
 use App\Support\Navigation;
 use App\Support\StudentProfile;
@@ -39,9 +40,14 @@ class InterventionController extends Controller
             'estado' => Intervention::ESTADO_ABIERTA,
         ]);
 
+        Audit::log($request, $intervention, 'intervencion_registrada', [], $intervention->only(['origen', 'origen_id', 'descripcion', 'fecha', 'estado']));
+
         // Si nació de una alerta, esa alerta queda atendida: registrar la intervención cierra el ciclo (RF-37).
         if ($intervention->origen === 'alerta' && $intervention->origen_id) {
-            Alert::where('id', $intervention->origen_id)->where('student_id', $student->id)->update(['atendida' => true]);
+            $alerta = Alert::where('id', $intervention->origen_id)->where('student_id', $student->id)->first();
+            if ($alerta) {
+                Audit::update($request, $alerta, ['atendida' => true], 'alerta_atendida');
+            }
         }
 
         return redirect()->route('students.show', $student)->with('status', 'Intervención registrada correctamente.');
@@ -78,11 +84,11 @@ class InterventionController extends Controller
             return redirect()->route('students.show', $intervencion->student_id)->with('status', 'Esta intervención ya estaba cerrada.');
         }
 
-        $intervencion->update([
+        Audit::update($request, $intervencion, [
             'resultado' => $request->validated()['resultado'],
             'estado' => Intervention::ESTADO_CERRADA,
             'cerrada_en' => now(),
-        ]);
+        ], 'intervencion_cerrada');
 
         return redirect()->route('students.show', $intervencion->student_id)->with('status', 'Intervención cerrada correctamente.');
     }
