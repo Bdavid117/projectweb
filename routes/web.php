@@ -88,6 +88,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/estudiantes/{student}/intervenciones/crear', [InterventionController::class, 'create'])->name('interventions.create');
         Route::post('/estudiantes/{student}/intervenciones', [InterventionController::class, 'store'])->name('interventions.store');
+        Route::get('/intervenciones/{intervencion}/cerrar', [InterventionController::class, 'close'])->name('interventions.close');
+        Route::put('/intervenciones/{intervencion}/cierre', [InterventionController::class, 'storeClose'])->name('interventions.do-close');
     });
 
     Route::middleware('role:estudiante,coordinacion')->group(function () {

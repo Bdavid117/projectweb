@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Role;
+use App\Http\Requests\CloseInterventionRequest;
 use App\Http\Requests\StoreInterventionRequest;
 use App\Models\Intervention;
 use App\Models\Student;
+use App\Support\Labels;
 use App\Support\Navigation;
 use App\Support\StudentProfile;
 use Illuminate\Http\RedirectResponse;
@@ -37,6 +39,46 @@ class InterventionController extends Controller
         ]);
 
         return redirect()->route('students.show', $student)->with('status', 'Intervención registrada correctamente.');
+    }
+
+    public function close(Request $request, Intervention $intervencion): View|RedirectResponse
+    {
+        $this->authorize('update', $intervencion);
+
+        if (! $intervencion->isAbierta()) {
+            return redirect()->route('students.show', $intervencion->student_id)->with('status', 'Esta intervención ya estaba cerrada.');
+        }
+
+        $user = $request->user();
+        $intervencion->loadMissing(['student.user', 'responsable']);
+
+        return view('interventions.close', [
+            'user' => $user->viewData(),
+            'navGroups' => Navigation::forRole($user->role, $user->role === Role::Profesor ? 'mis-asesorias' : 'estudiantes'),
+            'student' => StudentProfile::header($intervencion->student),
+            'intervention' => [
+                'id' => $intervencion->id,
+                'origen' => $intervencion->origenLabel(),
+                'date' => Labels::date($intervencion->fecha),
+                'description' => $intervencion->descripcion,
+                'responsable' => $intervencion->responsable->name,
+            ],
+        ]);
+    }
+
+    public function storeClose(CloseInterventionRequest $request, Intervention $intervencion): RedirectResponse
+    {
+        if (! $intervencion->isAbierta()) {
+            return redirect()->route('students.show', $intervencion->student_id)->with('status', 'Esta intervención ya estaba cerrada.');
+        }
+
+        $intervencion->update([
+            'resultado' => $request->validated()['resultado'],
+            'estado' => Intervention::ESTADO_CERRADA,
+            'cerrada_en' => now(),
+        ]);
+
+        return redirect()->route('students.show', $intervencion->student_id)->with('status', 'Intervención cerrada correctamente.');
     }
 
     /**
