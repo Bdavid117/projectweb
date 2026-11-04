@@ -7,6 +7,7 @@ use App\Http\Controllers\AlertController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\InternshipController;
+use App\Http\Controllers\InterventionController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MyTutorController;
 use App\Http\Controllers\NotificationController;
@@ -84,6 +85,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/tutorias/{tutoria}/editar', [TutorshipController::class, 'edit'])->name('tutorships.edit');
         Route::put('/tutorias/{tutoria}', [TutorshipController::class, 'update'])->name('tutorships.update');
         Route::delete('/tutorias/{tutoria}', [TutorshipController::class, 'destroy'])->name('tutorships.destroy');
+
+        Route::get('/estudiantes/{student}/intervenciones/crear', [InterventionController::class, 'create'])->name('interventions.create');
+        Route::post('/estudiantes/{student}/intervenciones', [InterventionController::class, 'store'])->name('interventions.store');
+        Route::get('/intervenciones/{intervencion}/cerrar', [InterventionController::class, 'close'])->name('interventions.close');
+        Route::put('/intervenciones/{intervencion}/cierre', [InterventionController::class, 'storeClose'])->name('interventions.do-close');
     });
 
     Route::middleware('role:estudiante,coordinacion')->group(function () {

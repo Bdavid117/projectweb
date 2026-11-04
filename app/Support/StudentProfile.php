@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\AcademicRecord;
 use App\Models\AcademicTerm;
 use App\Models\CommitteeRequest;
+use App\Models\Intervention;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -61,6 +62,7 @@ class StudentProfile
         ];
         if ($seesTutorships) {
             $tabs['tutorias'] = 'Tutorías';
+            $tabs['intervenciones'] = 'Intervenciones';
         }
 
         return [
@@ -93,6 +95,16 @@ class StudentProfile
                 'reason' => $t->motivo,
                 'note' => (string) $t->observaciones,
                 'editUrl' => $viewer && $viewer->can('update', $t) ? route('tutorships.edit', $t) : null,
+            ])->all(),
+            'interventions' => ! $seesTutorships ? [] : $student->interventions()->with('responsable')->latest('fecha')->latest('id')->get()->map(fn (Intervention $i) => [
+                'origen' => $i->origenLabel(),
+                'date' => Labels::date($i->fecha),
+                'description' => $i->descripcion,
+                'responsable' => $i->responsable->name,
+                'status' => $i->isAbierta() ? 'Abierta' : 'Cerrada',
+                'tone' => $i->isAbierta() ? 'warning' : 'success',
+                'result' => $i->resultado,
+                'closeUrl' => $i->isAbierta() && $viewer && $viewer->can('update', $i) ? route('interventions.close', $i) : null,
             ])->all(),
         ];
     }

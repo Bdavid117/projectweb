@@ -157,6 +157,7 @@ class ProgramMetrics
         return $this->alerts($ids)->with('student.user')->latest('fecha_deteccion')->latest('id')->limit(12)->get()->map(fn (Alert $alert) => [
             'tags' => $tagsByStudent->get($alert->student_id, array_values(array_unique([str_replace('_', '-', (string) $alert->student->estado), 'con-alerta']))),
             'id' => $alert->id,
+            'student_id' => $alert->student_id,
             'open' => ! $alert->atendida,
             'name' => $alert->student->user?->name ?? $alert->student->codigo,
             'issue' => $alert->detalle ?? $alert->tipo,

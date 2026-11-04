@@ -16,6 +16,9 @@
                     @if($canRegisterTutorship)
                         <x-button variant="primary" icon="message-square" :href="route('tutorships.create', $student['id'])">Registrar tutoría</x-button>
                     @endif
+                    @if($canRegisterIntervention)
+                        <x-button variant="secondary" icon="clipboard-list" :href="route('interventions.create', $student['id'])">Registrar intervención</x-button>
+                    @endif
                 </div>
             </div>
 
@@ -241,6 +244,34 @@
                         @if($loop->last)</ul>@endif
                     @empty
                         <x-empty-state kind="tutor" title="Sin tutorías registradas." />
+                    @endforelse
+                </x-section>
+            </div>
+
+            {{-- Intervenciones --}}
+            <div role="tabpanel" id="panel-intervenciones" aria-labelledby="tab-intervenciones" tabindex="0" x-show="active === 'intervenciones'" x-cloak>
+                <x-section title="Intervenciones de acompañamiento" note="Con su origen y su resultado. Visibles para Coordinación y el profesor con vínculo vigente.">
+                    @forelse($interventions as $item)
+                        @if($loop->first)<ul class="flex flex-col border-t border-[var(--trz-linea)]">@endif
+                        <li class="flex flex-col gap-2 border-b border-[var(--trz-linea)] py-4">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex flex-wrap items-center gap-2.5">
+                                    <x-status-badge :text="$item['status']" :tone="$item['tone']" />
+                                    <span class="text-base font-semibold text-[var(--trz-tinta)]">Origen: {{ $item['origen'] }}</span>
+                                </div>
+                                @if($item['closeUrl'])
+                                    <x-link-arrow :href="$item['closeUrl']" icon="check" class="shrink-0 print:hidden">Cerrar</x-link-arrow>
+                                @endif
+                            </div>
+                            <p class="text-sm text-[var(--trz-texto-2)]">{{ $item['date'] }} · {{ $item['responsable'] }}</p>
+                            <p class="text-[15px] leading-relaxed text-[var(--trz-tinta)]">{{ $item['description'] }}</p>
+                            @if($item['result'])
+                                <p class="text-[15px] leading-relaxed text-[var(--trz-texto-2)]"><span class="font-semibold text-[var(--trz-tinta)]">Resultado:</span> {{ $item['result'] }}</p>
+                            @endif
+                        </li>
+                        @if($loop->last)</ul>@endif
+                    @empty
+                        <x-empty-state kind="tutor" title="Sin intervenciones registradas." text="Regístrelas desde el botón de la ficha o desde una alerta, solicitud o tutoría del estudiante." />
                     @endforelse
                 </x-section>
             </div>

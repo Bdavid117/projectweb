@@ -22,7 +22,7 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Ids numéricos acotados: un id fuera del rango de bigint debe dar 404, no un error de PostgreSQL.
-        foreach (['student', 'solicitud', 'soporte', 'tutoria', 'experiencia'] as $parameter) {
+        foreach (['student', 'solicitud', 'soporte', 'tutoria', 'experiencia', 'intervencion', 'alerta'] as $parameter) {
             Route::pattern($parameter, '[0-9]{1,18}');
         }
 
