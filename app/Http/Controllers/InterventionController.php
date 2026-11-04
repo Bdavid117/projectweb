@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\Role;
 use App\Http\Requests\CloseInterventionRequest;
 use App\Http\Requests\StoreInterventionRequest;
+use App\Models\Alert;
 use App\Models\Intervention;
 use App\Models\Student;
 use App\Support\Labels;
@@ -33,10 +34,15 @@ class InterventionController extends Controller
 
     public function store(StoreInterventionRequest $request, Student $student): RedirectResponse
     {
-        $student->interventions()->create($request->validated() + [
+        $intervention = $student->interventions()->create($request->validated() + [
             'responsable_id' => $request->user()->id,
             'estado' => Intervention::ESTADO_ABIERTA,
         ]);
+
+        // Si nació de una alerta, esa alerta queda atendida: registrar la intervención cierra el ciclo (RF-37).
+        if ($intervention->origen === 'alerta' && $intervention->origen_id) {
+            Alert::where('id', $intervention->origen_id)->where('student_id', $student->id)->update(['atendida' => true]);
+        }
 
         return redirect()->route('students.show', $student)->with('status', 'Intervención registrada correctamente.');
     }

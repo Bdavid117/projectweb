@@ -76,9 +76,10 @@
                                         <div class="flex flex-wrap items-center gap-3">
                                             <x-status-badge :text="$row['status']" :tone="$row['tone']" />
                                             @if($row['open'])
+                                                <x-button variant="subtle" icon="clipboard-list" :href="route('interventions.create', ['student' => $row['student_id'], 'origen' => 'alerta', 'origen_id' => $row['id']])" class="-ml-3 sm:-ml-0">Registrar intervención</x-button>
                                                 <form method="POST" action="{{ route('alerts.attend', $row['id']) }}">
                                                     @csrf
-                                                    <x-button variant="subtle" type="submit" icon="check" class="-ml-3 sm:-ml-0">Marcar atendida</x-button>
+                                                    <x-button variant="subtle" type="submit" icon="check">Marcar atendida</x-button>
                                                 </form>
                                             @endif
                                         </div>
