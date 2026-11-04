@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Role;
 use App\Models\AcademicTerm;
+use App\Models\Intervention;
 use App\Models\Student;
 use App\Models\Tutorship;
 use App\Models\User;
@@ -95,6 +96,7 @@ class StudentController extends Controller
             'user' => $user->viewData(),
             'navGroups' => Navigation::forRole($user->role, 'estudiantes'),
             'canRegisterTutorship' => $user->can('create', [Tutorship::class, $student]),
+            'canRegisterIntervention' => $user->can('create', [Intervention::class, $student]),
             ...StudentProfile::build($student, $user),
         ]);
     }
